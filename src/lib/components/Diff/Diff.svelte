@@ -30,6 +30,7 @@
 		lineAnnotations,
 		renderAnnotation,
 		renderAnnotationClass,
+		preloaded,
 		selection = $bindable(undefined),
 		defaultSelection,
 		onSelectionChange,
@@ -62,32 +63,18 @@
 
 	const fileWrapperClass = $derived(classes.file({ className: fileClass }));
 
-	// --- SSR: render the diff HTML on the server as declarative shadow DOM so it is
-	// visible before hydration (requires `compilerOptions.experimental.async`). ---
-	const serverPreloaded = !BROWSER ? await preloadServerDiff() : undefined;
-	const serverMarkup = createPreloadedMarkup(
-		serverPreloaded,
-		untrack(() => fileWrapperClass)
-	);
+	// --- SSR: a diff preloaded on the server (`preloadDiff()` in a `load` function) is written as
+	// declarative shadow DOM, so it shows before hydration. Without it the server renders the empty
+	// mount and the diff fills in on the client. No component-level `await`: the component compiles
+	// without `experimental.async`. ---
+	const serverMarkup = !BROWSER
+		? createPreloadedMarkup(
+				untrack(() => preloaded),
+				untrack(() => fileWrapperClass)
+			)
+		: '';
 	// First client pass hydrates the SSR'd shadow DOM; later prop changes re-render fresh.
 	let hasHydrated = false;
-
-	async function preloadServerDiff(): Promise<PreloadedDiffRenderItem[] | undefined> {
-		try {
-			const { preloadDiff } = await import('./preloadDiff.js');
-			return await preloadDiff(
-				{ patch, files },
-				createInteractiveOptions(
-					new DiffAnnotationRenderer(annotationSnippet, renderAnnotationClass)
-				),
-				{ lineAnnotations },
-				createOptionProps()
-			);
-		} catch (error) {
-			errorMessage = error instanceof Error ? error.message : String(error);
-			return undefined;
-		}
-	}
 
 	function createPreloadedMarkup(
 		items: PreloadedDiffRenderItem[] | undefined,

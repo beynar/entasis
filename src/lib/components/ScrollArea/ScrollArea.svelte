@@ -324,6 +324,18 @@
 </div>
 
 <style>
+	/* The overflow variables change on every scroll. The scrolled content does not inherit them:
+	   WebKit would otherwise restyle all of it on each new value and keep every restyle in its
+	   style cache, growing memory with each scroll. The root, its ::before / ::after and the
+	   scrollbars still read them. (Registering them `inherits: false` would also hide them from
+	   ::before, and WebKit does not update a ::before that inherits them back explicitly.) */
+	[data-scroll-area-viewport] {
+		--scroll-area-overflow-x-start: initial;
+		--scroll-area-overflow-x-end: initial;
+		--scroll-area-overflow-y-start: initial;
+		--scroll-area-overflow-y-end: initial;
+	}
+
 	/* Hide native scrollbars cross-browser; custom thumbs overlay the real scroll container.
 	   Firefox/standard + old Edge are also set inline in viewportAttachment as a backstop. */
 	[data-scroll-area-viewport] {

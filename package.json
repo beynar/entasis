@@ -492,6 +492,11 @@
 			"svelte": "./dist/components/Chip/index.js",
 			"default": "./dist/components/Chip/index.js"
 		},
+		"./countdown": {
+			"types": "./dist/components/Countdown/index.d.ts",
+			"svelte": "./dist/components/Countdown/index.js",
+			"default": "./dist/components/Countdown/index.js"
+		},
 		"./event-calendar": {
 			"types": "./dist/components/EventCalendar/index.d.ts",
 			"svelte": "./dist/components/EventCalendar/index.js",
@@ -1066,6 +1071,9 @@
 			],
 			"chip": [
 				"dist/components/Chip/index.d.ts"
+			],
+			"countdown": [
+				"dist/components/Countdown/index.d.ts"
 			],
 			"event-calendar": [
 				"dist/components/EventCalendar/index.d.ts"

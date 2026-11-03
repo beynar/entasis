@@ -16,6 +16,11 @@ export type TimelineVariant = 'ghost' | 'card' | 'outline' | 'soft';
  * (solid after a finished step, faint after the others).
  */
 export type TimelineProgress = 'done' | 'current' | 'upcoming';
+/**
+ * The selection value of an item: its `id`, or its array index when it has no `id`. `1` and `'1'`
+ * are different values.
+ */
+export type TimelineValue = string | number;
 
 export type TimelineItem = {
 	/** Stable identity. Use an explicit ID when the array can reorder. */
@@ -45,6 +50,11 @@ export type TimelineItem = {
 	progress?: TimelineProgress;
 	/** Logical side override. Valid only when placement is alternate. */
 	side?: TimelineSide;
+	/**
+	 * In a `selectable` timeline, the item cannot be selected and the arrow keys skip it. It still
+	 * renders and reads as usual. Ignored when the timeline is not selectable.
+	 */
+	disabled?: boolean;
 };
 
 export type TimelineItemPayload<Item extends TimelineItem> = Readonly<{
@@ -56,6 +66,24 @@ export type TimelineItemPayload<Item extends TimelineItem> = Readonly<{
 	connectorColor: Colors;
 	isFirst: boolean;
 	isLast: boolean;
+	/** The item's selection value: its `id`, or its index when it has none. */
+	value: TimelineValue;
+	/** Whether the timeline is `selectable`. */
+	selectable: boolean;
+	/** Whether this item is the selected one. Always `false` when the timeline is not selectable. */
+	selected: boolean;
+	/** Whether this item cannot be selected (`item.disabled` in a selectable timeline). */
+	disabled: boolean;
+	/**
+	 * Selects this item, like a click on it; reports through `onValueChange`. Does nothing when the
+	 * timeline is not selectable, the item is disabled or already selected.
+	 */
+	select: () => void;
+	/**
+	 * DOM id the item's selection button takes its accessible name from. The default title carries
+	 * it; an `item` snippet that does not render `defaultContent()` puts it on its own title.
+	 */
+	titleId: string;
 	defaultContent: Snippet;
 	defaultMarker: Snippet;
 	defaultOpposite: Snippet;
@@ -74,6 +102,16 @@ type TimelinePlacementProps<Item extends TimelineItem> =
 			/** Replaces the opposite track. Its default renderer is the item date. */
 			opposite?: Snippet<[TimelineItemPayload<Item>]>;
 	  };
+
+/** Payload of Timeline's `onValueChange`. */
+export type TimelineValueChangePayload<Item extends TimelineItem = TimelineItem> = {
+	/** The newly selected item's value. */
+	value: TimelineValue;
+	/** The newly selected item, as passed in `items`. */
+	item: Item;
+	/** Its position in `items`. */
+	index: number;
+};
 
 type TimelineRootAttributes = Omit<
 	HTMLAttributes<HTMLOListElement>,
@@ -104,6 +142,26 @@ export type TimelineProps<Item extends TimelineItem = TimelineItem> = WithAttach
 			showConnectors?: boolean;
 			/** Applies the shared inline scroll fade while a horizontal timeline overflows. */
 			scrollFade?: boolean;
+			/**
+			 * Makes each item a toggle button (`aria-pressed`) that selects it on click, Enter or
+			 * Space. The items share one tab stop; arrow keys along the orientation, Home and End move
+			 * it. Off by default: a display-only timeline renders no buttons.
+			 * @default false
+			 */
+			selectable?: boolean;
+			/**
+			 * The selected item's value (its `id`, else its index). Bindable. A value naming no item
+			 * selects nothing. Read only when `selectable`.
+			 */
+			value?: TimelineValue;
+			/** Initial selected value when `value` is omitted. */
+			defaultValue?: TimelineValue;
+			/**
+			 * Called once per selection change made by a click, Enter, Space or a payload's `select()`,
+			 * with `{ value, item, index }`. Not called when the selected item is selected again or
+			 * when `value` changes from outside.
+			 */
+			onValueChange?: (payload: TimelineValueChangePayload<Item>) => void;
 			/** Per-instance translations merged over the global i18n catalog. */
 			i18n?: Partial<Messages>;
 			/** Replaces content inside the module-owned item surface. */

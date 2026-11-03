@@ -43,6 +43,8 @@ for (const file of files) {
 	if (extname(file) === '.wasm') errors.push(`bundled WebAssembly asset: ${name}`);
 	if (/\.worker\.(?:js|mjs)$/i.test(file)) errors.push(`bundled worker asset: ${name}`);
 	if (extname(file) !== '.js') continue;
+	// The MCP docs are prose for agents: their examples import pdfjs-dist in the consumer's code.
+	if (file.endsWith('.mcp.js')) continue;
 
 	const source = await readFile(file, 'utf8');
 	for (const dependency of forbiddenDependencies) {

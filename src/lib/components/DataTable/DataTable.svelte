@@ -2,6 +2,7 @@
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { createVirtualizer } from '@tanstack/svelte-virtual';
 	import { get } from 'svelte/store';
+	import { BROWSER } from 'esm-env';
 	import { untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import Empty from '../Empty/Empty.svelte';
@@ -586,8 +587,9 @@
 		setPage: (page) => model.setPage(page),
 		setPageSize: (size) => model.setPageSize(size)
 	};
+	// Published in the browser only: a server write would make Svelte replay the parent's markup.
 	// eslint-disable-next-line no-useless-assignment -- Assignment publishes the table api to bind:api.
-	api = tableApi;
+	if (BROWSER) api = tableApi;
 	const statePayload = $derived<DataTableToolbarPayload<TData>>({
 		state: tableApi.state,
 		selectedRows: [...tableApi.selectedRows],

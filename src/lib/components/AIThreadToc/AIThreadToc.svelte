@@ -499,7 +499,6 @@
 						bind:this={pinAreaElement}
 						data-slot="ai-thread-toc-pin-area"
 						class={classes.pinArea()}
-						style={`--ai-thread-toc-preview-top: ${previewPinTop}%`}
 					>
 						{#if showRange}
 							<div data-slot="ai-thread-toc-rail" class={classes.rail()}>
@@ -554,29 +553,33 @@
 							</button>
 						{/each}
 
-						{#if previewEntry && previewPinIndex >= 0}
-							<HoverCard
-								bind:open={previewOpen}
-								trigger={previewAnchor}
-								children={previewCard}
-								position={resolvedPreviewPosition}
-								offset={PREVIEW_GAP}
-								delay={0}
-								closeDelay={0}
-								openOnFocus={false}
-								openOnClick={false}
-								closeOnClickOutside={false}
-								class="w-80 max-w-[calc(100vw-8rem)]"
-								triggerClass={classes.previewAnchor({ side })}
-								popover={{
-									class: 'pointer-events-none',
-									theme: aiThreadTocPopoverTheme
-								}}
-								onAfterClose={() => {
-									if (!previewOpen) previewEntry = undefined;
-								}}
-							/>
-						{/if}
+						<!-- The preview anchor's offset changes with each hovered pin: set on this box-less wrapper,
+							 it reaches the anchor only, not every pin (WebKit restyled them all per change). -->
+						<div class="contents" style:--ai-thread-toc-preview-top="{previewPinTop}%">
+							{#if previewEntry && previewPinIndex >= 0}
+								<HoverCard
+									bind:open={previewOpen}
+									trigger={previewAnchor}
+									children={previewCard}
+									position={resolvedPreviewPosition}
+									offset={PREVIEW_GAP}
+									delay={0}
+									closeDelay={0}
+									openOnFocus={false}
+									openOnClick={false}
+									closeOnClickOutside={false}
+									class="w-80 max-w-[calc(100vw-8rem)]"
+									triggerClass={classes.previewAnchor({ side })}
+									popover={{
+										class: 'pointer-events-none',
+										theme: aiThreadTocPopoverTheme
+									}}
+									onAfterClose={() => {
+										if (!previewOpen) previewEntry = undefined;
+									}}
+								/>
+							{/if}
+						</div>
 					</div>
 				</div>
 			</div>

@@ -328,7 +328,14 @@
 	data-density={density}
 	data-rail={hasRail ? railAppearance : undefined}
 >
-	<div data-slot="sidebar-spacer" class={getSidebarGapClass(variant)}></div>
+	<!-- While a resize runs, the spacer and the container follow the live width directly, and
+		 `--sidebar-width` (inherited by the whole wrapper) only changes once it ends. -->
+	<div
+		data-slot="sidebar-spacer"
+		class={getSidebarGapClass(variant)}
+		style:width={resize.liveWidth &&
+			`calc(${resize.liveWidth} + var(--sidebar-activity-offset, 0px))`}
+	></div>
 	{#if activityBar}
 		<!-- Pinned outside the panel and never offset by the collapse state, so the rail stays
 			 on screen while the panel slides away. -->
@@ -359,6 +366,7 @@
 		data-side={side}
 		inert={displayState === 'hidden' && !isPeeking ? true : undefined}
 		class={getSidebarContainerClass(side, variant, edgeRevealed, frame)}
+		style:width={resize.liveWidth}
 	>
 		<div
 			data-sidebar="sidebar"

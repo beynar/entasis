@@ -1,5 +1,6 @@
 <script lang="ts" generics="Option extends RadioOption, Value extends string = Option['value']">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { RadioOption, RadioInputProps } from './radioInput.props.js';
@@ -30,7 +31,7 @@
 		size = 'normal',
 		...rest
 	}: RadioInputProps<Option, Value> = $props();
-	if (value === undefined) value = untrack(() => defaultValue) as Value | null;
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue)) as Value | null;
 
 	const id = $props.id();
 

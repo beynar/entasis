@@ -7,9 +7,10 @@ delegated to the \`@pierre/diffs\` engine. The diff shares the Code component's
 CSS-variable syntax palette, so colors adapt to light and dark automatically from
 the design tokens.
 
-The diff is rendered **client-side** (no SSR / no hydration): the component mounts
-the underlying \`FileDiff\` instances inside an attachment on mount and tears them
-down on cleanup. This keeps it robust without requiring experimental async Svelte.
+The diff renders **client-side** by default: the component mounts the underlying
+\`FileDiff\` instances inside an attachment and tears them down on cleanup. It compiles
+without Svelte's \`experimental.async\`. To show it in the server HTML, render it ahead of
+time with \`preloadDiff()\` in a \`load\` function and pass the result as \`preloaded\`.
 
 ## Basic Usage
 
@@ -60,6 +61,7 @@ Or render a unified patch string (can contain multiple files):
 
 ### Advanced Props
 - **options**: FileDiffOptions - Escape hatch forwarded to each \`@pierre/diffs\` \`FileDiff\`. The ergonomic props above win over matching fields.
+- **preloaded**: DiffPreload - The diff rendered on the server by \`preloadDiff()\`, shown before hydration (see Server preview).
 - **fileClass**: string - Extra classes for each per-file wrapper.
 - **class**: string - Extra classes for the root element.
 - **theme**: DiffThemeProps - Overrides for the \`diff\` (root), \`file\` (per-file wrapper), and \`error\` parts.
@@ -107,7 +109,37 @@ div[data-slot="diff"]           ← root (theme.diff)
 
 ## Notes
 
-- Rendering is client-only; on the server the mount container is empty and fills in on mount.
+- Without \`preloaded\`, the server renders the empty mount container and the diff fills in on mount.
+
+## Server preview
+
+\`preloadDiff({ patch | files, ...displayProps })\` renders each file to HTML on the server; the
+\`<Diff>\` writes it as declarative shadow DOM, so the diff is visible before hydration, then the
+client takes it over in place. Pass the same content and display props to both.
+
+\`\`\`ts
+// +page.server.ts
+import { preloadDiff } from 'entasis/diff';
+
+export const load = async () => {
+  const patch = await readPatch();
+  return { patch, preloaded: await preloadDiff({ patch, diffStyle: 'split' }) };
+};
+
+async function readPatch() {
+  return 'diff --git a/a.ts b/a.ts';
+}
+\`\`\`
+
+\`\`\`svelte
+<script lang="ts">
+  import { Diff, type DiffPreload } from 'entasis/diff';
+
+  let { data }: { data: { patch: string; preloaded: DiffPreload } } = $props();
+</script>
+
+<Diff patch={data.patch} diffStyle="split" preloaded={data.preloaded} />
+\`\`\`
 - Colors come from the shared Code syntax theme — the component renders \`<CodeTheme />\` so the \`--code-token-*\` variables exist wherever \`Diff\` is used, and light/dark adaptation is automatic.
 - Invalid input (both \`patch\` and \`files\`, an empty patch, or unparseable content) is caught and shown in the error surface instead of throwing.
 - Each file's code column scrolls horizontally inside the \`@pierre/diffs\` shadow root; while it overflows the component names it as a \`role="region"\` and gives it a tab stop, so long lines are reachable from the keyboard.

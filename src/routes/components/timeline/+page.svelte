@@ -8,6 +8,7 @@
 	import TimelineMinimalDemo from './TimelineMinimalDemo.svelte';
 	import TimelineOrderTrackingDemo from './TimelineOrderTrackingDemo.svelte';
 	import TimelineProgressDemo from './TimelineProgressDemo.svelte';
+	import TimelineSelectionDemo from './TimelineSelectionDemo.svelte';
 	import TimelineVariantsDemo from './TimelineVariantsDemo.svelte';
 	import {
 		activityCode,
@@ -16,6 +17,7 @@
 		milestonesCode,
 		minimalCode,
 		progressCode,
+		selectionCode,
 		variantsCode
 	} from './codeSnippets.js';
 
@@ -85,7 +87,15 @@
 		'Ghost, card, outline, and soft variants',
 		'Independent size, density, item color, and connector color',
 		'Default date, title, description, icon, and loading rendering',
-		'Done, current, and upcoming step progress with solid and faint connectors'
+		'Done, current, and upcoming step progress with solid and faint connectors',
+		{
+			label: 'Opt-in item selection with value binding and aria-pressed',
+			test: 'a11y:timeline.selection-pressed'
+		},
+		{
+			label: 'One roving tab stop across selectable items',
+			test: 'a11y:timeline.selection-roving'
+		}
 	]}
 >
 	<ComponentCard
@@ -115,6 +125,15 @@
 			class="!min-h-0 !items-stretch !justify-start p-3 sm:p-6"
 		>
 			<TimelineProgressDemo />
+		</ComponentCard>
+
+		<ComponentCard
+			title="Selectable steps"
+			description="Set selectable to make each step a toggle button selected by click, Enter, or Space. Bind value to the selected step's id and show its panel below. The steps share one tab stop that the arrow keys move; a disabled step is skipped."
+			code={selectionCode}
+			class="!min-h-0 !items-stretch !justify-start p-3 sm:p-6"
+		>
+			<TimelineSelectionDemo />
 		</ComponentCard>
 
 		<ComponentCard

@@ -85,7 +85,7 @@ Data attributes (presence attributes, set to \`""\` while the state holds):
 - \`data-overflow-x-start\`, \`data-overflow-x-end\`, \`data-overflow-y-start\`, \`data-overflow-y-end\` on the root: content is hidden past that edge by more than \`overflowEdgeThreshold\`. The x edges are logical (inline start / end), so in RTL \`start\` is the right edge
 - \`data-orientation\` (\`vertical\` | \`horizontal\`) on the scrollbars and thumbs
 
-CSS variables on the root, in px (0 while the axis does not overflow): \`--scroll-area-overflow-x-start\`, \`--scroll-area-overflow-x-end\`, \`--scroll-area-overflow-y-start\`, \`--scroll-area-overflow-y-end\`. Overscroll (WebKit rubber banding) is not counted as hidden content.
+CSS variables on the root, in px (0 while the axis does not overflow): \`--scroll-area-overflow-x-start\`, \`--scroll-area-overflow-x-end\`, \`--scroll-area-overflow-y-start\`, \`--scroll-area-overflow-y-end\`. Overscroll (WebKit rubber banding) is not counted as hidden content. Read them on the root, its \`::before\` / \`::after\` or the scrollbars: the scrolled content does not inherit them, since they change on every scroll.
 
 The typed maps \`scrollAreaDataAttributes\` and \`scrollAreaCssVariables\` (from \`entasis/scroll-area\`) list each name with its meaning.
 

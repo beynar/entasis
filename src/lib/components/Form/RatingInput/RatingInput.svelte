@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Rating from '../../Rating/Rating.svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -31,7 +32,7 @@
 		label,
 		...rest
 	}: RatingInputProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 

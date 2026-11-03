@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState, type FieldValidatorResult } from '../Field/field.state.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
@@ -42,7 +43,7 @@
 		...rest
 	}: PinInputProps = $props();
 	const t = $derived(useI18n());
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	const resolvedLength = () => (Number.isFinite(length) ? Math.max(1, Math.floor(length)) : 6);

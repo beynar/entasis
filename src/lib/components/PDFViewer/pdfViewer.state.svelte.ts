@@ -269,7 +269,10 @@ export class PDFViewerState extends createBindableStateClass<PDFViewerOptions>()
 		try {
 			const runtimeAssets = this.runtimeAssets ?? documentViewerAssets.pdf;
 			const pdfjs: PDFJSModule =
-				this.pdfjs ?? (await loadDocumentViewerRuntime<PDFJSModule>(runtimeAssets.moduleUrl));
+				this.pdfjs ??
+				((runtimeAssets.load
+					? await runtimeAssets.load()
+					: await loadDocumentViewerRuntime(runtimeAssets.moduleUrl)) as PDFJSModule);
 			if (
 				!pdfjs.GlobalWorkerOptions.workerPort &&
 				pdfjs.GlobalWorkerOptions.workerSrc !== runtimeAssets.workerUrl

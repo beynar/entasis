@@ -183,6 +183,7 @@ describe('keyboard inset (OV-INFRA-7)', () => {
 		const track = (type: string, listener: Listener) =>
 			listeners.set(type, [...(listeners.get(type) ?? []), listener]);
 		const properties = new Map<string, string>();
+		const writes: string[] = [];
 		const fakeWindow = {
 			innerHeight,
 			innerWidth: 400,
@@ -196,12 +197,25 @@ describe('keyboard inset (OV-INFRA-7)', () => {
 		const fakeDocument = {
 			documentElement: {
 				clientHeight,
-				style: { setProperty: (name: string, value: string) => properties.set(name, value) }
+				style: {
+					setProperty: (name: string, value: string) => {
+						writes.push(name);
+						properties.set(name, value);
+					},
+					getPropertyValue: (name: string) => properties.get(name) ?? ''
+				}
 			}
 		};
 		new Function('window', 'document', compileViewportScript())(fakeWindow, fakeDocument);
 		const fire = (type: string) => listeners.get(type)?.forEach((listener) => listener());
-		return { properties, fire, visualViewport: visualViewport as Viewport };
+		return {
+			properties,
+			writes,
+			fire,
+			visualViewport: visualViewport as Viewport,
+			fakeWindow,
+			fakeDocument
+		};
 	};
 
 	test('is the part of the layout viewport the visual viewport leaves uncovered', () => {
@@ -269,7 +283,10 @@ describe('keyboard inset (OV-INFRA-7)', () => {
 					addEventListener: () => {}
 				},
 				{
-					documentElement: { clientHeight: 800, style: { setProperty: () => {} } },
+					documentElement: {
+						clientHeight: 800,
+						style: { setProperty: () => {}, getPropertyValue: () => '' }
+					},
 					querySelector: (selector: string) => (selector === 'meta[name="viewport"]' ? meta : null)
 				}
 			);
@@ -293,9 +310,33 @@ describe('keyboard inset (OV-INFRA-7)', () => {
 		});
 	});
 
-	test('keeps the existing window size variables', () => {
+	test('gives the window height in px while a keyboard covers part of the layout viewport', () => {
 		const { properties } = runViewportScript({ height: 500, offsetTop: 0, scale: 1 }, 800);
 		expect(properties.get('--window-height')).toBe('500px');
-		expect(properties.get('--window-width')).toBe('400px');
+		expect(properties.get('--window-width')).toBe('100vw');
+	});
+
+	test('keeps the window size constant while the window resizes, and writes nothing unchanged', () => {
+		// Every element inherits these: a value rewritten on each resize restyled the whole page in
+		// WebKit and kept each restyle in its style cache.
+		const viewport = { height: 800, offsetTop: 0, scale: 1 };
+		const { properties, writes, fire, fakeWindow, fakeDocument } = runViewportScript(
+			viewport,
+			800,
+			800
+		);
+		expect(properties.get('--window-height')).toBe('100dvh');
+		writes.length = 0;
+		for (const height of [760, 720, 680]) {
+			fakeWindow.innerHeight = height;
+			fakeDocument.documentElement.clientHeight = height;
+			fakeWindow.innerWidth = height / 2;
+			viewport.height = height;
+			fire('window:resize');
+			fire('vv:resize');
+		}
+		expect(writes).toEqual([]);
+		expect(properties.get('--window-height')).toBe('100dvh');
+		expect(properties.get('--window-width')).toBe('100vw');
 	});
 });

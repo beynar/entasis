@@ -5,6 +5,7 @@
 	// text needs: the text as the value, and inline completion that previews the highlighted
 	// suggestion in the input without committing it.
 	import { tick, untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
@@ -63,7 +64,7 @@
 		description,
 		...rest
 	}: AutocompleteProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	const t = $derived(useI18n(i18n));

@@ -9,6 +9,7 @@ export type {
 } from './diff.props.js';
 export type { DiffInput, DiffRenderItem, DiffRenderState } from './diff-input.js';
 export { createDiffRenderItems } from './diff-input.js';
+export { preloadDiff, type DiffPreload, type DiffPreloadOptions } from './preloadDiff.js';
 export { createDiffOptions, registerDiffSyntaxTheme, type DiffOptionProps } from './diff-theme.js';
 export {
 	diffTheme,

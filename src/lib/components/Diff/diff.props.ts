@@ -1,3 +1,4 @@
+import type { DiffPreload } from './preloadDiff.js';
 import type {
 	DiffLineAnnotation,
 	FileContents,
@@ -51,6 +52,11 @@ export type DiffProps = WithAttachments<
 
 			/** Diff-side line annotations passed to the renderer. */
 			lineAnnotations?: DiffLineAnnotation<undefined>[];
+			/**
+			 * The diff rendered on the server by `preloadDiff()` (in a `load` function), shown before
+			 * hydration. Without it the diff renders on the client, when the component mounts.
+			 */
+			preloaded?: DiffPreload;
 			/** Classes merged onto the annotation snippet host element. */
 			renderAnnotationClass?: string;
 

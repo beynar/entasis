@@ -69,6 +69,7 @@ import { addressDescription } from '$lib/components/Address/address.mcp.js';
 import { avatarDescription } from '$lib/components/Avatar/avatar.mcp.js';
 import { chartDescription } from '$lib/components/Chart/chart.mcp.js';
 import { chipDescription } from '$lib/components/Chip/chip.mcp.js';
+import { countdownDescription } from '$lib/components/Countdown/countdown.mcp.js';
 import { eventCalendarDescription } from '$lib/components/EventCalendar/eventCalendar.mcp.js';
 import { ganttChartDescription } from '$lib/components/GanttChart/ganttChart.mcp.js';
 import { kanbanDescription } from '$lib/components/Kanban/kanban.mcp.js';
@@ -216,6 +217,7 @@ export const componentMcpRegistry = {
 	'avatar-group': avatarDescription,
 	chart: chartDescription,
 	chip: chipDescription,
+	countdown: countdownDescription,
 	'event-calendar': eventCalendarDescription,
 	'gantt-chart': ganttChartDescription,
 	kanban: kanbanDescription,

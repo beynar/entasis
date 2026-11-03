@@ -15,6 +15,11 @@ const colorVariants = {
 	neutral: ''
 } as const;
 
+// Selectable items: the item's selection button lies under its parts, which let the pointer through
+// to it. Interactive content inside a custom renderer (a link, a button, a field) stays clickable.
+const pointerPassThrough =
+	'pointer-events-none [&_:is(a,button,input,select,textarea,summary)]:pointer-events-auto';
+
 // The `--timeline-*` properties are INTERNAL: the root publishes marker size, spacing and the
 // title/surface offsets so the connector, marker and content parts line up on one midline.
 // `orientation` and `size` drive them; they are not a consumer hook.
@@ -42,13 +47,23 @@ const defaultRoot = cva({
 		scrollFade: {
 			none: '',
 			x: 'scroll-fade-x'
+		},
+		selectable: {
+			true: '',
+			false: ''
 		}
 	},
+	compoundVariants: [
+		// A selectable ghost surface reaches `sm` before its marker; the inline padding keeps the first
+		// one inside the scroll box.
+		{ orientation: 'horizontal', selectable: true, class: 'px-sm' }
+	],
 	defaultVariants: {
 		orientation: 'vertical',
 		size: 'normal',
 		density: 'normal',
-		scrollFade: 'none'
+		scrollFade: 'none',
+		selectable: false
 	}
 });
 
@@ -157,6 +172,10 @@ const defaultOpposite = cva({
 			compact: '',
 			normal: '',
 			comfortable: ''
+		},
+		selectable: {
+			true: pointerPassThrough,
+			false: ''
 		}
 	},
 	compoundVariants: [
@@ -199,7 +218,8 @@ const defaultOpposite = cva({
 	defaultVariants: {
 		orientation: 'vertical',
 		side: 'end',
-		density: 'normal'
+		density: 'normal',
+		selectable: false
 	}
 });
 
@@ -235,6 +255,10 @@ const defaultAxis = cva({
 		isLast: {
 			true: '',
 			false: ''
+		},
+		selectable: {
+			true: 'pointer-events-none',
+			false: ''
 		}
 	},
 	compoundVariants: [
@@ -263,8 +287,15 @@ const defaultAxis = cva({
 		variant: 'ghost',
 		density: 'normal',
 		hasDate: true,
-		isLast: false
+		isLast: false,
+		selectable: false
 	}
+});
+
+// The selection button of a selectable item: an invisible, empty `<button>` stretched under the
+// whole item, so a click anywhere on the item lands on it. The item content paints its states.
+const defaultItemButton = cva({
+	base: 'peer/timeline-item-button absolute inset-0 z-0 cursor-pointer appearance-none bg-transparent outline-none disabled:cursor-default'
 });
 
 // `progress` is the step the connector leaves: solid after a done step, faint after the
@@ -349,7 +380,22 @@ const defaultContent = cva({
 			normal: '',
 			comfortable: ''
 		},
-		color: colorVariants
+		color: colorVariants,
+		selectable: {
+			true: pointerPassThrough,
+			false: ''
+		},
+		// The item's selection button is enabled: its hover and press tint this surface through the
+		// state layer, and its keyboard focus rings it.
+		interactive: {
+			true: 'state-layer peer-hover/timeline-item-button:before:opacity-[var(--state-hover-opacity)] peer-active/timeline-item-button:before:opacity-[var(--state-pressed-opacity)] peer-focus-visible/timeline-item-button:ring-2 peer-focus-visible/timeline-item-button:ring-focus/50',
+			false: ''
+		},
+		// The shared soft selected recipe (`selectedSoft` in `Theme/theme.recipes.ts`).
+		selected: {
+			true: 'bg-selected-muted text-selected-muted-readable',
+			false: ''
+		}
 	},
 	compoundVariants: [
 		{ orientation: 'vertical', placement: 'start', class: 'col-start-1' },
@@ -390,7 +436,45 @@ const defaultContent = cva({
 		},
 		{ variant: ['card', 'outline', 'soft'], density: 'compact', class: 'p-lg' },
 		{ variant: ['card', 'outline', 'soft'], density: 'normal', class: 'p-xl' },
-		{ variant: ['card', 'outline', 'soft'], density: 'comfortable', class: 'p-layout-sm' }
+		{ variant: ['card', 'outline', 'soft'], density: 'comfortable', class: 'p-layout-sm' },
+		// A selectable ghost item gets a surface for its hover, selection and focus ring. It reaches
+		// `sm` toward the axis and `xs` above and below, so the text stays where it was.
+		{ variant: 'ghost', selectable: true, class: 'rounded-md px-sm py-xs' },
+		{ orientation: 'vertical', variant: 'ghost', selectable: true, class: '-my-xs' },
+		{
+			orientation: 'vertical',
+			placement: 'end',
+			variant: 'ghost',
+			selectable: true,
+			class: '-ms-sm'
+		},
+		{
+			orientation: 'vertical',
+			placement: 'start',
+			variant: 'ghost',
+			selectable: true,
+			class: '-me-sm'
+		},
+		{
+			orientation: 'vertical',
+			placement: 'alternate',
+			side: 'end',
+			variant: 'ghost',
+			selectable: true,
+			class: '-ms-sm'
+		},
+		{
+			orientation: 'vertical',
+			placement: 'alternate',
+			side: 'start',
+			variant: 'ghost',
+			selectable: true,
+			class: '-me-sm @max-[40rem]:me-0 @max-[40rem]:-ms-sm'
+		},
+		{ orientation: 'horizontal', variant: 'ghost', selectable: true, class: '-ms-sm' },
+		// A selected surface also rings in the selected role, so it still reads as selected where the
+		// selected fill matches the variant's own surface (a soft item in the selected role).
+		{ variant: ['card', 'outline', 'soft'], selected: true, class: 'ring-2 ring-selected' }
 	],
 	defaultVariants: {
 		orientation: 'vertical',
@@ -398,7 +482,10 @@ const defaultContent = cva({
 		side: 'end',
 		variant: 'ghost',
 		density: 'normal',
-		color: 'neutral'
+		color: 'neutral',
+		selectable: false,
+		interactive: false,
+		selected: false
 	}
 });
 
@@ -425,18 +512,24 @@ const defaultDate = cva({
 			card: '',
 			outline: '',
 			soft: 'text-color-muted-readable'
+		},
+		selected: {
+			true: '',
+			false: ''
 		}
 	},
 	compoundVariants: [
 		{ placement: ['start', 'end'], density: 'compact', class: 'mb-xs' },
 		{ placement: ['start', 'end'], density: 'normal', class: 'mb-sm' },
-		{ placement: ['start', 'end'], density: 'comfortable', class: 'mb-md' }
+		{ placement: ['start', 'end'], density: 'comfortable', class: 'mb-md' },
+		{ selected: true, class: 'text-selected-muted-readable/70' }
 	],
 	defaultVariants: {
 		size: 'normal',
 		density: 'normal',
 		placement: 'end',
-		variant: 'ghost'
+		variant: 'ghost',
+		selected: false
 	}
 });
 
@@ -457,11 +550,17 @@ const defaultTitle = cva({
 			card: 'text-neutral',
 			outline: 'text-neutral',
 			soft: 'text-color-muted-readable'
+		},
+		selected: {
+			true: '',
+			false: ''
 		}
 	},
+	compoundVariants: [{ selected: true, class: 'text-selected-muted-readable' }],
 	defaultVariants: {
 		size: 'normal',
-		variant: 'ghost'
+		variant: 'ghost',
+		selected: false
 	}
 });
 
@@ -483,12 +582,18 @@ const defaultDescription = cva({
 			card: 'text-neutral/70',
 			outline: 'text-neutral/70',
 			soft: 'text-color-muted-readable'
+		},
+		selected: {
+			true: '',
+			false: ''
 		}
 	},
+	compoundVariants: [{ selected: true, class: 'text-selected-muted-readable/70' }],
 	defaultVariants: {
 		size: 'normal',
 		density: 'normal',
-		variant: 'ghost'
+		variant: 'ghost',
+		selected: false
 	}
 });
 
@@ -511,6 +616,7 @@ export const timelineTheme = {
 	item: defaultItem,
 	opposite: defaultOpposite,
 	axis: defaultAxis,
+	itemButton: defaultItemButton,
 	connector: defaultConnector,
 	marker: defaultMarker,
 	content: defaultContent,

@@ -1,5 +1,6 @@
 <script lang="ts" generics="Mode extends 'single' | 'multiple' = 'single'">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Button from '../../Button/Button.svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -42,7 +43,7 @@
 		visible,
 		...rest
 	}: FileInputProps<Mode> = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	const t = $derived(useI18n());

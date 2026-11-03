@@ -77,6 +77,33 @@ describe('sidebar resize', () => {
 		expect(width(resizeHandle)).toBe(start + 60);
 	});
 
+	test('sizes the panel directly during a drag and changes --sidebar-width once, at the end', async () => {
+		// Everything in the wrapper, the page included, inherits --sidebar-width: changed on each
+		// move, it made WebKit restyle all of it per step and keep every restyle in its style cache.
+		render(SidebarResizeHarness);
+		const wrapper = query('[data-slot="sidebar-wrapper"]');
+		const container = query('[data-slot="sidebar-container"]');
+		const spacer = query('[data-slot="sidebar-spacer"]');
+		const resizeHandle = handle();
+		const start = startPanelWidth(260);
+		const restingWidth = wrapper.style.getPropertyValue('--sidebar-width');
+
+		await firePointer(resizeHandle, 'pointerdown', start);
+		for (const delta of [20, 40, 60]) {
+			await firePointer(resizeHandle, 'pointermove', start + delta);
+			expect(container.style.width).toBe(`${start + delta}px`);
+			expect(spacer.style.width).toBe(
+				`calc(${start + delta}px + var(--sidebar-activity-offset, 0px))`
+			);
+			expect(wrapper.style.getPropertyValue('--sidebar-width')).toBe(restingWidth);
+		}
+
+		await firePointer(resizeHandle, 'pointerup', start + 60);
+		expect(wrapper.style.getPropertyValue('--sidebar-width')).toBe(`${start + 60}px`);
+		expect(container.style.width).toBe('');
+		expect(spacer.style.width).toBe('');
+	});
+
 	test('ignores a sub-threshold twitch so a combined rail handle still toggles on click', async () => {
 		render(SidebarResizeHarness, { props: { rail: true } });
 		const resizeHandle = handle();

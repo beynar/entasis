@@ -21,6 +21,7 @@ export const scrollAreaDataAttributes = {
 /** The name of a ScrollArea data attribute. */
 export type ScrollAreaDataAttribute = keyof typeof scrollAreaDataAttributes;
 
+/** Set on the root and read there, on its ::before / ::after and the scrollbars; the scrolled content does not inherit them. */
 export const scrollAreaCssVariables = {
 	'--scroll-area-overflow-x-start':
 		'Px of content hidden past the inline start edge (0 while the axis does not overflow).',

@@ -2,6 +2,12 @@ export interface DocumentViewerAssets {
 	pdf: {
 		moduleUrl: string;
 		workerUrl: string;
+		/**
+		 * Loads pdf.js from your own bundle instead of `moduleUrl` (`() => import('pdfjs-dist')`),
+		 * so no CDN is reached: pair it with a same-origin `workerUrl`
+		 * (`import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'`).
+		 */
+		load?: () => Promise<unknown>;
 	};
 	docx: {
 		moduleUrl: string;

@@ -6,13 +6,77 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Countdown` (`entasis/countdown`): the time left until `until` (a `Date`, ISO string or epoch
+  ms) in the active locale through `Intl`: "3 days", `units={2}` for "3 days, 4 hours"
+  (« 3 jours et 4 heures »), or `format="clock"` for "2:14:05". One timer is aimed at the next
+  moment the text changes, never a per-second poll, and it resyncs when the page becomes visible.
+  Reaching `until` reads the localized "now" and calls `onComplete` once. Renders a
+  `<time role="timer" datetime>`, composes inside `Stat`'s `value`, and `children` receives
+  `{ remaining, days, hours, minutes, seconds, label, done, fraction }` (`fraction` from `from`,
+  for a `Progress`).
+- `Timeline`: `selectable` makes each item a toggle button (`aria-pressed`) that selects it on
+  click, Enter or Space, with `value` (bindable), `defaultValue` and
+  `onValueChange({ value, item, index })`. An item's value is its `id`, else its index; an item
+  can be `disabled`. The items share one roving tab stop (arrows along the orientation, RTL-aware,
+  Home and End), the selected item paints the selected recipe in every variant, and the `<li>`
+  carries `data-selected`. Custom `item` snippets get `selected`, `select()` and `titleId` in
+  their payload. Timelines without `selectable` render exactly as before.
+- `DocumentViewer`: `assets.pdf.load` gives pdf.js from your own bundle
+  (`() => import('pdfjs-dist')`, with a same-origin `workerUrl`). Nothing is then imported from a
+  URL, so a strict Content-Security-Policy needs no CDN origin, no `blob:` worker and no
+  `'wasm-unsafe-eval'` for PDFs.
+- `Diff`: `preloadDiff()` renders a diff to HTML on the server (in a `load` function), and
+  `preloaded` shows it before hydration.
+
+### Fixed
+
+- Server rendering: a bound value the parent left `undefined` no longer makes Svelte render the
+  parent's markup twice when the component's default is `null` or `false`. That default is now
+  written in the browser only, which covers most fields (`TextInput`, `Select`, `Combobox`,
+  `DateInput`, `Switch`, `Checkbox` and 17 more) and the `open` of every overlay and disclosure
+  (`Dialog`, `Popover`, `Tooltip`, `Collapsible`…); the server HTML is unchanged. A meaningful
+  default (`Tabs`' first tab, `defaultValue`, `defaultOpen`) is still written, so the parent
+  renders with it; give bound state a starting value (`let name = $state('')`) to keep those to
+  one render as well.
+- `Combobox`: an unset value (`undefined`) styles its placeholder as an empty one, as `null` does.
+- WebKit memory (Safari, WKWebView apps): CSS variables that change while the user interacts no
+  longer sit, inherited, above large subtrees. WebKit restyled every descendant on each new value
+  and kept each restyle in its style cache, so memory grew with every step and never came back.
+  Measured in a WKWebView over 200 steps:
+  - `ScrollArea`: the `--scroll-area-overflow-*` variables stop at the viewport (scrolling a
+    calendar: +332 MB → +0 MB, style work 6 ms → 0.2 ms per scroll). The root, its `::before` /
+    `::after` and the scrollbars still read them; the scrolled content no longer inherits them.
+  - `Theme`: `--window-height` is `100dvh` and `--window-width` `100vw`, constant while the window
+    resizes; the height is in px only while a keyboard or a zoom covers part of the viewport
+    (one window-resize gesture: +80 MB → +4 MB). Unchanged values are not written again.
+  - `Sidebar`: a drag or keyboard resize sizes the panel directly and updates `--sidebar-width`
+    once it ends (+228 MB → +18 MB, 16 ms → 0.1 ms per step).
+  - `VideoPlayer`'s timeline, `AIThreadToc`'s preview anchor and `VoiceInput`'s level meter keep
+    their moving values off the elements around them.
+
+- `Diff` compiles without Svelte's `experimental.async`: it no longer awaits at the component's
+  top level, which made any app without that option fail its build. The server preview is now
+  opt-in through `preloadDiff()` and `preloaded`; without it the diff renders on mount. A test
+  compiles every library component without the option, so it cannot come back.
+- `Diff`: a diff rendered on the client gives its overflowing code columns their name and tab
+  stop. They were found only when the markup already existed (a server preview), so a diff
+  rendered on mount left them unreachable from the keyboard.
+
+### Changed
+
+- `Tabs`, `Stepper` and `DataTable` publish `bind:api` in the browser only. During server
+  rendering it stays `undefined`, which spares the parent a second render; read it in handlers and
+  effects rather than in server-rendered markup.
+
 ## 0.14.1 — 2026-11-02
 
 ### Fixed
 
-- Server rendering no longer leaks a \`ThemeState\` per request. A \`<Theme>\` registered itself in
+- Server rendering no longer leaks a `ThemeState` per request. A `<Theme>` registered itself in
   module-level lists (active Theme for reduced motion, CSP nonce, portal container), and when Svelte
-  renders a page twice on the server (a child writing a bound prop, such as \`<Tabs bind:api>\`), it
+  renders a page twice on the server (a child writing a bound prop, such as `<Tabs bind:api>`), it
   never runs the discarded pass's cleanup: one Theme, with its props and snippets, stayed in memory
   for good, and its nonce or motion setting could be read by later requests. These registrations
   now happen in the browser only, still synchronously in the Theme's constructor; the server HTML is
@@ -22,52 +86,52 @@ Unreleased section under the new version.
 
 ### Added
 
-- \`RichTextInput\`: \`collaboration\` hands edytor's collaboration settings to the editor (\`room\`,
-  \`server\`, \`params\`, \`actor\`, \`document\`, \`sync\`, \`presence\`…): a room kept in the browser
+- `RichTextInput`: `collaboration` hands edytor's collaboration settings to the editor (`room`,
+  `server`, `params`, `actor`, `document`, `sync`, `presence`…): a room kept in the browser
   and synced across tabs, a room people edit together through a server, or one document shared
-  between views. The shared document is the source of truth: \`value\` seeds only an empty room,
-  later parent values are not loaded, and \`value\` / \`onValueChange\` follow every edit, remote ones
+  between views. The shared document is the source of truth: `value` seeds only an empty room,
+  later parent values are not loaded, and `value` / `onValueChange` follow every edit, remote ones
   included. Collaborators' carets, names and selections show in their colors.
-- \`DataTable\`: \`sortableRows\` lets the user reorder rows. A row drags by its grip (a line shows
+- `DataTable`: `sortableRows` lets the user reorder rows. A row drags by its grip (a line shows
   where it lands), or moves with ArrowUp / ArrowDown, Home and End once its grip has focus, each
-  keyboard move announced. The table shows the new order, writes it to a bound \`items\` (now
-  bindable), then calls \`onRowMove({ row, from, to, rows, after, before })\` once per move, with the
-  row's new neighbours in the whole order. \`canDragRow\` keeps a row in place. Reordering pauses
+  keyboard move announced. The table shows the new order, writes it to a bound `items` (now
+  bindable), then calls `onRowMove({ row, from, to, rows, after, before })` once per move, with the
+  row's new neighbours in the whole order. `canDragRow` keeps a row in place. Reordering pauses
   (grips disabled, the reason in their title) while a sort, a filter, a search or a grouping is
   active, and for hierarchical rows. Rows slide to their new places unless the reader prefers
-  reduced motion; theme parts \`rowDragCell\` and \`rowDragHandle\`.
+  reduced motion; theme parts `rowDragCell` and `rowDragHandle`.
 
 ### Changed
 
-- **Breaking:** \`RichTextInput\`, and the \`AIComposer\` and \`AIChat\` that embed it, run on
-  [edytor](https://edytor.dev) instead of Lexical. Install \`edytor\` (\`pnpm add edytor\`) in place
-  of the eight Lexical packages. The props, the markdown \`value\`, triggers and tokens, the
-  toolbars, \`formats\`, the submit shortcut and the handle (\`focus\`, \`clear\`, \`insertText\`,
-  \`insertItem\`, \`insertToken\`) are unchanged, and the markdown read and written is the same:
-  one block per line, newlines kept, nothing escaped, tokens as \`<File id label path />\` tags.
-- \`RichTextInput\`: \`ref\` is the editable root as an \`HTMLElement\` (it was typed
-  \`HTMLDivElement\`).
-- \`RichTextInput\`: a press below the last line puts the caret at the end of the text, and blocks
+- **Breaking:** `RichTextInput`, and the `AIComposer` and `AIChat` that embed it, run on
+  [edytor](https://edytor.dev) instead of Lexical. Install `edytor` (`pnpm add edytor`) in place
+  of the eight Lexical packages. The props, the markdown `value`, triggers and tokens, the
+  toolbars, `formats`, the submit shortcut and the handle (`focus`, `clear`, `insertText`,
+  `insertItem`, `insertToken`) are unchanged, and the markdown read and written is the same:
+  one block per line, newlines kept, nothing escaped, tokens as `<File id label path />` tags.
+- `RichTextInput`: `ref` is the editable root as an `HTMLElement` (it was typed
+  `HTMLDivElement`).
+- `RichTextInput`: a press below the last line puts the caret at the end of the text, and blocks
   pasted into an empty line take its place.
 
 ### Removed
 
-- The optional peer dependencies \`lexical\`, \`@lexical/history\`, \`@lexical/link\`,
-  \`@lexical/list\`, \`@lexical/markdown\`, \`@lexical/rich-text\`, \`@lexical/selection\` and
-  \`@lexical/utils\`.
+- The optional peer dependencies `lexical`, `@lexical/history`, `@lexical/link`,
+  `@lexical/list`, `@lexical/markdown`, `@lexical/rich-text`, `@lexical/selection` and
+  `@lexical/utils`.
 
 ### Fixed
 
-- \`DataTable\`: \`animateRows\` no longer slides rows when the reader prefers reduced motion.
-- The loading overlay (\`spinnerOverlay\`, Button's \`loading\`) no longer moves its host. It made
-  every host \`position: relative\` from its inline style alone, so a button placed by its classes
-  (\`absolute\`, \`fixed\`, \`sticky\`) fell back into the flow while it loaded, and the inline style
+- `DataTable`: `animateRows` no longer slides rows when the reader prefers reduced motion.
+- The loading overlay (`spinnerOverlay`, Button's `loading`) no longer moves its host. It made
+  every host `position: relative` from its inline style alone, so a button placed by its classes
+  (`absolute`, `fixed`, `sticky`) fell back into the flow while it loaded, and the inline style
   stayed after. Only a static host is made relative now, and it gets its position back when loading
   ends.
 - The loading overlay keeps its host's corners when the host's radius changes while it loads (a
   class or style swap). It copied the radius once, when it appeared, so a button turned into a pill
   mid-load showed the overlay's old square-ish corners.
-- A loading Button with its own background (\`solid\`, \`soft\`) no longer shows a thin dark line
+- A loading Button with its own background (`solid`, `soft`) no longer shows a thin dark line
   around its rounded corners. Its background ended on the same anti-aliased edge as the overlay and
   bled through it; the overlay now paints that background itself, opaque and in the same tint, and
   the host's own is cleared until loading ends.
@@ -76,10 +140,10 @@ Unreleased section under the new version.
 
 ### Fixed
 
-- \`SignatureInput\`: a saved signature (a value set from outside) shows in the pad's ink color,
+- `SignatureInput`: a saved signature (a value set from outside) shows in the pad's ink color,
   as the live strokes do, so the black PNG saved for paper reads on a dark theme. The image is
-  painted as a mask over the theme's text color; the value and \`inkColor\` are unchanged. The new
-  \`imageInk\` prop (\`'theme'\` by default, or \`'as-is'\`) keeps an image with several colors or
+  painted as a mask over the theme's text color; the value and `inkColor` are unchanged. The new
+  `imageInk` prop (`'theme'` by default, or `'as-is'`) keeps an image with several colors or
   an opaque background as it is. A URL from another origin that refuses CORS falls back to the
   image itself.
 
@@ -87,42 +151,42 @@ Unreleased section under the new version.
 
 ### Added
 
-- Sidebar menu entries and submenu entries take \`media\`, \`description\` and \`meta\`, so a
-  conversation list stays data: \`media\` is a snippet drawn in place of the icon (a face, an
-  avatar) at the media size, which an \`svg\` or \`img\` placed directly inside fills, and which
-  stays visible when the Sidebar collapses to icons; \`description\` is a lighter second line
-  under the label, truncated to one line, which gives the row the large height; \`meta\` is a short
+- Sidebar menu entries and submenu entries take `media`, `description` and `meta`, so a
+  conversation list stays data: `media` is a snippet drawn in place of the icon (a face, an
+  avatar) at the media size, which an `svg` or `img` placed directly inside fills, and which
+  stays visible when the Sidebar collapses to icons; `description` is a lighter second line
+  under the label, truncated to one line, which gives the row the large height; `meta` is a short
   text at the end of the label's line (a time, "Hier"), before which the label truncates, left out
-  in icon mode like \`badge\`. On a row with a description, the \`badge\` and the \`suffix\` sit at
-  the end of the description's line, so every row's meta ends on one column. \`suffix\`,
-  \`badge\`, \`action\`, \`isActive\`, \`href\` and the tooltips keep their behaviour. New theme
-  parts: \`menuMedia\`, \`menuText\`, \`menuTitleRow\`, \`menuTitle\`, \`menuDescriptionRow\`,
-  \`menuMeta\`.
+  in icon mode like `badge`. On a row with a description, the `badge` and the `suffix` sit at
+  the end of the description's line, so every row's meta ends on one column. `suffix`,
+  `badge`, `action`, `isActive`, `href` and the tooltips keep their behaviour. New theme
+  parts: `menuMedia`, `menuText`, `menuTitleRow`, `menuTitle`, `menuDescriptionRow`,
+  `menuMeta`.
 
 ## 0.13.6 — 2026-10-31
 
 ### Added
 
-- \`AddressInput\` (\`entasis/address-input\`, and \`type: 'address'\` in Form and \`ask()\`): a postal
-  address field whose value is an address object. \`fields\` picks the parts it shows (\`line1\`,
-  \`line2\`, \`postalCode\`, \`city\`, \`region\`, \`country\`) and lays them out in rows, several
-  side by side with their own widths, labels and placeholders; \`editableFields\`
-  the ones a person may type in, \`requiredFields\` the ones a started address must fill ("Required:
+- `AddressInput` (`entasis/address-input`, and `type: 'address'` in Form and `ask()`): a postal
+  address field whose value is an address object. `fields` picks the parts it shows (`line1`,
+  `line2`, `postalCode`, `city`, `region`, `country`) and lays them out in rows, several
+  side by side with their own widths, labels and placeholders; `editableFields`
+  the ones a person may type in, `requiredFields` the ones a started address must fill ("Required:
   City"). The street line searches Google Places as it is typed, built in, and a chosen suggestion
-  fills every part, with its coordinates (\`location: { lat, lng }\`) and place id. The search
-  goes through the app's \`/api/places\` route, one file with \`createGooglePlacesProxy({ apiKey })\`,
-  so the key stays on the server; without it the search turns itself off. \`provider\` or
-  \`setAddressProvider\` swaps in another search, \`null\` turns it off. \`layout="search"\` shows one search input
+  fills every part, with its coordinates (`location: { lat, lng }`) and place id. The search
+  goes through the app's `/api/places` route, one file with `createGooglePlacesProxy({ apiKey })`,
+  so the key stays on the server; without it the search turns itself off. `provider` or
+  `setAddressProvider` swaps in another search, `null` turns it off. `layout="search"` shows one search input
   instead. The country is a list named in the active locale; a native form receives
-  \`name[line1]\`, \`name[postalCode]\`… The part inputs are not Form entries.
-- \`entasis/address\`: the address model, \`formatAddress\` (each country's line order: "75004 Paris",
+  `name[line1]`, `name[postalCode]`… The part inputs are not Form entries.
+- `entasis/address`: the address model, `formatAddress` (each country's line order: "75004 Paris",
   "Mountain View, CA 94043", the UK's postcode line, the street number before or after the
-  street), an \`<Address>\` display component with the same \`fields\` choice,
-  \`createGooglePlacesProxy\` (the server handlers of the \`/api/places\` route, which forward only
-  the two Places calls) and \`createGooglePlacesProvider\`, which searches Google Places (Places
+  street), an `<Address>` display component with the same `fields` choice,
+  `createGooglePlacesProxy` (the server handlers of the `/api/places` route, which forward only
+  the two Places calls) and `createGooglePlacesProvider`, which searches Google Places (Places
   API "New") over REST, with no SDK. It bills one session per chosen address and keeps to
   addresses by default.
-- \`SignatureInput\` (\`entasis/signature-input\`, and \`type: 'signature'\` in Form and \`ask()\`): a
+- `SignatureInput` (`entasis/signature-input`, and `type: 'signature'` in Form and `ask()`): a
   pad to sign with a mouse, a finger or a pen. Its value is the signature as a PNG or SVG data
   URL cropped to the ink, drawn in black for documents while the pad follows the theme. Strokes
   are smoothed, follow pen pressure, and undo or clear by button or key.
@@ -131,21 +195,21 @@ Unreleased section under the new version.
 
 ### Added
 
-- Timeline items take a \`progress: 'done' | 'current' | 'upcoming'\` (\`TimelineProgress\`) to draw a
+- Timeline items take a `progress: 'done' | 'current' | 'upcoming'` (`TimelineProgress`) to draw a
   process's progress band. A done step's marker is filled with a check, the current one is a ring
-  around a point with \`aria-current="step"\`, and an upcoming one is a quiet ring with its step
+  around a point with `aria-current="step"`, and an upcoming one is a quiet ring with its step
   number, all at the size's marker scale. The connector is solid up to the current step and faint
-  after it, 2px thick, in the step's color unless \`connectorColor\` is set. \`icon\`, \`loading\`,
-  the \`marker\` snippet and theme overrides (\`marker\` and \`connector\` gain a \`progress\`
-  variant) still apply. Items without \`progress\` render exactly as before.
+  after it, 2px thick, in the step's color unless `connectorColor` is set. `icon`, `loading`,
+  the `marker` snippet and theme overrides (`marker` and `connector` gain a `progress`
+  variant) still apply. Items without `progress` render exactly as before.
 
 ### Fixed
 
-- A \`Code\` in a height-bound flex column (a Dialog or Drawer body) no longer clips its last lines:
+- A `Code` in a height-bound flex column (a Dialog or Drawer body) no longer clips its last lines:
   it shrinks to the room left and scrolls inside, under its header and above its footer.
-  \`class="shrink-0"\` keeps its full height for the column to scroll instead.
-- \`Code\`'s \`wrap\` and \`tabSize\` hold against an app stylesheet that styles every \`pre.th-code\`
-  (edytor's \`code.css\` sets \`white-space: pre\` and \`tab-size\` unlayered, which beat Code's
+  `class="shrink-0"` keeps its full height for the column to scroll instead.
+- `Code`'s `wrap` and `tabSize` hold against an app stylesheet that styles every `pre.th-code`
+  (edytor's `code.css` sets `white-space: pre` and `tab-size` unlayered, which beat Code's
   utilities): Code now sets them itself, scoped under its root.
 - A hidden offcanvas Sidebar revealed from the edge beside an `activityBar` no longer slides
   across the activity bar: the panel comes out from under it, for every variant. The activity bar

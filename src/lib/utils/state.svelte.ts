@@ -1,4 +1,13 @@
+import { BROWSER } from 'esm-env';
 import { untrack } from 'svelte';
+
+/**
+ * The default a component writes into a bound prop the parent left `undefined`. On the server each
+ * such write makes Svelte replay the parent's markup; a `null` or `false` default reads as the
+ * parent's `undefined`, so it stays unwritten until the browser.
+ */
+export const boundDefault = <Value>(value: Value): Value | undefined =>
+	BROWSER || (value !== null && value !== false) ? value : undefined;
 
 export function createBindableValue<Value>(
 	read: () => Value | undefined,
@@ -12,7 +21,7 @@ export function createBindableValue<Value>(
 		})
 	);
 	untrack(() => {
-		if (read() === undefined) write(retained);
+		if (read() === undefined && boundDefault(retained) !== undefined) write(retained);
 	});
 
 	return {

@@ -36,9 +36,6 @@
 	const currentPercentage = $derived(getPercentage(currentValue));
 	const bufferedPercentage = $derived(getPercentage(buffered));
 	const formattedValue = $derived(format(currentValue));
-	const sliderStyle = $derived(
-		`--video-player-timeline-value: ${currentPercentage}%; --video-player-timeline-buffered: ${bufferedPercentage}%;`
-	);
 
 	function clampValue(nextValue: number) {
 		return Math.min(maxValue, Math.max(min, nextValue));
@@ -59,8 +56,9 @@
 <div
 	data-slot="video-player-timeline-slider"
 	class={classes.slider({ size, disabled: isDisabled })}
-	style={sliderStyle}
 >
+	<!-- Positions go on the parts themselves: the value changes through playback, and a variable
+		 on the root would restyle every part on each change (WebKit also keeps each restyle). -->
 	<div
 		data-slot="video-player-timeline-track"
 		class={classes.timelineTrack({ disabled: isDisabled })}
@@ -69,18 +67,18 @@
 			<div
 				data-slot="video-player-timeline-buffered"
 				class={classes.timelineBuffered()}
-				style="width: var(--video-player-timeline-buffered);"
+				style:width="{bufferedPercentage}%"
 			></div>
 			<div
 				data-slot="video-player-timeline-range"
 				class={classes.timelineRange()}
-				style="width: var(--video-player-timeline-value);"
+				style:width="{currentPercentage}%"
 			></div>
 		</div>
 		<div
 			data-slot="video-player-timeline-thumb"
 			class={classes.timelineThumb()}
-			style="left: var(--video-player-timeline-value);"
+			style:left="{currentPercentage}%"
 		></div>
 		<input
 			data-slot="video-player-timeline-input"

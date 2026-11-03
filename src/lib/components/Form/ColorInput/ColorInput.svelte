@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { focusIntoPopup } from '../Field/focusIntoPopup.js';
 	import { addAlphaToHex, isValidColor, parseCSS, rgb2hex, rgb2hsl } from 'colorizr';
 	import ColorPicker from '../ColorPicker/ColorPicker.svelte';
@@ -32,7 +33,7 @@
 		i18n,
 		...rest
 	}: ColorInputProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	let isPickerOpen = $state(false);

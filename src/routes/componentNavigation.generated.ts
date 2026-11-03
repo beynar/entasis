@@ -305,6 +305,10 @@ export const componentNavigationSections = [
 				text: 'Chip'
 			},
 			{
+				href: '/components/countdown',
+				text: 'Countdown'
+			},
+			{
 				href: '/components/event-calendar',
 				text: 'Event calendar'
 			},

@@ -7,6 +7,8 @@ export type {
 	TimelineProgress,
 	TimelineProps,
 	TimelineSide,
+	TimelineValue,
+	TimelineValueChangePayload,
 	TimelineVariant
 } from './timeline.props.js';
 export {

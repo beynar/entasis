@@ -453,12 +453,13 @@
 	const windowRows: Row[] = [
 		{
 			name: '--window-height',
-			detail: 'the real visual viewport height in px',
+			detail:
+				'100dvh, or the visual viewport height in px while a keyboard or zoom covers part of it',
 			meaning: 'Written by Theme. h-window reads it, falling back to 100dvh.'
 		},
 		{
 			name: '--window-width',
-			detail: 'window.innerWidth in px',
+			detail: '100vw',
 			meaning: 'Written by Theme and read by w-window.'
 		}
 	];

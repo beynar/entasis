@@ -50,6 +50,30 @@ Heavy parsers are not package dependencies. The active format loads its pinned m
 
 With the defaults, CSP must allow cdnjs.cloudflare.com, cdn.jsdelivr.net, and cdn.sheetjs.com in **script-src** and **connect-src**, add \`worker-src blob:\`, and add \`'wasm-unsafe-eval'\` to **script-src**. When assets are self-hosted, allow their configured origins instead.
 
+Only the active format's assets load: a PDF never reaches the Office, spreadsheet, or CSV runtimes.
+
+### PDF without a CDN
+
+Give pdf.js from your own bundle with **assets.pdf.load**, and its worker from your own origin. Nothing is imported from a URL, so a strict CSP needs no CDN origin: \`script-src 'self'\` and \`worker-src 'self'\` are enough (no \`blob:\`, no \`'wasm-unsafe-eval'\` for PDF).
+
+\`\`\`svelte nocheck
+<script lang="ts">
+  import { DocumentViewer } from 'entasis/document-viewer';
+  // pdfjs-dist is your dependency; Vite serves the worker from your origin.
+  import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
+  let { src }: { src: string } = $props();
+</script>
+
+<DocumentViewer
+  {src}
+  format="pdf"
+  assets={{ pdf: { load: () => import('pdfjs-dist'), workerUrl } }}
+/>
+\`\`\`
+
+Dynamic \`import()\` cannot carry Subresource Integrity, so CDN URLs cannot be pinned by hash: bundling (above) or self-hosting the files is how a nonce/SRI policy stays strict.
+
 ## Events and snippets
 
 - **onLoad**, **onError**, **onWarning**, **onPageChange**, and **onSheetChange** report lifecycle and navigation changes.

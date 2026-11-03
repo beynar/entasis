@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { focusIntoPopup } from '../Field/focusIntoPopup.js';
 	import { Maskito } from '@maskito/core';
 	import { maskitoDateOptionsGenerator } from '@maskito/kit';
@@ -43,7 +44,7 @@
 		...rest
 	}: DateInputProps = $props();
 	const t = $derived(useI18n());
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	const dateSeparator = $derived(separator || '/');

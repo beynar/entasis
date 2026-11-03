@@ -3,7 +3,9 @@
 	import Slot from '../Slot/Slot.svelte';
 	import Spinner from '../Spinner/Spinner.svelte';
 	import type { Density, Sizes } from '$lib/types/theme.js';
+	import { presence } from '$lib/utils/stateAttributes.js';
 	import type { Snippet } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 	import type { ResolvedTimelineItem } from './timeline.items.js';
 	import type {
 		TimelineItem,
@@ -20,6 +22,10 @@
 		size,
 		density,
 		showConnectors,
+		selectable,
+		selected,
+		onSelect,
+		navigationItem,
 		loadingLabel,
 		classes,
 		itemRenderer,
@@ -32,12 +38,21 @@
 		size: Sizes;
 		density: Density;
 		showConnectors: boolean;
+		selectable: boolean;
+		selected: boolean;
+		onSelect: () => void;
+		navigationItem: Attachment<HTMLElement>;
 		loadingLabel: string;
 		classes: TimelineClasses;
 		itemRenderer?: Snippet<[TimelineItemPayload<Item>]>;
 		markerRenderer?: Snippet<[TimelineItemPayload<Item>]>;
 		oppositeRenderer?: Snippet<[TimelineItemPayload<Item>]>;
 	} = $props();
+
+	const uid = $props.id();
+	const titleId = `${uid}-title`;
+	const disabled = $derived(selectable && entry.item.disabled === true);
+	const interactive = $derived(selectable && !disabled);
 
 	const payload = $derived<TimelineItemPayload<Item>>({
 		item: entry.item,
@@ -48,6 +63,12 @@
 		connectorColor: entry.connectorColor,
 		isFirst: entry.isFirst,
 		isLast: entry.isLast,
+		value: entry.value,
+		selectable,
+		selected,
+		disabled,
+		select: onSelect,
+		titleId,
 		defaultContent,
 		defaultMarker,
 		defaultOpposite
@@ -66,6 +87,8 @@
 	data-first={entry.isFirst ? 'true' : undefined}
 	data-last={entry.isLast ? 'true' : undefined}
 	data-progress={entry.item.progress}
+	data-selected={selectable ? presence(selected) : undefined}
+	data-disabled={presence(disabled)}
 	aria-current={entry.item.progress === 'current' ? 'step' : undefined}
 	class={classes.item({
 		orientation: entry.orientation,
@@ -76,6 +99,23 @@
 		isLast: entry.isLast
 	})}
 >
+	{#if selectable}
+		<!-- The selection target spans the item. It is empty and lies under the item's parts, so it
+		     takes its name from the title rather than wrapping content that may hold its own links. -->
+		<button
+			type="button"
+			data-slot="timeline-item-button"
+			aria-pressed={selected}
+			aria-labelledby={titleId}
+			aria-label={typeof entry.item.title === 'string' ? entry.item.title : undefined}
+			aria-current={entry.item.progress === 'current' ? 'step' : undefined}
+			{disabled}
+			class={classes.itemButton()}
+			onclick={onSelect}
+			{@attach navigationItem}
+		></button>
+	{/if}
+
 	{#if placement === 'alternate'}
 		<div
 			data-slot="timeline-opposite"
@@ -83,7 +123,8 @@
 			class={classes.opposite({
 				orientation: entry.orientation,
 				side: entry.side,
-				density
+				density,
+				selectable
 			})}
 		>
 			<Slot render={oppositeRenderer} {payload}>
@@ -101,7 +142,8 @@
 			variant,
 			density,
 			hasDate: Boolean(entry.item.date),
-			isLast: entry.isLast
+			isLast: entry.isLast,
+			selectable
 		})}
 		aria-hidden="true"
 		inert
@@ -133,7 +175,10 @@
 			side: entry.side,
 			variant,
 			density,
-			color: entry.color
+			color: entry.color,
+			selectable,
+			interactive,
+			selected
 		})}
 	>
 		<Slot render={itemRenderer} {payload}>
@@ -153,12 +198,15 @@
 			<time
 				data-slot="timeline-date"
 				datetime={entry.item.datetime}
-				class={classes.date({ size, density, placement, variant })}
+				class={classes.date({ size, density, placement, variant, selected })}
 			>
 				<Slot render={entry.item.date} />
 			</time>
 		{:else}
-			<div data-slot="timeline-date" class={classes.date({ size, density, placement, variant })}>
+			<div
+				data-slot="timeline-date"
+				class={classes.date({ size, density, placement, variant, selected })}
+			>
 				<Slot render={entry.item.date} />
 			</div>
 		{/if}
@@ -171,14 +219,19 @@
 	{/if}
 
 	<div data-slot="timeline-title-row" class={classes.titleRow()}>
-		<Slot as="div" render={entry.item.title} class={classes.title({ size, variant })} />
+		<Slot
+			as="div"
+			render={entry.item.title}
+			attrs={selectable ? { id: titleId } : undefined}
+			class={classes.title({ size, variant, selected })}
+		/>
 	</div>
 
 	{#if entry.item.description}
 		<Slot
 			as="div"
 			render={entry.item.description}
-			class={classes.description({ size, density, variant })}
+			class={classes.description({ size, density, variant, selected })}
 		/>
 	{/if}
 {/snippet}

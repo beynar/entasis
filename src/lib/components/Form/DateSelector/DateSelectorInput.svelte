@@ -1,5 +1,6 @@
 <script lang="ts" generics="Mode extends DateSelectorInputMode">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -50,7 +51,7 @@
 		size,
 		...rest
 	}: DateSelectorInputProps<Mode> = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const openState = createBindableValue(
 		() => open,

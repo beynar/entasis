@@ -1,6 +1,7 @@
 <script lang="ts" generics="Multiple extends boolean = false">
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { on } from 'svelte/events';
 	import Field from '../Field/Field.svelte';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
@@ -55,7 +56,7 @@
 		label,
 		...rest
 	}: SelectProps<Multiple> = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const generatedId = $props.id();
 	const id = untrack(() => idProp) ?? generatedId;

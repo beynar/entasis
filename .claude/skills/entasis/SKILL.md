@@ -68,6 +68,12 @@ fails the build when it does not.
   `onValueChange`; a bindable `open` always ships with `defaultOpen` and `onOpenChange`. Bind one,
   or drive it with the pair. Rating, Meter, ProgressCircle, and QRCode display a value they never
   edit and are marked `@readonly-value` in their props file.
+- **Give bound state a starting value.** `let name = $state('')`, `let open = $state(false)`,
+  not `$state()`. A component writes its default into a bound value the parent left `undefined`,
+  and on the server that write makes Svelte render the parent's markup twice. A `null` or `false`
+  default is only written in the browser, so `bind:value={x}` or `bind:open={x}` with `x` unset
+  stays a single render for most fields and every closed overlay; a meaningful default (Tabs' first
+  tab, `defaultValue`, `defaultOpen`) is still written.
 - **Callbacks name the change, not the gesture**, take one payload object, and are present tense:
   `onValueChange`, `onOpenChange`, `onWidthChange`, `onSearchChange`. Never `onChange`, `onClick`,
   `onToggle`, `onPageChange`, or `onWidthChanged`.
@@ -87,7 +93,8 @@ fails the build when it does not.
   `MultiStepForm` values, like a native form. Use `readOnly` for a value that must still submit.
 - **`api` is the instance handle.** `bind:api` on Tabs, Stepper, DataTable, Tree, AIChat, and
   AIConversation gives the state object; the exported types are `TabsApi`, `StepperApi`,
-  `DataTableApi`, `AIConversationApi`. Popover and Dialog snippets and lifecycle callbacks receive
+  `DataTableApi`, `AIConversationApi`. Tabs, Stepper and DataTable publish it in the browser
+  only: during server rendering it is `undefined`, so read it in handlers and effects. Popover and Dialog snippets and lifecycle callbacks receive
   the narrow `PopoverApi` (`entasis/popover`) and `DialogApi` (`entasis/dialog`): open state,
   `open()`, `close()`, `toggle()` and the `trigger` / `reference` attachments. `PopoverState` is a
   deprecated alias of `PopoverApi`.
@@ -471,6 +478,7 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 - `entasis/avatar` — Avatar group (/components/avatar-group)
 - `entasis/chart` — Chart (/components/chart)
 - `entasis/chip` — Chip (/components/chip)
+- `entasis/countdown` — Countdown (/components/countdown)
 - `entasis/event-calendar` — Event calendar (/components/event-calendar)
 - `entasis/gantt-chart` — Gantt chart (/components/gantt-chart)
 - `entasis/kanban` — Kanban (/components/kanban)

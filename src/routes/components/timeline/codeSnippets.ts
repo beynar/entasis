@@ -172,6 +172,42 @@ export const progressCode = [
 	'<Timeline items={onboarding} size="small" color="success" />'
 ].join('\n');
 
+export const selectionCode = [
+	"import { Card } from 'entasis/card';",
+	"import { Timeline, type TimelineItem } from 'entasis/timeline';",
+	'',
+	'type RunStep = TimelineItem & { id: string; title: string; summary: string };',
+	'',
+	'const steps: RunStep[] = [',
+	"  { id: 'fetch', title: 'Fetch sources', progress: 'done', summary: 'Pulled 418 files.' },",
+	"  { id: 'index', title: 'Index', progress: 'done', summary: 'Built the symbol index.' },",
+	"  { id: 'analyze', title: 'Analyze', progress: 'current', summary: '61 of 140 modules done.' },",
+	"  { id: 'report', title: 'Report', progress: 'upcoming', summary: 'Not started.' },",
+	"  { id: 'publish', title: 'Publish', progress: 'upcoming', disabled: true, summary: 'Needs a report.' }",
+	'];',
+	'',
+	"let selected = $state<string | number | undefined>('analyze');",
+	'const step = $derived(steps.find((candidate) => candidate.id === selected));',
+	'',
+	'<Timeline',
+	'  items={steps}',
+	'  orientation="horizontal"',
+	'  color="primary"',
+	'  density="compact"',
+	'  selectable',
+	'  bind:value={selected}',
+	'  onValueChange={({ item }) => console.log(item.summary)}',
+	'  aria-label="Run steps"',
+	'/>',
+	'',
+	'{#if step}',
+	'  <Card variant="outline" density="compact">',
+	'    {#snippet title()}{step.title}{/snippet}',
+	'    {step.summary}',
+	'  </Card>',
+	'{/if}'
+].join('\n');
+
 export const minimalCode = [
 	'<Timeline items={releases} density="comfortable">',
 	'  {#snippet marker({ index, defaultMarker })}',

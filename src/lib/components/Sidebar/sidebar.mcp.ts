@@ -347,7 +347,7 @@ Attributes are presence attributes (set while the state holds, omitted otherwise
 - \`data-sidebar\`: The part (\`sidebar\`, \`menu-button\`, \`menu-sub\`, \`group-content\`, \`rail\`, ...).
 
 **CSS variables**
-- \`--sidebar-width\`: On the root: the expanded panel width.
+- \`--sidebar-width\`: On the root: the expanded panel width. A drag or keyboard resize updates it once it ends; meanwhile the panel follows the pointer directly.
 - \`--sidebar-width-icon\`: On the root: the width of the collapsed icon rail.
 - \`--sidebar-width-mobile\`: On the root: the width of the mobile drawer.
 - \`--sidebar-suffix-width\`: On a row with a \`suffix\` (its \`menu-item\` row wrapper or \`menu-sub-item\`): the suffix's measured width in px, reserved at the row's end so the label truncates before it.

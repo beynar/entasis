@@ -34,7 +34,8 @@ export const sidebarDataAttributes = {
 export type SidebarDataAttribute = keyof typeof sidebarDataAttributes;
 
 export const sidebarCssVariables = {
-	'--sidebar-width': 'On the root: the expanded panel width.',
+	'--sidebar-width':
+		'On the root: the expanded panel width. A drag or keyboard resize updates it once it ends; meanwhile the panel follows the pointer directly.',
 	'--sidebar-width-icon': 'On the root: the width of the collapsed icon rail.',
 	'--sidebar-width-mobile': 'On the root: the width of the mobile drawer.',
 	'--sidebar-suffix-width':

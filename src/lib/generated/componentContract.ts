@@ -2411,6 +2411,34 @@ export const componentInventory = [
 		visibility: 'public'
 	},
 	{
+		id: 'countdown',
+		subpath: 'entasis/countdown',
+		sourceIndex: 'src/lib/components/Countdown/index.ts',
+		exportedSymbols: [
+			'Countdown',
+			'CountdownFormat',
+			'CountdownInstant',
+			'CountdownPayload',
+			'CountdownProps',
+			'CountdownTheme',
+			'CountdownThemeProps',
+			'countdownTheme',
+			'setCountdownTheme',
+			'useCountdownTheme'
+		],
+		docs: [
+			{
+				id: 'countdown',
+				route: '/components/countdown',
+				category: 'Data display',
+				label: 'Countdown'
+			}
+		],
+		capabilities: ['svelte', 'component', 'dataDisplay'],
+		relatedComponents: ['stat', 'progress'],
+		visibility: 'public'
+	},
+	{
 		id: 'event-calendar',
 		subpath: 'entasis/event-calendar',
 		sourceIndex: 'src/lib/components/EventCalendar/index.ts',
@@ -2929,6 +2957,8 @@ export const componentInventory = [
 			'TimelineSide',
 			'TimelineTheme',
 			'TimelineThemeProps',
+			'TimelineValue',
+			'TimelineValueChangePayload',
 			'TimelineVariant',
 			'setTimelineTheme',
 			'timelineTheme',
@@ -4261,6 +4291,8 @@ export const componentInventory = [
 			'DiffInput',
 			'DiffLineAnnotation',
 			'DiffOptionProps',
+			'DiffPreload',
+			'DiffPreloadOptions',
 			'DiffProps',
 			'DiffRenderItem',
 			'DiffRenderState',
@@ -4272,6 +4304,7 @@ export const componentInventory = [
 			'createDiffOptions',
 			'createDiffRenderItems',
 			'diffTheme',
+			'preloadDiff',
 			'registerDiffSyntaxTheme',
 			'setDiffTheme',
 			'useDiffTheme'
@@ -4846,6 +4879,7 @@ export const relatedComponents = {
 	'avatar-group': [],
 	chart: [],
 	chip: ['tag-group'],
+	countdown: ['stat', 'progress'],
 	'event-calendar': ['calendar', 'gantt-chart'],
 	'gantt-chart': ['event-calendar', 'timeline'],
 	kanban: ['sortable-list'],

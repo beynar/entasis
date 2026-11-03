@@ -116,3 +116,29 @@ test('an RTL viewport scrolls with a negative offset that the thumb follows from
 	await expect.poll(() => area.hasAttribute('data-overflow-x-end')).toBe(false);
 	expect(area).toHaveAttribute('data-overflow-x-start');
 });
+
+test('the overflow variables reach the root and its ::before, not the scrolled content', async () => {
+	// They change on every scroll: inherited by the content, WebKit restyled all of it per scroll
+	// and kept each restyle in its style cache. The root's ::before / ::after still read them.
+	const style = document.createElement('style');
+	style.textContent = `[data-scroll-area]::before { content: ''; position: absolute; width: var(--scroll-area-overflow-y-start); }`;
+	document.head.append(style);
+	await render(ScrollAreaHarness, { props: { style: 'height: 40px' } });
+	const root = document.querySelector<HTMLElement>('[data-scroll-area]')!;
+	const viewport = root.querySelector<HTMLElement>('[data-scroll-area-viewport]')!;
+	const content = viewport.querySelector('p')!;
+	content.style.height = '400px';
+	await expect.poll(() => viewport.getAttribute('tabindex')).toBe('0');
+
+	viewport.scrollTop = 30;
+	await expect
+		.poll(() => getComputedStyle(root).getPropertyValue('--scroll-area-overflow-y-start'))
+		.toBe('30px');
+	expect(getComputedStyle(root, '::before').width).toBe('30px');
+	expect(getComputedStyle(content).getPropertyValue('--scroll-area-overflow-y-start')).toBe('');
+
+	// …and follow the next scroll (WebKit kept a stale ::before for variables registered not inherited).
+	viewport.scrollTop = 12;
+	await expect.poll(() => getComputedStyle(root, '::before').width).toBe('12px');
+	style.remove();
+});

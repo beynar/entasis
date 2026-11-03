@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy, setContext, untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Button from '../../Button/Button.svelte';
 	import { builtInAddressProvider, getAddressProvider } from '../../Address/address.provider.js';
 	import {
@@ -66,7 +67,7 @@
 		fieldAttrs,
 		...rest
 	}: AddressInputProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	const t = $derived(useI18n(i18n));

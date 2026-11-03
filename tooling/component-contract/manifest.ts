@@ -321,6 +321,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	component('chip', 'components/Chip', 'Data display', 'Chip', {
 		related: ['tag-group']
 	}),
+	component('countdown', 'components/Countdown', 'Data display', 'Countdown', {
+		related: ['stat', 'progress']
+	}),
 	component('event-calendar', 'components/EventCalendar', 'Data display', 'Event calendar', {
 		related: ['calendar', 'gantt-chart']
 	}),
@@ -1908,6 +1911,18 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'setChipTheme',
 		'useChipTheme'
 	],
+	countdown: [
+		'Countdown',
+		'CountdownFormat',
+		'CountdownInstant',
+		'CountdownPayload',
+		'CountdownProps',
+		'CountdownTheme',
+		'CountdownThemeProps',
+		'countdownTheme',
+		'setCountdownTheme',
+		'useCountdownTheme'
+	],
 	'event-calendar': [
 		'EventCalendar',
 		'EventCalendarAgendaDetailsPayload',
@@ -2239,6 +2254,8 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'TimelineSide',
 		'TimelineTheme',
 		'TimelineThemeProps',
+		'TimelineValue',
+		'TimelineValueChangePayload',
 		'TimelineVariant',
 		'setTimelineTheme',
 		'timelineTheme',
@@ -2883,6 +2900,8 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'DiffInput',
 		'DiffLineAnnotation',
 		'DiffOptionProps',
+		'DiffPreload',
+		'DiffPreloadOptions',
 		'DiffProps',
 		'DiffRenderItem',
 		'DiffRenderState',
@@ -2894,6 +2913,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'createDiffOptions',
 		'createDiffRenderItems',
 		'diffTheme',
+		'preloadDiff',
 		'registerDiffSyntaxTheme',
 		'setDiffTheme',
 		'useDiffTheme'

@@ -15,6 +15,7 @@
 	import { ComboboxController } from './combobox.state.svelte.js';
 	import ComboboxPopup from './ComboboxPopup.svelte';
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { presence } from '$lib/utils/stateAttributes.js';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 
@@ -61,7 +62,7 @@
 		description,
 		...rest
 	}: ComboboxProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	const t = $derived(useI18n(i18n));
@@ -282,7 +283,7 @@
 				data-disabled={presence(field.disabled)}
 				{@attach popupOpenClaim(controller.visible)}
 				autocomplete="off"
-				class={classes.input({ size, hasValue: field.value !== null, disabled: field.disabled })}
+				class={classes.input({ size, hasValue: field.value != null, disabled: field.disabled })}
 				class:placeholder:text-neutral={selectedOption && !searchValue}
 				oninput={(event) => controller.onInput(event)}
 				onkeydown={(event) => controller.onKeydown(event)}

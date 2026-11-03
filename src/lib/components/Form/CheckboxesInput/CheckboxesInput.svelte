@@ -1,5 +1,6 @@
 <script lang="ts" generics="Option extends CheckboxOption, Value extends string = Option['value']">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { CheckboxOption, CheckboxesInputProps } from './checkboxesInput.props.js';
@@ -31,7 +32,7 @@
 		selectAllLabel,
 		...rest
 	}: CheckboxesInputProps<Option, Value> = $props();
-	if (value === undefined) value = untrack(() => defaultValue) as Value[];
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue)) as Value[];
 
 	const id = $props.id();
 

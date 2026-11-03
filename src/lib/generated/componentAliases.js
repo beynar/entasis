@@ -72,6 +72,7 @@ export const componentAliases = {
 	'entasis/avatar': './src/lib/components/Avatar/index.ts',
 	'entasis/chart': './src/lib/components/Chart/index.ts',
 	'entasis/chip': './src/lib/components/Chip/index.ts',
+	'entasis/countdown': './src/lib/components/Countdown/index.ts',
 	'entasis/event-calendar': './src/lib/components/EventCalendar/index.ts',
 	'entasis/gantt-chart': './src/lib/components/GanttChart/index.ts',
 	'entasis/kanban': './src/lib/components/Kanban/index.ts',

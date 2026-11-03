@@ -1,7 +1,7 @@
 export const timelineDescription = `
 # Timeline
 
-Render an ordered sequence of dated or descriptive events on a vertical or horizontal axis. Timeline owns the semantic list, item surfaces, axis anchors, markers, connectors, responsive alternate collapse, and horizontal overflow behavior. Input order is always render order.
+Render an ordered sequence of dated or descriptive events on a vertical or horizontal axis. Timeline owns the semantic list, item surfaces, axis anchors, markers, connectors, responsive alternate collapse, horizontal overflow behavior, and opt-in item selection. Input order is always render order.
 
 ## Basic usage
 
@@ -48,6 +48,13 @@ The default configuration is a vertical timeline with all content on the logical
 - **scrollFade**: \`boolean\` (default: \`true\`) — applies the shared logical horizontal scroll fade only while a horizontal timeline actually overflows.
 - **i18n**: \`Partial<Messages>\` — per-instance translations merged over the global i18n catalog.
 
+### Selection
+
+- **selectable**: \`boolean\` (default: \`false\`) — makes every item a toggle button that selects it. See Selection below. Without it Timeline renders no buttons and ignores \`value\`, \`defaultValue\`, and \`item.disabled\`.
+- **value**: \`TimelineValue\` (\`string | number\`, bindable) — the selected item's value: its \`id\`, or its index when it has no \`id\`. A value naming no item selects nothing.
+- **defaultValue**: \`TimelineValue\` — initial selection when \`value\` is omitted.
+- **onValueChange**: \`(payload: TimelineValueChangePayload<Item>) => void\` — called once per selection change made by a click, Enter, Space, or a payload's \`select()\`, with \`{ value, item, index }\`. Not called when the selected item is selected again or when \`value\` changes from outside.
+
 ### Custom rendering
 
 - **item**: \`Snippet<[TimelineItemPayload<Item>]>\` — replaces the content inside each Timeline-owned variant surface.
@@ -76,6 +83,7 @@ type TimelineItem = {
   connectorColor?: Colors;
   progress?: 'done' | 'current' | 'upcoming';
   side?: 'start' | 'end';
+  disabled?: boolean;
 };
 \`\`\`
 
@@ -88,6 +96,7 @@ type TimelineItem = {
 - \`connectorColor\` overrides the root color for this item's outgoing connector. It has no effect on the final item.
 - \`side\` overrides alternate parity for one item. It is not valid with fixed placement.
 - \`progress\` marks a step of a process (\`TimelineProgress\`). See Step progress below.
+- \`disabled\` keeps the item from being selected in a \`selectable\` timeline; the arrow keys skip it. It changes nothing else.
 
 ## Placement and dates
 
@@ -130,6 +139,50 @@ Give each item a \`progress\` to draw a process's progress band, such as a file'
 - The \`marker\` snippet still replaces every marker: read \`payload.item.progress\` and call \`defaultMarker()\` for the steps it leaves alone. Theme overrides reach the \`progress\` variant of the \`marker\` and \`connector\` parts, for example \`theme={{ connector: { progress: { done: 'bg-success' } } }}\`.
 - Styling hooks: \`data-progress\` on the item, its marker and its outgoing connector.
 
+## Selection
+
+Set \`selectable\` to let a click on a step open its panel. Each item gets a real \`<button type="button">\` stretched over the whole \`<li>\` (title, description, marker, and the space around them), with \`aria-pressed\` for the selected item. Selection follows the editable-state contract: bind \`value\`, or pass \`defaultValue\` and \`onValueChange\`.
+
+\`\`\`svelte
+<script lang="ts">
+  import { Timeline, type TimelineItem, type TimelineValue } from 'entasis/timeline';
+
+  type RunStep = TimelineItem & { id: string; summary: string };
+
+  const steps: RunStep[] = [
+    { id: 'fetch', title: 'Fetch sources', progress: 'done', summary: 'Pulled 418 files.' },
+    { id: 'analyze', title: 'Analyze', progress: 'current', summary: '61 of 140 modules done.' },
+    { id: 'report', title: 'Report', progress: 'upcoming', summary: 'Not started.' },
+    { id: 'publish', title: 'Publish', progress: 'upcoming', disabled: true, summary: 'Needs a report.' }
+  ];
+
+  let selected = $state<TimelineValue | undefined>('analyze');
+  const step = $derived(steps.find((candidate) => candidate.id === selected));
+</script>
+
+<Timeline
+  items={steps}
+  orientation="horizontal"
+  color="primary"
+  selectable
+  bind:value={selected}
+  onValueChange={({ item }) => console.log(item.summary)}
+  aria-label="Run steps"
+/>
+
+{#if step}
+  <section aria-label={step.id}>{step.summary}</section>
+{/if}
+\`\`\`
+
+- **Value.** An item's value is its \`id\`; an item without one is selected by its array index, which shifts when the array reorders, so give items an \`id\` when they can move. Timeline throws a \`TypeError\` when an index fallback equals another item's numeric \`id\`.
+- **Re-selecting** the selected item changes nothing: there is no deselect gesture. Clear the selection by setting \`value\` to \`undefined\`. Removing the selected item leaves \`value\` as it was, naming no item.
+- **Keyboard.** The buttons share one tab stop: the selected item, else the \`progress: 'current'\` step, else the first enabled item. In a horizontal timeline ArrowLeft and ArrowRight move it (mirrored in right-to-left layouts); in a vertical one ArrowUp and ArrowDown. Home and End jump to the ends, and the arrows wrap. Moving focus never selects; Enter and Space select. Escape is left to the surrounding UI. Disabled items are disabled buttons, never focused. The tab stop follows its item through inserts, removals, and reorders. A selectable horizontal timeline that overflows adds no scroll stop of its own: moving focus scrolls the item into view.
+- **Name.** The button is named by the item's title through \`aria-labelledby={payload.titleId}\`; the default title carries that id. An \`item\` snippet that does not render \`defaultContent()\` puts \`id={titleId}\` on its own title (a string \`title\` also names the button through \`aria-label\` as a fallback). The current step's button repeats \`aria-current="step"\`; selection never uses \`aria-current\`.
+- **Custom content.** The button is empty and sits under the item's parts, which let the pointer through to it, so nothing interactive is nested in it. Links, buttons, and form fields inside an \`item\` or \`opposite\` snippet stay clickable above it and do not select. A snippet can also call \`payload.select()\`, and read \`payload.selected\`, \`payload.disabled\`, and \`payload.value\`.
+- **Styling.** The item surface (\`content\` part) paints the selected recipe (\`bg-selected-muted text-selected-muted-readable\`) in every variant; \`card\`, \`outline\`, and \`soft\` also ring it in the selected role. A ghost item gets a rounded surface that reaches past its text toward the axis. Hover and press tint the surface through the shared state layer, keyboard focus rings it (\`ring-focus/50\`), and the cursor is a pointer. The \`itemButton\` theme part styles the invisible button; the \`content\`, \`title\`, \`description\`, and \`date\` parts take \`selected\` variants, and \`content\` takes \`selectable\` and \`interactive\` (selectable and not disabled).
+- **Styling hooks.** In a selectable timeline each \`<li>\` carries \`data-selected\` while selected and \`data-disabled\` while disabled (presence attributes); the button is \`data-slot="timeline-item-button"\`.
+
 ## Generic snippets and defaults
 
 Application item types can extend \`TimelineItem\`. The extended type remains available as \`payload.item\` in all three renderer snippets.
@@ -170,6 +223,12 @@ type TimelineItemPayload<Item extends TimelineItem> = Readonly<{
   connectorColor: Colors;
   isFirst: boolean;
   isLast: boolean;
+  value: string | number;
+  selectable: boolean;
+  selected: boolean;
+  disabled: boolean;
+  select: () => void;
+  titleId: string;
   defaultContent: Snippet;
   defaultMarker: Snippet;
   defaultOpposite: Snippet;
@@ -200,7 +259,8 @@ The variant is global. Timeline does not support per-item variant overrides.
 Timeline throws a descriptive \`TypeError\` when:
 
 - two items have the same explicit \`id\`;
-- an item supplies \`side\` while placement is fixed to \`start\` or \`end\`.
+- an item supplies \`side\` while placement is fixed to \`start\` or \`end\`;
+- in a \`selectable\` timeline, an item without an \`id\` falls back to an index that is another item's numeric \`id\`.
 
 The ID check preserves number and string identity, so \`1\` and \`'1'\` are different IDs. TypeScript separately rejects \`opposite\` with fixed placement.
 
@@ -211,11 +271,12 @@ The ID check preserves number and string identity, so \`1\` and \`'1'\` are diff
 - An item with \`progress: 'current'\` carries \`aria-current="step"\`.
 - A default loading marker has a localized polite status announcement outside the decorative axis.
 - A default date with \`datetime\` renders as a semantic \`<time>\` element.
-- An overflowing horizontal timeline becomes a native keyboard scroll region; a non-overflowing timeline adds no tab stop.
+- An overflowing horizontal timeline becomes a native keyboard scroll region; a non-overflowing timeline adds no tab stop. A \`selectable\` timeline is reached through its one item tab stop instead.
+- A \`selectable\` timeline renders one toggle button per item (\`aria-pressed\`), named by the item title. See Selection.
 
 ## Theme parts
 
-\`root\`, \`item\`, \`opposite\`, \`axis\`, \`connector\`, \`marker\`, \`content\`, \`date\`, \`titleRow\`, \`title\`, \`description\`, and \`loading\`.
+\`root\`, \`item\`, \`opposite\`, \`axis\`, \`itemButton\`, \`connector\`, \`marker\`, \`content\`, \`date\`, \`titleRow\`, \`title\`, \`description\`, and \`loading\`.
 
-Timeline is display-only. It has no selection, navigation, event callbacks, animation state, bindable controller, or date processing. Step \`progress\` is presentation the host sets per item, not a state Timeline advances.
+Timeline is display-only unless \`selectable\`: then selection is its only state. It has no navigation, animation state, bindable controller, or date processing. Step \`progress\` is presentation the host sets per item, not a state Timeline advances, and selecting an item does not change its progress.
 `;

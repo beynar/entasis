@@ -5,15 +5,16 @@ import { isOverflowing } from '$lib/utils/useOverflowObserver.svelte.js';
 /**
  * Owns the lifecycle of the underlying `@pierre/diffs` `FileDiff` instances.
  *
- * This is a client-side, render-only path (no SSR / hydration): for each parsed
- * file diff we create a wrapper element, instantiate a `FileDiff`, and call
- * `render(...)`. `cleanUp()` disposes every instance and is called from the
- * component's attachment teardown.
+ * For each parsed file diff it creates a wrapper element, instantiates a `FileDiff`, and calls
+ * `render(...)`, or `hydrate(...)` over a diff preloaded on the server. `cleanUp()` disposes
+ * every instance and is called from the component's attachment teardown.
  */
 export class DiffRenderer {
 	private instances: FileDiff[] = [];
 	private scrollRegions: ResizeObserver | null = null;
 	private scrollRegionLabels = new WeakMap<Element, string>();
+	private shadowObservers: MutationObserver[] = [];
+	private pendingFrames = new Set<number>();
 
 	render(
 		container: HTMLElement,
@@ -98,17 +99,36 @@ export class DiffRenderer {
 		labelFile: ((file: string) => string) | undefined
 	): void {
 		if (labelFile == null || typeof ResizeObserver === 'undefined') return;
-		const shadow = wrapper.querySelector('diffs-container')?.shadowRoot;
-		if (shadow == null) return;
 		const label = labelFile(file);
-		this.scrollRegions ??= new ResizeObserver((entries) => {
+		const scrollRegions = (this.scrollRegions ??= new ResizeObserver((entries) => {
 			for (const entry of entries) this.syncScrollRegion(entry.target);
-		});
-		for (const code of shadow.querySelectorAll('code')) {
-			this.scrollRegionLabels.set(code, label);
-			this.syncScrollRegion(code);
-			this.scrollRegions.observe(code);
-		}
+		}));
+		const track = (shadow: ShadowRoot) => {
+			for (const code of shadow.querySelectorAll('code')) {
+				if (this.scrollRegionLabels.get(code) === label) continue;
+				this.scrollRegionLabels.set(code, label);
+				this.syncScrollRegion(code);
+				scrollRegions.observe(code);
+			}
+		};
+		// A hydrated diff already holds its markup; a client render fills the shadow root a moment
+		// later, and again on each re-render. Watch it so every <code> gets its tab stop.
+		const watch = () => {
+			const shadow = wrapper.querySelector('diffs-container')?.shadowRoot;
+			if (shadow == null) return false;
+			track(shadow);
+			const mutations = new MutationObserver(() => track(shadow));
+			mutations.observe(shadow, { childList: true, subtree: true });
+			this.shadowObservers.push(mutations);
+			return true;
+		};
+		if (watch()) return;
+		let frames = 0;
+		const retry = () => {
+			if (watch() || ++frames > 120) return;
+			this.pendingFrames.add(requestAnimationFrame(retry));
+		};
+		this.pendingFrames.add(requestAnimationFrame(retry));
 	}
 
 	// `aria-label` goes on and off with the role: a bare <code> has no role, and a label on a
@@ -143,6 +163,10 @@ export class DiffRenderer {
 		this.instances = [];
 		this.scrollRegions?.disconnect();
 		this.scrollRegions = null;
+		for (const observer of this.shadowObservers) observer.disconnect();
+		this.shadowObservers = [];
+		for (const frame of this.pendingFrames) cancelAnimationFrame(frame);
+		this.pendingFrames.clear();
 	}
 
 	private syncSelectedLines(instance: FileDiff, state: DiffRenderState): void {

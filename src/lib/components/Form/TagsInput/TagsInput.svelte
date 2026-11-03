@@ -17,6 +17,7 @@
 	import { ComboboxController } from '../Combobox/combobox.state.svelte.js';
 	import ComboboxPopup from '../Combobox/ComboboxPopup.svelte';
 	import { tick, untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import type { Attachment } from 'svelte/attachments';
 	import { on } from 'svelte/events';
 	import { flip } from 'svelte/animate';
@@ -69,7 +70,7 @@
 		description,
 		...rest
 	}: TagsInputProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	const t = $derived(useI18n(i18n));

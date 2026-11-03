@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import Field from '../Field/Field.svelte';
 	import { createFieldState, type FieldState } from '../Field/field.state.svelte.js';
@@ -51,7 +52,7 @@
 		fieldAttrs,
 		...rest
 	}: SliderProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const t = $derived(useI18n(i18n));
 	// An i18n direction that the document does not carry still has to mirror the whole field, so

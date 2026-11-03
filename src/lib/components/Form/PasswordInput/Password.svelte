@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { tick } from 'svelte';
 	import Field from '../Field/Field.svelte';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
@@ -33,7 +34,7 @@
 		...rest
 	}: PasswordInputProps = $props();
 	const t = $derived(useI18n());
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	// A sign-in field must accept whatever password the account already has, so the default
 	// minimum is skipped for `current-password`. An explicit `minLength` always applies.

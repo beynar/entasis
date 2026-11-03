@@ -8,6 +8,7 @@
 	import { xIcon } from '../../Icons/x.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { tick, untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { flip } from 'svelte/animate';
 	import { scale } from 'svelte/transition';
 
@@ -39,7 +40,7 @@
 		description,
 		...rest
 	}: KeyValueInputProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 

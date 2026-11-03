@@ -23,6 +23,7 @@
 		maskitoParseTime
 	} from '@maskito/kit';
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { on } from 'svelte/events';
 
 	let {
@@ -46,7 +47,7 @@
 		onValueChange,
 		...rest
 	}: TimeInputProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	let pickerOpen = $state(false);

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Button from '../../Button/Button.svelte';
 	import { arrowCounterClockwiseIcon } from '../../Icons/arrowCounterClockwise.js';
 	import { eraserIcon } from '../../Icons/eraser.js';
@@ -43,7 +44,7 @@
 		theme,
 		...rest
 	}: SignatureInputProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	const statusId = `${id}-status`;

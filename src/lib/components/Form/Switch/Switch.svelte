@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
 	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { useFieldTheme } from '../Field/field.theme.js';
@@ -29,7 +30,7 @@
 		inputAttrs,
 		...rest
 	}: SwitchProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	// Field falls back to a generated name so Form wiring stays unique. Only a name the app gave,

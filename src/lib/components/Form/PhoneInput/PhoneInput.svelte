@@ -17,6 +17,7 @@
 		type PhoneCountryOption
 	} from './phoneInputCountry.js';
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { on } from 'svelte/events';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 
@@ -41,7 +42,7 @@
 		visible,
 		...rest
 	}: PhoneInputProps = $props();
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	const t = $derived(useI18n());

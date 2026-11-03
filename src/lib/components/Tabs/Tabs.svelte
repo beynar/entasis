@@ -9,6 +9,7 @@
 		useTabSelection
 	} from '$lib/components/Tabbar/tabbar.selection.svelte.js';
 	import { StepperState } from '../Stepper/stepper.state.svelte.js';
+	import { BROWSER } from 'esm-env';
 	import { untrack } from 'svelte';
 	import type { TabsProps, TabsValueChangeReason } from './tabs.props.js';
 	import { useTabsMotion, useTabsTheme } from './tabs.theme.js';
@@ -85,7 +86,7 @@
 	const bindApi = (stepper: StepperState<Item>) => {
 		stepper.next = () => stepToEnabledTab(stepper, 1);
 		stepper.previous = () => stepToEnabledTab(stepper, -1);
-		api = stepper;
+		if (BROWSER) api = stepper;
 	};
 
 	const classes = $derived(useTabsTheme(theme));

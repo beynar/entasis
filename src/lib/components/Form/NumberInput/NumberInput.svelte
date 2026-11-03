@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import type { Attachment } from 'svelte/attachments';
 	import { on } from 'svelte/events';
 	import Button from '../../Button/Button.svelte';
@@ -54,7 +55,7 @@
 		...rest
 	}: NumberInputProps = $props();
 	const t = $derived(useI18n());
-	if (value === undefined) value = untrack(() => defaultValue);
+	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const id = $props.id();
 	const activeLocale = $derived(locale ?? t.locale);

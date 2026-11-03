@@ -133,6 +133,13 @@ export const VISUAL_VIEWPORT_TOP_VARIABLE = '--visual-viewport-top';
  * The layout viewport is the larger of `innerHeight` and the root's `clientHeight`: iOS 26
  * shrinks `innerHeight` with the keyboard, while the root keeps the height fixed content uses.
  *
+ * `--window-height` is `100dvh` and `--window-width` `100vw`, constant strings that follow the
+ * window by themselves; the height is in px only while the visual viewport is shorter than the
+ * layout viewport (a keyboard, a zoom), where `dvh` does not follow. Every element inherits these
+ * variables, so a px value rewritten on each resize event made WebKit restyle the whole page each
+ * time and keep every restyle in its style cache (about 80 MB per window-resize gesture). Values
+ * that did not change are not written again.
+ *
  * On iOS it also adds `maximum-scale=1` to the viewport meta tag (unless it sets its own): Safari
  * zooms the page into any text field below 16px when it takes focus and leaves it zoomed. iOS
  * ignores the limit for the user's pinch zoom, so the page stays zoomable; other platforms would
@@ -152,13 +159,15 @@ export const compileViewportScript = () => /* js */ `
 	if (viewportMeta && !/maximum-scale/.test(viewportMeta.content)) {
 		viewportMeta.content = viewportMeta.content + ', maximum-scale=1';
 	}
+	const write = (name, value) => {
+		if (root.style.getPropertyValue(name) !== value) root.style.setProperty(name, value);
+	};
 	const setWindowHeight = () => {
 		const height = visualViewport?.height ?? window.innerHeight;
-		root.style.setProperty('--window-height', height + 'px');
+		const layoutHeight = Math.max(window.innerHeight, root.clientHeight || 0);
+		write('--window-height', Math.abs(layoutHeight - height) < 1 ? '100dvh' : height + 'px');
 	};
-	const setWindowWidth = () => {
-		root.style.setProperty('--window-width', window.innerWidth + 'px');
-	};
+	const setWindowWidth = () => write('--window-width', '100vw');
 	const setKeyboardInset = () => {
 		const zoomed = !!visualViewport && Math.abs(visualViewport.scale - 1) > 0.01;
 		const layoutHeight = Math.max(window.innerHeight, root.clientHeight || 0);
@@ -167,8 +176,8 @@ export const compileViewportScript = () => /* js */ `
 			visualViewport && !zoomed
 				? Math.max(0, Math.round(layoutHeight - visualViewport.height - visualViewport.offsetTop))
 				: 0;
-		root.style.setProperty('${KEYBOARD_INSET_VARIABLE}', inset + 'px');
-		root.style.setProperty('${VISUAL_VIEWPORT_TOP_VARIABLE}', top + 'px');
+		write('${KEYBOARD_INSET_VARIABLE}', inset + 'px');
+		write('${VISUAL_VIEWPORT_TOP_VARIABLE}', top + 'px');
 	};
 	window.addEventListener('resize', setWindowHeight);
 	window.addEventListener('resize', setWindowWidth);

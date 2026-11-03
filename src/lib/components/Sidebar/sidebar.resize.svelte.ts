@@ -37,6 +37,13 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 	isStateTransitioning = $state(false);
 	isWidthInitializing = $state(false);
 	isEdgeRevealSuppressed = $state(false);
+	/**
+	 * `--sidebar-width` while a resize runs: the width it started from. Every element inside the
+	 * wrapper, the page included, inherits the variable; changed on each pointer move, it made
+	 * WebKit restyle all of them per step and keep each restyle in its style cache. The spacer and
+	 * the container take the live width as their own `width` instead (`liveWidth`).
+	 */
+	private resizeStartWidth = $state<string | null>(null);
 	private startWidth = 0;
 	private didDrag = false;
 	private suppressNextClick = false;
@@ -90,6 +97,17 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 	}
 
 	get renderWidth() {
+		if (this.resizeStartWidth !== null) return this.resizeStartWidth;
+		return this.restingWidth;
+	}
+
+	/** The width the expanded panel follows while a resize runs, set on the spacer and container. */
+	get liveWidth() {
+		if (this.resizeStartWidth === null || this.displayState !== 'expanded') return undefined;
+		return this.width;
+	}
+
+	private get restingWidth() {
 		if (!this.isWidthInitializing || this.initialStoredWidth === null) return this.width;
 		return `${Math.round(this.initialStoredWidth)}px`;
 	}
@@ -163,6 +181,7 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 			if (!panelNode) return false;
 
 			node.focus();
+			this.resizeStartWidth ??= this.restingWidth;
 			this.startWidth = panelNode.getBoundingClientRect().width;
 			this.didDrag = false;
 			this.suppressNextClick = false;
@@ -195,6 +214,7 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 		if (!this.isDragging) return;
 
 		this.isDragging = false;
+		if (!this.isKeyboardResizing) this.resizeStartWidth = null;
 		this.suppressNextClick = this.didDrag;
 		if (this.didDrag) this.commitWidth();
 		if (document.activeElement === node) node.blur();
@@ -271,6 +291,7 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 	}
 
 	private markKeyboardResizing() {
+		this.resizeStartWidth ??= this.restingWidth;
 		this.isKeyboardResizing = true;
 		if (this.keyboardResizeTimeout) {
 			clearTimeout(this.keyboardResizeTimeout);
@@ -278,6 +299,7 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 		this.keyboardResizeTimeout = setTimeout(() => {
 			this.isKeyboardResizing = false;
 			this.keyboardResizeTimeout = null;
+			if (!this.isDragging) this.resizeStartWidth = null;
 		}, 120);
 	}
 

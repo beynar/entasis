@@ -4,6 +4,7 @@
 
 <script lang="ts" generics="Item">
 	/* eslint-disable no-useless-assignment -- bindableApi is an output binding. */
+	import { BROWSER } from 'esm-env';
 	import { onMount, tick, untrack } from 'svelte';
 	import BeforeHydratation from '../Utils/BeforeHydratation.svelte';
 	import { type StepperProps } from './stepper.props.js';
@@ -59,7 +60,8 @@
 		}
 	});
 
-	bindableApi = stepper;
+	// Published in the browser only: a server write would make Svelte replay the parent's markup.
+	if (BROWSER) bindableApi = stepper;
 	const classes = $derived(useStepperTheme(theme));
 	const stepCount = $derived(Math.max(items.length, 1));
 	const trackWidth = $derived(stepper.expanded ? `${stepCount * 100}%` : '100%');
