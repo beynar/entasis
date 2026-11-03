@@ -11,6 +11,7 @@
 	import { drawerInsetValue } from '../Theme/theme.designTokens.js';
 	import { composeHandlers } from '$lib/utils/handlers.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { holdWebMCPSurface } from '$lib/utils/webmcp/webmcp.registry.js';
 
 	let {
 		id: customId,
@@ -138,6 +139,11 @@
 		get motion() {
 			return theme?.motion;
 		}
+	});
+
+	// What a modal covers is out of reach for an agent as well.
+	$effect(() => {
+		if (dialog.isOpen && dialog.modal) return holdWebMCPSurface(dialog.id);
 	});
 
 	const classes = $derived(useDialogTheme(theme));

@@ -1,7 +1,7 @@
 import type { ButtonProps } from '$lib/components/Button/index.js';
 import type { DialogProps } from '$lib/components/Dialog/index.js';
 import type { Slot } from '$lib/components/Slot/slot.js';
-import type { FormProps } from '../Form/form.props.js';
+import type { FormProps, FormToolOptions } from '../Form/form.props.js';
 import type { FormInputs, InferFormValue, LiveFormValue } from '../Form/form.js';
 
 export type AskButton =
@@ -42,6 +42,12 @@ export type AskOptions<I extends FormInputs> = Pick<
 	 * (the default) only the form scrolls, so the header and the buttons stay on screen.
 	 */
 	dialog?: AskDialogOptions;
+	/**
+	 * How the open dialog appears to AI agents under `<Theme webmcp>`: two tools named
+	 * `answer_dialog` and `cancel_dialog`, described from `title`, `description`, `confirm` and
+	 * `cancel`. Options refine the first; `false` keeps the dialog from agents.
+	 */
+	tool?: boolean | FormToolOptions;
 };
 
 export type AskResult<I extends FormInputs> =

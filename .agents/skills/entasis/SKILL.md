@@ -583,5 +583,6 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 - `entasis/scheduling` — scheduling, utility
 - `entasis/icons/*` — icons, snippet, wildcard-export
 - `entasis/spinner-overlay` — attachment, feedback
+- `entasis/webmcp` — svelte, webmcp, ai-agents, utility
 
 <!-- component-contract:inventory:end -->

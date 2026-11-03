@@ -8,6 +8,14 @@
 	import type { FormInputs, InferFormValue, LiveFormValue } from '../Form/form.js';
 	import type { AskButton, AskProps, AskResult } from './ask.props.js';
 	import { registerAskHost, type AskRequest } from './ask.js';
+	import type { FormToolOptions } from '../Form/form.props.js';
+	import {
+		registerWebMCPTool,
+		toolText,
+		useWebMCPConfig,
+		type WebMCPToolHandle
+	} from '$lib/utils/webmcp/webmcp.registry.js';
+	import type { WebMCPTool } from '$lib/utils/webmcp/webmcp.types.js';
 
 	type AskButtonOptions = Exclude<AskButton, string>;
 	type ResolvedAskButton = {
@@ -31,6 +39,62 @@
 
 	let { type }: AskProps = $props();
 	let asks = $state<AskViewState[]>([]);
+	const webmcp = useWebMCPConfig();
+	// By ask id. Plain: the effect below writes it and must not depend on it.
+	const cancelTools: Record<string, WebMCPToolHandle> = {};
+
+	// The tools follow the buttons: a disabled one has no tool, as a person could not press it.
+	function askTool(askState: AskViewState): boolean | FormToolOptions {
+		const { title, description, confirm, tool } = askState.options;
+		if (tool === false || resolveButton(confirm).disabled) return false;
+		const dialog = [toolText(title), toolText(description)].filter(Boolean).join(': ');
+		return {
+			name: 'answer_dialog',
+			title: toolText(title) || undefined,
+			description:
+				`A dialog is waiting for an answer${dialog ? ` (${dialog})` : ''}. ` +
+				`Calling this tool fills it in and confirms it with "${toolText(resolveButton(confirm).text)}".`,
+			...(typeof tool === 'object' ? tool : {})
+		};
+	}
+
+	function cancelTool(askState: AskViewState): WebMCPTool {
+		const { id } = askState;
+		return {
+			name: 'cancel_dialog',
+			description: `Dismisses the open dialog with "${toolText(resolveButton(askState.options.cancel).text)}", without answering it.`,
+			execute: () => {
+				const current = asks.find((candidate) => candidate.id === id);
+				if (!current?.open || current.form?.loading) return { status: 'busy' };
+				cancelAsk(current);
+				return { status: 'cancelled' };
+			}
+		};
+	}
+
+	$effect(() => {
+		const config = webmcp.options;
+		const open = asks.filter(
+			({ open, options }) =>
+				config && open && options.tool !== false && !resolveButton(options.cancel).disabled
+		);
+		for (const askState of open) {
+			const exposedTo = config?.exposedTo;
+			const handle = cancelTools[askState.id];
+			if (handle) handle.update(cancelTool(askState), { exposedTo });
+			else {
+				cancelTools[askState.id] = registerWebMCPTool(cancelTool(askState), {
+					exposedTo,
+					modal: askState.id
+				});
+			}
+		}
+		for (const [id, handle] of Object.entries(cancelTools)) {
+			if (open.some((askState) => askState.id === id)) continue;
+			handle.remove();
+			delete cancelTools[id];
+		}
+	});
 
 	function resolveButton(button: AskButton): ResolvedAskButton {
 		if (typeof button === 'string') {
@@ -123,6 +187,10 @@
 				askState.reject(error);
 			}
 			asks = [];
+			for (const [id, handle] of Object.entries(cancelTools)) {
+				handle.remove();
+				delete cancelTools[id];
+			}
 		};
 	});
 </script>
@@ -171,6 +239,7 @@
 				validationMode={askState.options.validationMode}
 				validationDebounce={askState.options.validationDebounce}
 				theme={askState.options.theme}
+				tool={askTool(askState)}
 			/>
 		</div>
 

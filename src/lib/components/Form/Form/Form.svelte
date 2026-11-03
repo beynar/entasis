@@ -10,7 +10,8 @@
 	import FormInputRenderer from './FormInputRenderer.svelte';
 	import type { FormProps } from './form.props.js';
 	import { useFormTheme } from './form.theme.js';
-	import { useForm } from './form.state.svelte.js';
+	import { useForm, type FormState } from './form.state.svelte.js';
+	import { useFormTool } from './form.tool.svelte.js';
 	import { isRegisteredFormInput } from './form.registry.js';
 	import { formCardSurfaceContextKey, type FormCardSurfaceContext } from './form.context.js';
 	import FieldGroup from '../Field/FieldGroup.svelte';
@@ -39,7 +40,8 @@
 		readOnly = false,
 		validationMode,
 		validationDebounce,
-		errors
+		errors,
+		tool
 	}: FormProps<I> = $props();
 	// Every field below shares the form's disabled and read-only state.
 	provideFieldGroup({
@@ -85,6 +87,28 @@
 		}
 	});
 	if (form !== formState) form = formState;
+	let root = $state<HTMLElement>();
+	useFormTool({
+		form: formState as unknown as FormState<FormInputs>,
+		get tool() {
+			return tool;
+		},
+		get title() {
+			return title;
+		},
+		get description() {
+			return description;
+		},
+		get disabled() {
+			return disabled;
+		},
+		get canSubmit() {
+			return Boolean(onSubmit);
+		},
+		get root() {
+			return root;
+		}
+	});
 	const inputsEntries = $derived(Object.entries<FormInput>(inputs));
 	const visibleInputsEntries = $derived(
 		inputsEntries.filter(([, input]) =>
@@ -152,6 +176,7 @@
 	{/if}
 {/snippet}
 <div
+	bind:this={root}
 	role="form"
 	{@attach formState.keyboardNavigation}
 	data-size={size}

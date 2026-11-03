@@ -164,6 +164,18 @@
 		setPickerValue(getActiveTimeOption(hourOptions, selectedHour), minute);
 	};
 
+	// A value set from outside reaches the input. Typing never gets here with a different time:
+	// its partial text already parses to the value, and rewriting it would move the caret.
+	$effect(() => {
+		const input = field.node instanceof HTMLInputElement ? field.node : null;
+		if (!input) return;
+		if (normalizedValue === null) {
+			if (input.value !== '') input.value = '';
+		} else if (maskitoParseTime(input.value, params) !== normalizedValue) {
+			input.value = maskitoStringifyTime(normalizedValue, params);
+		}
+	});
+
 	const maskAction = (input: HTMLInputElement) => {
 		untrack(() => {
 			const mask = maskitoTimeOptionsGenerator(params);

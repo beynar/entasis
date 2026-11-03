@@ -70,6 +70,7 @@ Form renders configured entasis fields inside a div, owns their state and valida
 - **errors**: errors from outside the form, for example a SvelteKit ActionData, keyed by field name with one message or a list of them. They show under their fields, survive validation, do not block a submit (the server re-checks), and clear when that field's value next changes. Changing the prop replaces the errors; the first errored field in render order is revealed.
 - **disabled**: disables every field, for example disabled={form.loading} while a submission runs. Disabled fields skip validation and, as in a native form, are left out of the submitted value. The root carries data-disabled. A disabled option inside an enabled radio or checkbox group is different: when selected it stays in that field's value, while a plain native <form> leaves it out of its submission.
 - **readOnly**: makes every field read-only. Values stay focusable, validated and submitted, but users cannot change them. The root carries data-readonly.
+- **tool**: how the form appears to AI agents under \`<Theme webmcp>\`: nothing to set for it to work, \`{ name, title, description, consequential, exposedTo }\` to refine it, \`false\` to keep it from agents. See \`entasis/webmcp\`.
 - **class**: additional classes on the root div.
 - **theme**: Form theme overrides for root, header, title, description, group, group label/description/fields, top-level items, custom entries, footer, and actions. Global Card typography and section-rhythm changes flow into all Form variants before Form-specific overrides are composed; Card surface changes apply only to the card variant.
 
@@ -295,7 +296,7 @@ const result = await ask({
 if (result.submitted) result.value.price; // Money
 \`\`\`
 
-Every Field entry option applies (label, description, required, disabled, readOnly, messages, size, density, visible, defaultValue, onValidate, onValueChange, slots); any other key goes to the component. required rejects what isEmpty reports empty (by default null, undefined, an empty string, or an array with no values) with the catalog required message, and isEmpty also decides whether the field reads as filled; validate runs for every entry of the type, before the entry's own onValidate. The value takes part in bind:value, visibility, validation, submission, and InferFormValue like a built-in input's. An entry whose type is neither built-in nor registered throws when the form reads it.
+Every Field entry option applies (label, description, required, disabled, readOnly, messages, size, density, visible, defaultValue, onValidate, onValueChange, slots, tool); any other key goes to the component. required rejects what isEmpty reports empty (by default null, undefined, an empty string, or an array with no values) with the catalog required message, and isEmpty also decides whether the field reads as filled; validate runs for every entry of the type, before the entry's own onValidate. The value takes part in bind:value, visibility, validation, submission, and InferFormValue like a built-in input's. An entry whose type is neither built-in nor registered throws when the form reads it. A definition's toolSchema, a JSON Schema of the value, lets AI agents fill the type in under \`<Theme webmcp>\`; without it the field stays for the user.
 
 ## Non-value entries
 

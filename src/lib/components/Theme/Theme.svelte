@@ -36,7 +36,8 @@
 		motion,
 		components,
 		nonce,
-		portalContainer
+		portalContainer,
+		webmcp
 	}: ThemeProps<T> = $props();
 
 	const validatedDefaultTheme = (() => {
@@ -143,6 +144,9 @@
 			},
 			get portalContainer() {
 				return portalContainer;
+			},
+			get webmcp() {
+				return webmcp;
 			},
 			get defaultColor() {
 				const resolved = theme.resolvedTheme;

@@ -1,4 +1,4 @@
-import type { FormFieldInput, FormInput, FormValueRecord } from './form.js';
+import type { FormFieldInput, FormInput, FormValueInput, FormValueRecord } from './form.js';
 import type { Sizes } from '$lib/types/theme.js';
 import type { FieldLabelPosition } from '../Field/field.js';
 
@@ -51,8 +51,9 @@ export function prepareInputProps(
 	labelPosition?: FieldLabelPosition
 ) {
 	// `type` and `display` pick the component in Form.svelte; they are not props.
-	const { type, visible, ...rest } = input as FormFieldInput & { display?: string };
+	const { type, visible, tool, ...rest } = input as FormValueInput & { display?: string };
 	void type;
+	void tool;
 	if ('display' in rest) delete (rest as { display?: string }).display;
 	// Only include visible if it's a boolean, not a function
 	const defaults = labelPosition ? { size, labelPosition } : { size };

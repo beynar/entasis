@@ -1589,6 +1589,7 @@ export const componentInventory = [
 			'FormAction',
 			'FormActionInput',
 			'FormCustomInput',
+			'FormEntryTool',
 			'FormErrors',
 			'FormFieldController',
 			'FormFieldEntry',
@@ -1613,6 +1614,7 @@ export const componentInventory = [
 			'FormSubmitHandler',
 			'FormTheme',
 			'FormThemeProps',
+			'FormToolOptions',
 			'FormValidateOptions',
 			'FormValueInput',
 			'FormVariant',
@@ -4802,6 +4804,26 @@ export const componentInventory = [
 		capabilities: ['attachment', 'feedback'],
 		relatedComponents: ['spinner'],
 		visibility: 'public'
+	},
+	{
+		id: 'webmcp',
+		subpath: 'entasis/webmcp',
+		sourceIndex: 'src/lib/utils/webmcp/index.ts',
+		exportedSymbols: [
+			'WebMCPJsonSchema',
+			'WebMCPOptions',
+			'WebMCPRegisterOptions',
+			'WebMCPTool',
+			'WebMCPToolAnnotations',
+			'WebMCPToolHandle',
+			'registerWebMCPTool',
+			'useWebMCPTool',
+			'webmcpSupported'
+		],
+		docs: [],
+		capabilities: ['svelte', 'webmcp', 'ai-agents', 'utility'],
+		relatedComponents: ['theme', 'form', 'ask'],
+		visibility: 'public'
 	}
 ] as const;
 
@@ -4953,7 +4975,8 @@ export const relatedComponents = {
 	motion: ['theme'],
 	scheduling: ['event-calendar', 'gantt-chart'],
 	icons: [],
-	'spinner-overlay': ['spinner']
+	'spinner-overlay': ['spinner'],
+	webmcp: ['theme', 'form', 'ask']
 } as const;
 
 export type ComponentInventoryEntry = (typeof componentInventory)[number];

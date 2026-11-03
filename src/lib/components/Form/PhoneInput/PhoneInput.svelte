@@ -153,6 +153,14 @@
 			node.querySelector('input')?.focus();
 		});
 
+	// A number set from outside reaches the input and picks its country; a typed one is already there.
+	$effect(() => {
+		const next = value ?? '';
+		if (next === untrack(getValue)) return;
+		if (iti) iti.setNumber(next);
+		else if (phoneInputNode) phoneInputNode.value = next;
+	});
+
 	const usePhoneInput = (node: HTMLInputElement) => {
 		return untrack(() => {
 			const currentAttachmentId = ++attachmentId;

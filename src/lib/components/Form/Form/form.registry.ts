@@ -4,6 +4,7 @@ import type { RegisteredInputType } from '../Field/field.js';
 import type { FieldValidatorResult } from '../Field/field.state.svelte.js';
 import { schemas } from '../Field/schemas.js';
 import { isEmptyValue } from '$lib/utils/values.js';
+import type { WebMCPJsonSchema } from '$lib/utils/webmcp/webmcp.types.js';
 import type { FormInputDefinition, FormRegisteredInput, FormRenderableInput } from './form.js';
 
 /** The definitions `registerFormInputs` takes: one per `FormInputRegistry` key, all optional. */
@@ -14,12 +15,14 @@ export type RegisteredFormInputDefinition = {
 	component: Component<Record<string, unknown>>;
 	isEmpty: (value: unknown) => boolean;
 	validate?: (value: unknown) => FieldValidatorResult;
+	toolSchema?: WebMCPJsonSchema;
 };
 
 type ErasedDefinition = {
 	component: unknown;
 	isEmpty?: (value: unknown) => boolean;
 	validate?: (value: unknown) => FieldValidatorResult;
+	toolSchema?: WebMCPJsonSchema;
 };
 
 // Form's own entry kinds; the built-in input types are rejected through the schema table.
@@ -50,7 +53,8 @@ export function registerFormInputs(inputs: FormInputDefinitions): () => void {
 				// field it registered for that type, which restores it.
 				component: definition.component as RegisteredFormInputDefinition['component'],
 				isEmpty: definition.isEmpty ?? isEmptyValue,
-				validate: definition.validate
+				validate: definition.validate,
+				toolSchema: definition.toolSchema
 			}
 		]);
 	}

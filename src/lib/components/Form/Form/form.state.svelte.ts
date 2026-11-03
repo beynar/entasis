@@ -361,13 +361,22 @@ export class FormState<I extends FormInputs = FormInputs> {
 		return !hasError && !field.validating;
 	};
 
-	submit = (): Promise<InferFormValue<I> | false> => {
+	submit = (): Promise<InferFormValue<I> | false> => this.runSubmit();
+
+	/**
+	 * @internal `submit` that gives up, resolving to false, when `cancelled` says so after the
+	 * async validators settled, the last moment before the handler runs.
+	 */
+	submitUnless = (cancelled: () => boolean): Promise<InferFormValue<I> | false> =>
+		this.runSubmit(cancelled);
+
+	private runSubmit(cancelled?: () => boolean): Promise<InferFormValue<I> | false> {
 		if (this.submitPromise) return this.submitPromise;
 
 		this.submitCount += 1;
 		const staged = this.stage(true);
 		if (!(staged instanceof Promise)) {
-			if (staged === false) return Promise.resolve(false);
+			if (staged === false || cancelled?.()) return Promise.resolve(false);
 			this.submitPromise = this.submitValidatedValue(staged);
 			return this.submitPromise;
 		}
@@ -377,7 +386,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 			this.loading = true;
 			try {
 				const value = await staged;
-				if (value === false) return false as const;
+				if (value === false || cancelled?.()) return false as const;
 				return await this.submitValidatedValue(value);
 			} finally {
 				this.loading = false;
@@ -388,7 +397,7 @@ export class FormState<I extends FormInputs = FormInputs> {
 			}
 		})();
 		return this.submitPromise;
-	};
+	}
 
 	/**
 	 * Shows errors from outside the form, a server response say, under their fields. They replace
@@ -696,6 +705,14 @@ export class FormState<I extends FormInputs = FormInputs> {
 			visibleValue[definition.name] = this.valueCache[definition.name];
 		}
 		return visibleValue as LiveFormValue<I>;
+	}
+
+	/** @internal The mounted fields of the active entries, for the WebMCP tool. */
+	toolFields(): (FlatFormField & { field: RegisteredField })[] {
+		return this.getActiveFieldDefinitions().flatMap((definition) => {
+			const field = this.fields.get(definition.name);
+			return field ? [{ ...definition, field }] : [];
+		});
 	}
 
 	private getFieldDefinition(name: string): FlatFormField | undefined {

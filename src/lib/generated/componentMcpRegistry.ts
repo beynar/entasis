@@ -143,6 +143,7 @@ import { cvaDescription } from '$lib/utils/cva/cva.mcp.js';
 import { schedulingDescription } from '$lib/utils/scheduling/scheduling.mcp.js';
 import { iconsDescription } from '$lib/components/Icons/icons.mcp.js';
 import { spinnerOverlayDescription } from '$lib/attachments/spinnerOverlay.mcp.js';
+import { webmcpDescription } from '$lib/utils/webmcp/webmcp.mcp.js';
 
 export const componentMcpRegistry = {
 	'ai-conversation': aiConversationDescription,
@@ -290,7 +291,8 @@ export const componentMcpRegistry = {
 	cva: cvaDescription,
 	scheduling: schedulingDescription,
 	icons: iconsDescription,
-	'spinner-overlay': spinnerOverlayDescription
+	'spinner-overlay': spinnerOverlayDescription,
+	webmcp: webmcpDescription
 } as const;
 
 export type ComponentMcpId = keyof typeof componentMcpRegistry;

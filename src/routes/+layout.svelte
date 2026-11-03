@@ -376,7 +376,12 @@
 	{/if}
 </svelte:head>
 
-<Theme transition={themeTransition} {designTokens} motion={motionTokens}>
+<Theme
+	transition={themeTransition}
+	{designTokens}
+	motion={motionTokens}
+	webmcp={page.url.pathname.startsWith('/__webmcp-lab')}
+>
 	{#snippet children(theme: ThemeState)}
 		<Ask />
 		{#if isPreviewRoute}

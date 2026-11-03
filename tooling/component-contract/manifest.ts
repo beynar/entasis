@@ -623,6 +623,17 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		capabilities: ['attachment', 'feedback'],
 		relatedComponents: ['spinner'],
 		visibility: 'public'
+	},
+	{
+		id: 'webmcp',
+		subpath: './webmcp',
+		sourceIndex: 'src/lib/utils/webmcp/index.ts',
+		exports: packageConditions('src/lib/utils/webmcp/index.ts'),
+		docs: [],
+		mcp: { source: 'utils/webmcp/webmcp.mcp.js', exportName: 'webmcpDescription' },
+		capabilities: ['svelte', 'webmcp', 'ai-agents', 'utility'],
+		relatedComponents: ['theme', 'form', 'ask'],
+		visibility: 'public'
 	}
 ];
 
@@ -1476,6 +1487,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'FormAction',
 		'FormActionInput',
 		'FormCustomInput',
+		'FormEntryTool',
 		'FormErrors',
 		'FormFieldController',
 		'FormFieldEntry',
@@ -1500,6 +1512,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'FormSubmitHandler',
 		'FormTheme',
 		'FormThemeProps',
+		'FormToolOptions',
 		'FormValidateOptions',
 		'FormValueInput',
 		'FormVariant',
@@ -3172,6 +3185,17 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 			'index.svelte': ['icon']
 		}
 	},
+	webmcp: [
+		'WebMCPJsonSchema',
+		'WebMCPOptions',
+		'WebMCPRegisterOptions',
+		'WebMCPTool',
+		'WebMCPToolAnnotations',
+		'WebMCPToolHandle',
+		'registerWebMCPTool',
+		'useWebMCPTool',
+		'webmcpSupported'
+	],
 	'spinner-overlay': [
 		'SpinnerOverlayOptions',
 		'setSpinnerOverlayTheme',

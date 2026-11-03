@@ -16,6 +16,23 @@ import type { FormThemeProps } from './form.theme.js';
 export type FormVariant = 'plain' | 'sectioned' | 'card';
 export type FormLayout = 'vertical' | 'horizontal';
 
+/** How a Form appears to AI agents under `<Theme webmcp>`. Everything has a default. */
+export type FormToolOptions = {
+	/** Tool name. Defaults to the slug of `title`, else `form`, with a suffix if already taken. */
+	name?: string;
+	/** Human-readable name. Defaults to `title`. */
+	title?: string;
+	/** Tells the model what the form does. Defaults to `title` and `description`. */
+	description?: string;
+	/**
+	 * Whether submitting matters enough for the browser to ask the user first. True unless set to
+	 * false, for a harmless form such as a search.
+	 */
+	consequential?: boolean;
+	/** Other origins allowed to use this tool. Defaults to `<Theme webmcp>`'s `exposedTo`. */
+	exposedTo?: string[];
+};
+
 export type FormProps<I extends FormInputs> = WithSlot<
 	{
 		/**
@@ -101,6 +118,11 @@ export type FormProps<I extends FormInputs> = WithSlot<
 		 * cannot change them.
 		 */
 		readOnly?: boolean;
+		/**
+		 * How the form appears to AI agents under `<Theme webmcp>`: nothing to set for it to work,
+		 * options to name or describe it better, `false` to keep it from agents.
+		 */
+		tool?: boolean | FormToolOptions;
 	},
 	'header' | 'title' | 'description' | 'footer',
 	FormState<I>
