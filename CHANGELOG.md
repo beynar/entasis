@@ -32,6 +32,10 @@ Unreleased section under the new version.
 
 ### Fixed
 
+- Installs again: `@pierre/diffs` 1.6.3 was published with unresolved `catalog:` and
+  `workspace:*` dependencies that neither npm nor pnpm can install, so the range is now
+  `>=1.5.2 <1.6.3`.
+
 - Server rendering: a bound value the parent left `undefined` no longer makes Svelte render the
   parent's markup twice when the component's default is `null` or `false`. That default is now
   written in the browser only, which covers most fields (`TextInput`, `Select`, `Combobox`,
