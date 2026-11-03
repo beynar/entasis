@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.15.0 — 2026-11-03
+
 ### Added
 
 - `Countdown` (`entasis/countdown`): the time left until `until` (a `Date`, ISO string or epoch
