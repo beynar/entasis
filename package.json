@@ -1,13 +1,13 @@
 {
 	"name": "entasis",
-	"version": "0.15.1",
+	"version": "0.15.3",
 	"license": "MIT",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync",
-		"prepack": "svelte-kit sync && npm run check:component-contract && npm run check:feature-chips && npm run check:semantic-theme-tokens && npm run check:template-purity && npm run check:public-api-contract && svelte-package && npm run check:packed-library && npm run check:package-consumer && npm run check:doc-fences && node tooling/check-document-viewer-package.mjs && publint",
+		"prepack": "svelte-kit sync && npm run check:component-contract && npm run check:feature-chips && npm run check:semantic-theme-tokens && npm run check:template-purity && npm run check:public-api-contract && svelte-package && npm run check:declaration-size && npm run check:packed-library && npm run check:package-consumer && npm run check:doc-fences && node tooling/check-document-viewer-package.mjs && publint",
 		"check:document-viewer-package": "node tooling/check-document-viewer-package.mjs",
 		"check:semantic-theme-tokens": "node tooling/check-semantic-theme-tokens.mjs",
 		"check:template-purity": "node tooling/check-template-purity.mjs",
@@ -26,6 +26,7 @@
 		"bench:baseline": "vitest bench --mode baseline --reporter=verbose",
 		"generate:component-contract": "node tooling/component-contract/generate.mjs",
 		"check:component-contract": "node tooling/component-contract/generate.mjs --check",
+		"check:declaration-size": "node tooling/check-declaration-size.mjs",
 		"check:packed-library": "node tooling/check-packed-library.mjs",
 		"test:contracts": "node --test tooling/component-contract/verify-checks.mjs",
 		"check:doc-fences": "node tooling/check-doc-fences.mjs",

@@ -47,6 +47,48 @@ Unreleased section under the new version.
 - `TimeInput` and `PhoneInput` show a value set from outside, such as `field.setValue` or a parent's
   `bind:value`. They kept showing the old text.
 
+## 0.15.3 — 2026-11-04
+
+### Security
+
+- `Markdown` and `AIMessage`: the list of attributes added in 0.15.2 checked names, not values, so a tag
+  in the text could still write CSS. `<Stack width="1px;background:url(https://…)">` sent a request
+  with no click, on the server and in the browser, and
+  `<Stack width="100vw;position:fixed;top:0;left:0;height:100vh;z-index:99999">` covered the window.
+  `width`, `height`, `maxWidth` and `minHeight` on `Stack` and `Grid`, and `wrap` on `Stack`, were
+  affected. Every attribute now has a rule for its values, and any other value is dropped. Sizes from
+  text take a number or one CSS length or percentage, so a document using `calc()`, `var()`, `auto` or
+  `fit-content` there loses it; other props take their own names or numbers.
+
+### Fixed
+
+- `Markdown` and `AIMessage`: `<Card title={true}>` or `<Stat value={42}>` in the text threw during
+  render and took the whole message down, on the server too. Numbers now draw as text, and a
+  boolean on a text prop is dropped. `="false"` on `scrollable` and `showBorders` no longer turns them on,
+  and `<Grid columns="2">` now means 2 columns.
+
+## 0.15.2 — 2026-11-04
+
+### Security
+
+- **Correction:** this entry reads as if tags in the text could no longer do harm. It closed active
+  elements and attributes, but not CSS written through the values of attributes it kept; see 0.15.3.
+- `Markdown` and `AIMessage`: a tag in the text could make an active element or run code. The filter
+  on the attributes of the built-in tags compared names case-sensitively and let `as` through, so
+  `<Stack as="a" HREF="javascript:alert(1)">`, `<Stack as="iframe" SRCDOC="…">` and
+  `<Stack ONCLICK="…">` all worked, from text a model can repeat from a row, an email or a web page.
+  Each built-in now takes a fixed list of its own props, and `as` only takes containers. Everything
+  else is dropped, in any case, which also ends `style`, `class`, `id`, `tabindex` and `data-*` set from
+  text; a document relying on those loses them.
+
+### Fixed
+
+- Type-check cost for apps using `Form`: `FormState.value`, `MultiStepFormState.value` and the
+  internal `prepareInputProps` now have declared types, so their declarations stop expanding the whole
+  input union. `form.state` goes from 247 KB to 10 KB, `multiStepForm.state` from 246 KB to 3 KB and
+  `visibility` from 433 KB to 2 KB. The public types are unchanged, and `check:declaration-size`
+  keeps them small.
+
 ## 0.15.1 — 2026-11-03
 
 ### Fixed

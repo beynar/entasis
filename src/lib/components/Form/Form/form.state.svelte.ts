@@ -143,7 +143,9 @@ export class FormState<I extends FormInputs = FormInputs> {
 	/** How many times the form was validated to submit; fields re-validate on edit after the first. */
 	submitCount = $state(0);
 
-	value = $derived.by(() => this.getVisibleValue());
+	// Named, so the emitted declaration keeps the alias: inferred, it expands to 240 KB that every
+	// consumer's type check has to read and relate.
+	value: LiveFormValue<I> = $derived.by(() => this.getVisibleValue());
 
 	/** When fields validate by themselves; a field's own `validationMode` takes precedence. */
 	get validationMode(): ValidationMode {
