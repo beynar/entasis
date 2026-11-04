@@ -43,6 +43,9 @@ Card, Stat, Stack, Grid, and GridSpan are also available as built-in MDX compone
 
 The built-in tags are **Card**, **Stat**, **Stack**, **Grid**, and **GridSpan**:
 
+A tag in the text reaches its component only through a fixed list of that component's props, because Markdown often draws text the app did not write. Anything else is dropped, whatever its case: \`href\`, \`src\`, \`on*\`, \`style\`, \`class\`, \`id\`, \`data-*\`. \`as\` on Stack takes only containers that hold content (\`div\`, \`span\`, \`section\`, \`article\`, \`aside\`, \`main\`, \`nav\`, \`header\`, \`footer\`), never a link, a frame or a form. Your own \`mdxComponents\` and \`mdx\` snippet receive the attributes as written: treat them as untrusted when the text is.
+
+
 ~~~svelte
 const content = [
   '<Grid columns={2} gap="lg">',

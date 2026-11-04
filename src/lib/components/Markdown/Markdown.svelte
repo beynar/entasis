@@ -8,6 +8,7 @@
 	import Mermaid from '../Mermaid/Mermaid.svelte';
 	import Stat from '../Stat/Stat.svelte';
 	import { Stack } from '../Stack/index.js';
+	import { getMdxProps, type MarkdownMdxTag, type MdxAttributes } from './markdown.mdx.js';
 	import type { MarkdownProps } from './markdown.props.js';
 	import {
 		buildMarkdownStreamdownTheme,
@@ -39,43 +40,23 @@
 	type MdxToken = Extract<StreamdownToken, { type: 'mdx' }>;
 	type ListItemToken = Extract<StreamdownToken, { type: 'list_item' }>;
 	type ListItemPayload = { token: ListItemToken; children: Snippet };
-	type MdxAttribute = string | number | boolean | null | undefined;
 	type MdxPayload = {
 		token: MdxToken;
 		children: Snippet;
-		props: Record<string, MdxAttribute>;
+		props: MdxAttributes;
 	};
 
 	const builtInMdxComponents = { Card, Grid, GridSpan, Stack, Stat } as const;
-	const blockedMdxProps = new Set([
-		'children',
-		'class',
-		'href',
-		'ref',
-		'rel',
-		'style',
-		'target',
-		'theme'
-	]);
-
 	const getMdxComponent = (tagName: string) =>
-		builtInMdxComponents[tagName as keyof typeof builtInMdxComponents];
-	const getMdxProps = (props: Record<string, MdxAttribute>): Record<string, MdxAttribute> => {
-		const mdxProps: Record<string, MdxAttribute> = {};
-		for (const [name, value] of Object.entries(props)) {
-			if (blockedMdxProps.has(name) || name.startsWith('on')) continue;
-			if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean')
-				continue;
-			mdxProps[name] = value;
-		}
-		return mdxProps;
-	};
+		Object.hasOwn(builtInMdxComponents, tagName)
+			? builtInMdxComponents[tagName as MarkdownMdxTag]
+			: undefined;
 </script>
 
 {#snippet renderMdx(payload: MdxPayload)}
 	{@const Component = getMdxComponent(payload.token.tagName)}
 	{#if Component}
-		<Component {...getMdxProps(payload.props)}>
+		<Component {...getMdxProps(payload.token.tagName as MarkdownMdxTag, payload.props)}>
 			{@render payload.children()}
 		</Component>
 	{:else if customMdx}

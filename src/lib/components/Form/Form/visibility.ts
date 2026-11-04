@@ -45,11 +45,21 @@ export function isFieldVisible(input: FormInput, formValue: FormValueRecord): bo
  * @param input - The form input configuration
  * @returns Input props without function-based visibility
  */
+/**
+ * The props Form hands an input. Deliberately not inferred: spreading the union of every input's
+ * props emits 440 KB of declaration, for a value each branch of FormInputRenderer casts anyway.
+ */
+export type PreparedInputProps = Record<string, unknown> & {
+	size: Sizes;
+	labelPosition?: FieldLabelPosition;
+	visible?: boolean;
+};
+
 export function prepareInputProps(
 	input: FormFieldInput,
 	size: Sizes,
 	labelPosition?: FieldLabelPosition
-) {
+): PreparedInputProps {
 	// `type` and `display` pick the component in Form.svelte; they are not props.
 	const { type, visible, ...rest } = input as FormFieldInput & { display?: string };
 	void type;

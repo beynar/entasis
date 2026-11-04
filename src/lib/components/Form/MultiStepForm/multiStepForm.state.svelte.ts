@@ -65,7 +65,8 @@ export class MultiStepFormState<I extends MultiStepFormItems = FormStep[]> {
 
 	steps = $derived(this.options.steps);
 	isLastStep = $derived(this.activeStep === this.steps.length - 1);
-	value = $derived.by(() => this.mergeStepValues());
+	// Named, so the emitted declaration keeps the alias (see FormState.value).
+	value: MultiStepFormValue<I> = $derived.by(() => this.mergeStepValues());
 	progress = $derived({
 		value: ((this.activeStep + 1) / this.steps.length) * 100,
 		color: this.options.meterColor ?? 'neutral'
