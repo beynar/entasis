@@ -93,9 +93,11 @@ describe('registerWebMCPTool', () => {
 		const { registered } = installContext();
 		const page = registerWebMCPTool(tool('page'));
 		await flush();
-		const modal = registerWebMCPTool(tool('dialog'), { modal: true });
+		const modal = registerWebMCPTool(tool('page'), { modal: true });
 		await flush();
-		expect(active(registered)).toEqual(['dialog']);
+		// The same name is free on another surface: only one surface is registered at a time.
+		expect(active(registered)).toEqual(['page']);
+		expect(registered.at(-1)?.signal?.aborted).toBe(false);
 
 		modal.remove();
 		await flush();
@@ -107,26 +109,32 @@ describe('registerWebMCPTool', () => {
 		const { registered } = installContext();
 		const page = registerWebMCPTool(tool('page'));
 		const first = registerWebMCPTool(tool('first'), { modal: 'a' });
+		const second = registerWebMCPTool(tool('second'), { modal: 'b' });
+		await flush();
+		// Nothing is open yet: a surface's tools wait for it.
+		expect(active(registered)).toEqual(['page']);
+
+		const releaseA = holdWebMCPSurface('a');
 		await flush();
 		expect(active(registered)).toEqual(['first']);
 
-		const second = registerWebMCPTool(tool('second'), { modal: 'b' });
+		const releaseB = holdWebMCPSurface('b');
 		await flush();
 		expect(active(registered)).toEqual(['second']);
 
-		const release = holdWebMCPSurface('c');
+		const releaseC = holdWebMCPSurface('c');
 		await flush();
 		expect(active(registered)).toEqual([]);
 
-		release();
-		second.remove();
+		releaseC();
+		releaseB();
 		await flush();
 		expect(active(registered)).toEqual(['first']);
 
-		first.remove();
+		releaseA();
 		await flush();
 		expect(active(registered)).toEqual(['page']);
-		page.remove();
+		for (const handle of [page, first, second]) handle.remove();
 	});
 
 	test('a change of exposure registers again', async () => {

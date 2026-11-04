@@ -53,6 +53,7 @@
 {/snippet}
 
 <Button
+	tool={Array.isArray(item.content) ? false : undefined}
 	id={menu.triggerId(item.value)}
 	variant="ghost"
 	{size}

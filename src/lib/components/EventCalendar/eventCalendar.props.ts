@@ -30,6 +30,7 @@ import type {
 	EventCalendarView,
 	EventCalendarWeekday
 } from './eventCalendar.types.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type { EventCalendarThemeProps } from './eventCalendar.theme.js';
 
@@ -401,6 +402,8 @@ type EventCalendarOwnProps<
 		showDatePicker?: boolean;
 		/** Fine-grained interaction and empty-slot activation policy. */
 		interactions?: EventCalendarInteractionOptions;
+		/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+		tool?: WebMCPToolProp;
 		/** Foreground overlap policy. Defaults to `true`. */
 		allowOverlap?: boolean | EventCalendarOverlapPredicate<TItemFields>;
 		/** Synchronous live item-proposal validator. Defaults to allowing proposals. */

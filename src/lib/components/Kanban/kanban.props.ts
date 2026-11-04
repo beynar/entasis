@@ -4,6 +4,7 @@ import type { Colors, Density } from '$lib/types/theme.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { KanbanThemeProps } from './kanban.theme.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 /** Minimal card shape; extend it with your own fields and render them via the
  * card snippet. Only `id` is required — `title`/`description` feed the DEFAULT
@@ -93,6 +94,8 @@ export type KanbanProps<C extends KanbanCard = KanbanCard> = WithAttachments<
 		 * column moves.
 		 */
 		columns: KanbanColumnData<C>[];
+		/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+		tool?: WebMCPToolProp;
 		/**
 		 * Move policy for cards crossing columns. Return false to reject (no
 		 * indicator, drop ignored). Column `limit` is enforced on top of this.

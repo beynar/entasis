@@ -3,6 +3,7 @@ import type { WithSlot, Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { MenuItem } from '../Menu/menu.props.js';
 import type { BreadcrumbsThemeProps } from './breadcrumbs.theme.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type BreadcrumbItemConfig = {
 	/**
@@ -49,6 +50,8 @@ export type BreadcrumbsProps<Items extends BreadcrumbItem[]> = WithAttachments<
 			 * Array of breadcrumb items to display.
 			 */
 			items: Items;
+			/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+			tool?: WebMCPToolProp;
 			/**
 			 * Optional home breadcrumb item to prepend to the items array.
 			 * If provided, it will be rendered as the first breadcrumb and will not be included in the ellipsis menu.

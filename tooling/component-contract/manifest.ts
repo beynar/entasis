@@ -3193,6 +3193,8 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'WebMCPTool',
 		'WebMCPToolAnnotations',
 		'WebMCPToolHandle',
+		'WebMCPToolOptions',
+		'WebMCPToolProp',
 		'registerWebMCPTool',
 		'useWebMCPTool',
 		'webmcpSupported'

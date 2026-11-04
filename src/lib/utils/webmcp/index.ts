@@ -5,5 +5,7 @@ export type {
 	WebMCPOptions,
 	WebMCPRegisterOptions,
 	WebMCPTool,
-	WebMCPToolAnnotations
+	WebMCPToolAnnotations,
+	WebMCPToolOptions,
+	WebMCPToolProp
 } from './webmcp.types.js';

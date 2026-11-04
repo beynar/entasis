@@ -1,4 +1,5 @@
 <script lang="ts" generics="Value extends string = string">
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import type { Attachment } from 'svelte/attachments';
 	import Button from '../Button/Button.svelte';
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
@@ -40,6 +41,7 @@
 		transition,
 		class: className = '',
 		theme,
+		tool,
 		...attachments
 	}: NavigationMenuProps<Value> = $props();
 
@@ -89,6 +91,15 @@
 	// Keys that matter for a stable list: panels by value, links by position.
 	const itemKey = (item: (typeof items)[number], index: number) =>
 		item.type === 'panel' ? `panel:${item.value}` : `link:${index}`;
+
+	useWebMCPExposure(() => import('./navigationMenu.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get items() {
+			return items;
+		}
+	});
 </script>
 
 <nav
@@ -112,6 +123,7 @@
 				{:else}
 					{@const link = item}
 					<Button
+						tool={false}
 						href={link.href}
 						target={link.target}
 						rel={link.rel}

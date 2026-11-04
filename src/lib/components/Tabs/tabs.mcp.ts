@@ -90,4 +90,8 @@ The theme supports the placement variant on root and content.
   \`{ in, out }\` is forwarded to the inner Stepper's \`transition\`, where it wins.
 - Ladder: \`<Theme components={{ tabs: { motion } }}>\` → \`setTabsTheme({ motion })\` →
   \`theme.motion\` → the \`transition\` prop. Reduced motion snaps between panels.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, AI agents get \`select_tab\`, with the enabled tabs as options. \`tool\` refines it and \`tool={false}\` keeps it from agents. See \`entasis/webmcp\`.
 `;

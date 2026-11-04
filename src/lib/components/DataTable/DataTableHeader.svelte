@@ -98,6 +98,7 @@
 </script>
 
 <thead
+	data-webmcp-owned
 	class={classes.header()}
 	style:position={sticky ? 'sticky' : undefined}
 	style:top={sticky ? '0' : undefined}

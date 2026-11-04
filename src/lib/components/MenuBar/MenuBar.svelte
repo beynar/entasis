@@ -13,6 +13,7 @@
 		closeOnItemClick = true,
 		class: className = '',
 		theme,
+		tool,
 		...attachments
 	}: MenuBarProps = $props();
 
@@ -41,6 +42,12 @@
 	{#each menus as menu, index (index)}
 		<PopupMenu
 			id={`${id}-menu-${index}`}
+			tool={tool === false
+				? false
+				: {
+						...(typeof tool === 'object' ? tool : {}),
+						title: typeof menu.label === 'string' ? menu.label : undefined
+					}}
 			bind:open={menuBar.openStates[index]}
 			position="bottom-start"
 			offset={4}

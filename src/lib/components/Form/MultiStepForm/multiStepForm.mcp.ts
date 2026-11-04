@@ -104,4 +104,8 @@ When onBeforeChange is present, navigation remains blocked unless the hook calls
 - **isLastStep**: whether the current step is final.
 - **progress** and **meterSteps**: values used by the default meter.
 - **submit()**: validates and advances or submits, returning the validated visited-step payload or false. The final-step result is the complete validated payload.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, the Form of the current step is a tool for AI agents, named after the step: it fills the step in and submits it, which moves to the next. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;

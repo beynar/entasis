@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { cx } from '$lib/utils/cva/index.js';
@@ -66,6 +67,7 @@
 		children,
 		banner,
 		theme,
+		tool,
 		...attachments
 	}: SidebarProps = $props();
 	const openState = createBindableValue(
@@ -272,6 +274,21 @@
 	function hasCollapsibleMedia(button: SidebarMenuButtonItem | undefined) {
 		return !button || button.icon != null || button.avatar != null;
 	}
+
+	useWebMCPExposure(() => import('./sidebar.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get activityBar() {
+			return activityBar;
+		},
+		get items() {
+			return items;
+		},
+		get views() {
+			return views;
+		}
+	});
 </script>
 
 {#if widthPrehydrationScript}

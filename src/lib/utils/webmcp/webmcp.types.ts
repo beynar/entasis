@@ -33,14 +33,37 @@ export type WebMCPRegisterOptions = {
 	/**
 	 * Makes the tool part of a modal surface: only the tools of the topmost surface stay available,
 	 * because what is behind a modal cannot be used, by a person or by an agent. `true` opens a
-	 * surface of its own; a string joins the modal Dialog with that `id`, which needs no tool to
-	 * pause the page.
+	 * surface of its own; a string joins the modal Dialog with that `id`, and the tool is available
+	 * while that Dialog is the topmost one.
 	 */
 	modal?: boolean | string;
 };
 
 /** The options `<Theme webmcp>` takes besides a plain `true`. */
 export type WebMCPOptions = Pick<WebMCPRegisterOptions, 'exposedTo'>;
+
+/**
+ * How a component appears to AI agents under `<Theme webmcp>`, given to its `tool` prop. Everything
+ * has a default taken from the props it already has.
+ */
+export type WebMCPToolOptions = {
+	/** Tool name. Defaults to one taken from the component, with a suffix if already taken. */
+	name?: string;
+	/** Human-readable name. */
+	title?: string;
+	/** Tells the model what the component does, besides what its props say. */
+	description?: string;
+	/**
+	 * Whether acting on it is significant or hard to undo, so the browser may ask the user first.
+	 * Each component has its own default.
+	 */
+	consequential?: boolean;
+	/** Other origins allowed to use this tool. Defaults to `<Theme webmcp>`'s `exposedTo`. */
+	exposedTo?: string[];
+};
+
+/** The `tool` prop of a component: its options, or `false` to keep it from agents. */
+export type WebMCPToolProp = boolean | WebMCPToolOptions;
 
 /** The part of the browser's `ModelContext` entasis calls. */
 export type ModelContextLike = {

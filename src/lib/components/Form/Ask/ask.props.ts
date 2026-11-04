@@ -1,7 +1,8 @@
 import type { ButtonProps } from '$lib/components/Button/index.js';
 import type { DialogProps } from '$lib/components/Dialog/index.js';
 import type { Slot } from '$lib/components/Slot/slot.js';
-import type { FormProps, FormToolOptions } from '../Form/form.props.js';
+import type { FormProps } from '../Form/form.props.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 import type { FormInputs, InferFormValue, LiveFormValue } from '../Form/form.js';
 
 export type AskButton =
@@ -47,7 +48,7 @@ export type AskOptions<I extends FormInputs> = Pick<
 	 * `answer_dialog` and `cancel_dialog`, described from `title`, `description`, `confirm` and
 	 * `cancel`. Options refine the first; `false` keeps the dialog from agents.
 	 */
-	tool?: boolean | FormToolOptions;
+	tool?: WebMCPToolProp;
 };
 
 export type AskResult<I extends FormInputs> =

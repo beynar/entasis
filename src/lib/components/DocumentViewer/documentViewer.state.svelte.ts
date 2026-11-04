@@ -21,6 +21,7 @@ import { DocumentSearch } from './documentSearch.svelte.js';
 import { DocumentOutput } from './documentOutput.js';
 import {
 	buildOoxmlTextLayer,
+	getOoxmlUnitText,
 	getOoxmlNaturalSize,
 	renderOoxmlUnit,
 	resolveOoxmlInternalLink,
@@ -48,6 +49,7 @@ export interface SurfaceSearchState {
 
 export interface DocumentSurfaceController {
 	search?(query: string): Promise<SurfaceSearchState>;
+	readUnit?(unit: number): Promise<string | null>;
 	nextMatch?(): SurfaceSearchState;
 	previousMatch?(): SurfaceSearchState;
 	clearSearch?(): void;
@@ -363,6 +365,24 @@ export class DocumentViewerState extends DocumentViewerOptionsBase {
 	};
 
 	search = this.documentSearch.search;
+
+	/** The search that owns the matches. */
+	get searchState() {
+		return this.documentSearch;
+	}
+
+	/** The text of a one-based page, slide or sheet; `null` for a format that has none to read. */
+	readUnit = async (unit: number): Promise<string | null> => {
+		const model = this.model;
+		const index = unit - 1;
+		if (model?.kind === 'ooxml') return getOoxmlUnitText(model, index);
+		if (model?.kind === 'legacy') return model.units[index]?.text ?? null;
+		if (model?.kind === 'spreadsheet') {
+			const cells = model.sheets[index]?.cells;
+			return cells ? Array.from(cells.values(), (cell) => cell.text).join('\n') : null;
+		}
+		return (await this.surface?.readUnit?.(unit)) ?? null;
+	};
 	nextMatch = this.documentSearch.next;
 	previousMatch = this.documentSearch.previous;
 	clearSearch = this.documentSearch.clear;

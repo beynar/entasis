@@ -5,6 +5,7 @@ import type { WithAttachments } from '$lib/types/props.js';
 import type { CommandThemeProps } from './command.theme.js';
 import type { OpenChangeHandler } from '$lib/utils/openChange.js';
 import type { ListLoop } from '$lib/utils/useListNavigation.svelte.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 /** A selectable command. `value` is the filter key + `onSelect` payload; `label` is the visible
  *  (and searchable) text. For rich rows (avatars, etc.) pass an `item` snippet to `<Command>`. */
@@ -67,6 +68,8 @@ export type CommandProps<Value extends string = string> = WithAttachments<
 			 * Render the palette inside a modal Dialog instead of inline.
 			 */
 			dialog?: boolean;
+			/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+			tool?: WebMCPToolProp;
 			/**
 			 * Dialog open state. Bindable. Dialog mode only.
 			 */

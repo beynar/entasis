@@ -90,6 +90,17 @@ delivers it.
     `DialogApi`), never an internal state class.
 14. **CSP.** Every injected `<script>` and `<style>` carries the Theme `nonce`.
 
+## WebMCP
+
+`<Theme webmcp>` (off by default) exposes the interface to agents in the browser. Each component
+that does keeps it in `<owner>.webmcp.ts` beside it, exporting `expose(source, config)`; the
+component only calls `useWebMCPExposure(() => import('./<owner>.webmcp.js'), source)` and takes a
+`tool` prop, so a page without the option does not load that file. Ask and MultiStepForm import
+theirs statically, as it computes their Form's `tool` prop during render. Shared tools (`click_button`,
+`run_command`, `navigate`) come from `src/lib/utils/webmcp`, through which every tool registers.
+An agent reaches what a person can: names come from existing props, what a control refuses is
+refused too, only the topmost modal's tools stay, and a tool reads only what the component shows.
+
 ## Theme ownership
 
 Component CVA definitions live in `<owner>.theme.ts`. Consumer-specific theme presets use

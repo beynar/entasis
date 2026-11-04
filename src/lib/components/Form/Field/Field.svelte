@@ -348,7 +348,7 @@
 			hasError: field.hasError,
 			labelPosition: resolvedLabelPosition
 		})}
-		data-field-control
+		data-webmcp-owned
 		{@attach focusFromContainer}
 		{@attach anchor}
 	>

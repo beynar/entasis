@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import {
 		closeMenuTree,
 		providePopupMenuLevel,
@@ -24,6 +25,7 @@
 
 	let {
 		menu,
+		tool,
 		closeOnItemClick = true,
 		defaultOpen = false,
 		open = $bindable(),
@@ -233,6 +235,20 @@
 		trigger !== undefined && trigger !== false && typeof trigger === 'object'
 			? { ...trigger, [arrowKey]: openFromArrowKey }
 			: trigger
+	);
+
+	// A submenu's rows are its parent's: the root menu offers them.
+	useWebMCPExposure(
+		() => import('./popupMenu.webmcp.js'),
+		{
+			get tool() {
+				return tool;
+			},
+			get items() {
+				return menu.items;
+			}
+		},
+		() => !isSubmenu
 	);
 </script>
 

@@ -229,4 +229,8 @@ The theme object contains:
 	});
 </script>
 \`\`\`
+
+## AI agents
+
+Under \`<Theme webmcp>\`, AI agents get \`go_to_page\`. \`tool\` refines it and \`tool={false}\` keeps it from agents. See \`entasis/webmcp\`.
 `;

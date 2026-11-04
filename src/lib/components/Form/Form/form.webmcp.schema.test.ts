@@ -1,10 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import {
-	controlAccepts,
-	fieldToolSchema,
-	fitsToolSchema,
-	toFieldValue
-} from './form.toolSchema.js';
+import { controlAccepts, fieldToolSchema, fitsToolSchema, toFieldValue } from './form.webmcp.js';
 import type { FormValueInput } from './form.js';
 import type { WebMCPJsonSchema } from '$lib/utils/webmcp/webmcp.types.js';
 

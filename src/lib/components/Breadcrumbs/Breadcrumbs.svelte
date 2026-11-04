@@ -1,4 +1,5 @@
 <script lang="ts" generics="Items extends BreadcrumbItem[] = BreadcrumbItem[]">
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import Slot from '../Slot/Slot.svelte';
@@ -21,6 +22,7 @@
 		ellipsis,
 		class: className,
 		theme,
+		tool,
 		...attachments
 	}: BreadcrumbsProps<Items> = $props();
 
@@ -71,6 +73,15 @@
 		return homeItem
 			? [homeItem].concat([ellipsisItem, ...visibleItems])
 			: [ellipsisItem, ...visibleItems];
+	});
+
+	useWebMCPExposure(() => import('./breadcrumbs.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get items() {
+			return items;
+		}
 	});
 </script>
 

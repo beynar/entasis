@@ -428,4 +428,8 @@ The theme object contains the following parts:
   });
 </script>
 \`\`\`
+
+## AI agents
+
+Under \`<Theme webmcp>\`, its links on this site join the \`navigate\` tool of AI agents, except the current one. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;

@@ -284,10 +284,12 @@ describe('ask() under <Theme webmcp>', () => {
 		const lower = ask(dialog);
 		await waitFor(() => expect(tools.has('cancel_dialog')).toBe(true));
 		const upper = ask({ ...dialog, title: 'Second' });
-		await waitFor(() => expect(tools.has('cancel_dialog')).toBe(false));
-		await waitFor(() => expect(tools.has('cancel_dialog_2')).toBe(true));
-		await (tools.get('cancel_dialog_2') as Tool).execute({}, {});
-		await upper;
+		const lowerTool = tools.get('cancel_dialog') as Tool;
+		// The lower dialog's tool steps aside: the name now belongs to the top dialog.
+		await waitFor(() => expect(tools.get('cancel_dialog')).not.toBe(lowerTool));
+		await waitFor(() => expect(tools.has('cancel_dialog')).toBe(true));
+		await (tools.get('cancel_dialog') as Tool).execute({}, {});
+		await expect(upper).resolves.toMatchObject({ submitted: false });
 		await waitFor(() => expect(tools.has('cancel_dialog')).toBe(true));
 		await (tools.get('cancel_dialog') as Tool).execute({}, {});
 		await lower;

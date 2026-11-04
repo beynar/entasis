@@ -7,16 +7,23 @@ WebMCP lets an AI agent running in the browser call tools a page declares. \`<Th
 
 ## What becomes a tool
 
-- Every Form. The input schema comes from \`inputs\`; the name from \`title\`, else \`form\`, with a suffix when taken; the description from \`title\` and \`description\`, else the field labels. Calling the tool fills the form in, validates it and runs \`onSubmit\`, as a user would. It answers with the status, the filled field names and the error messages, never a value; an error about a password is the catalog's generic one, and a field set to \`tool: false\` stays unnamed. Text in \`title\`, \`description\` and \`label\` reaches the model, so pass \`tool.description\` when a title quotes user content.
-- Every \`ask()\` dialog while it is open: \`answer_dialog\` and \`cancel_dialog\`. Only the topmost modal Dialog's tools stay available: page tools pause behind any modal, with or without a tool of its own. A disabled \`confirm\` or \`cancel\` removes its tool.
+Nothing to set: names and descriptions come from the props a component already has. Each has a \`tool\` prop, for options or \`false\` to keep it from agents.
 
-- Every Button a person could press: \`click_button({ id })\`, and \`click_danger_button({ id })\` for \`color="danger"\` or \`tool={{ consequential: true }}\`, which carries \`consequentialHint\`. The ids and titles come from the button's text or \`label\`. Disabled, loading, hidden and nameless buttons are left out, as are a field's own buttons, links to another site and anything past the first 100 buttons; the button is checked again when pressed. \`<Button tool={false}>\` keeps one from agents.
+- Form: a tool per form. The input schema comes from \`inputs\`; the name from \`title\`, else \`form\`, with a suffix when taken; the description from \`title\` and \`description\`, else the field labels. Calling it fills the form in, validates it and runs \`onSubmit\`, as a user would. It answers with the status, the filled field names and the error messages, never a value; an error about a password is the catalog's generic one, and a field set to \`tool: false\` stays unnamed. Text in \`title\`, \`description\` and \`label\` reaches the model, so pass \`tool.description\` when a title quotes user content. MultiStepForm: the current step's Form.
+- \`ask()\`, while open: \`answer_dialog\` and \`cancel_dialog\`. A disabled \`confirm\` or \`cancel\` removes its tool.
+- Button: \`click_button({ id })\` for those a person could press, and \`click_danger_button({ id })\` for \`color="danger"\` or \`tool={{ consequential: true }}\`, which carries \`consequentialHint\`. Disabled, loading, hidden and nameless buttons are left out, as are links off the site, buttons a component's own tools cover (a field's, a menu trigger, a table's or a calendar's chrome) and anything past the first 100; a button is checked again when pressed.
+- Command, PopupMenu, MenuBar, a Sidebar row that only runs a handler: \`run_command({ id })\` and \`run_consequential_command({ id })\`. ContextMenu joins only while open, as its rows act on what was right-clicked.
+- Sidebar, NavigationMenu, Breadcrumbs: \`navigate({ to })\`, limited to links on this site.
+- Tabs: \`select_tab\`. Pagination: \`go_to_page\`.
+- DataTable: \`query_table\`, and \`move_row\` while rows can be reordered. Chart: \`read_chart_data\`. DocumentViewer: \`search_document\`, \`read_document\`. Kanban: \`read_board\`, \`move_card\`. EventCalendar: \`read_calendar\`, \`show_calendar\`, \`move_event\`. What these read carries \`untrustedContentHint\`, and is limited to what the component shows: a cell as it is drawn when its column has a renderer (a virtualized row off screen reads as empty there), the fields a chart's marks name, a card's title and description. Labels of buttons and rows reach the model as option titles, so \`tool={false}\` one that quotes user content.
+
+Only the tools of the topmost modal Dialog stay available: page tools pause behind any modal, with or without a tool of its own.
 
 Password fields can be filled in. File, voice and signature fields stay for the user, as does a Combobox whose \`items\` is a function, since nothing can tell an offered option from any string; the tool description says so. Disabled, read-only and hidden fields are not in the schema, and a value sent for one is ignored. A value no control could produce, such as a disabled option or one past a limit, is refused with a catalog message.
 
 ## Refining a tool
 
-\`<Form tool={false}>\` keeps a form from agents. \`tool={{ name, title, description, consequential, exposedTo }}\` refines it; \`consequential: false\` is for a harmless form such as a search, which the browser then does not need to confirm. An entry takes \`tool: false\` or \`tool: { description, schema }\`, and \`registerFormInputs\` takes \`toolSchema\` for an app-defined type, without which the field stays for the user.
+\`tool={false}\` keeps a component from agents. \`tool={{ name, title, description, consequential, exposedTo }}\` refines it (\`WebMCPToolOptions\`); \`consequential: false\` is for a harmless form such as a search, which the browser then does not need to confirm. An entry takes \`tool: false\` or \`tool: { description, schema }\`, and \`registerFormInputs\` takes \`toolSchema\` for an app-defined type, without which the field stays for the user.
 
 ## Custom tools
 

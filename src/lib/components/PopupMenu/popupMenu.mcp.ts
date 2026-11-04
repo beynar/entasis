@@ -432,4 +432,8 @@ The popup is a Popover panel: it carries \`data-open\`, \`data-closed\`, \`data-
 - Use \`closeOnClickOutside={true}\` (default) for typical dropdown menus
 - Use \`closeOnMouseLeave={true}\` for hover-triggered quick menus; a prediction cone toward the submenu keeps it open during the diagonal move while sibling rows stay hoverable.
 - The \`menu\` prop accepts full MenuProps including theme forwarding to child components
+
+## AI agents
+
+Under \`<Theme webmcp>\`, its enabled rows, submenus included, join the \`run_command\` tool of AI agents, those with \`color="danger"\` joining \`run_consequential_command\`. A row with a handler is called with a click event that was not dispatched. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;

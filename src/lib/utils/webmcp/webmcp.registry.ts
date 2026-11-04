@@ -3,12 +3,14 @@
 // offers only the tools of the topmost modal surface, as a person can only reach that one.
 
 import { DEV } from 'esm-env';
-import { getContext } from 'svelte';
+import { getContext, setContext } from 'svelte';
 import type {
 	ModelContextLike,
 	WebMCPOptions,
 	WebMCPRegisterOptions,
-	WebMCPTool
+	WebMCPTool,
+	WebMCPToolOptions,
+	WebMCPToolProp
 } from './webmcp.types.js';
 
 // Keeps the erased tools of every Form and dialog in one set; each `execute` restores its own input.
@@ -41,8 +43,10 @@ let flushScheduled = false;
 
 const topSurface = (): unknown => [...surfaces.keys()].at(-1);
 
+// A page tool needs no modal open; a surface's tool needs that surface on top, which also takes it
+// away while its Dialog plays its closing transition.
 const isReachable = ({ surface }: Entry): boolean =>
-	surfaces.size === 0 || surface === topSurface();
+	surface === undefined ? surfaces.size === 0 : surface === topSurface();
 
 function retainSurface(surface: unknown): void {
 	surfaces.set(surface, (surfaces.get(surface) ?? 0) + 1);
@@ -87,12 +91,15 @@ export function toToolName(text: string | undefined): string | undefined {
 }
 
 // The browser rejects a name outside these rules, which would leave the tool silently missing.
-const uniqueName = (requested: string): string => {
+const uniqueName = (requested: string, surface: unknown): string => {
 	const base = requested.replace(/[^A-Za-z0-9_.-]/g, '_').slice(0, MAX_NAME_LENGTH) || 'tool';
 	if (DEV && base !== requested) {
 		console.warn(`[WebMCP] The tool name "${requested}" is not valid; using "${base}".`);
 	}
-	const taken = new Set([...entries].map((entry) => entry.name));
+	// Unique within a surface: only one surface's tools are ever registered at a time.
+	const taken = new Set(
+		[...entries].filter((entry) => entry.surface === surface).map((entry) => entry.name)
+	);
 	if (!taken.has(base)) return base;
 	for (let number = 2; ; number += 1) {
 		const suffix = `_${number}`;
@@ -192,16 +199,17 @@ export function registerWebMCPTool(
 	const entry: Entry = {
 		tool,
 		options,
-		surface: undefined,
-		name: uniqueName(tool.name),
+		surface: typeof options.modal === 'string' ? options.modal : undefined,
+		name: '',
 		signature: null,
 		controller: null
 	};
-	let baseName = tool.name;
-	if (options.modal) {
-		entry.surface = options.modal === true ? entry : options.modal;
-		retainSurface(entry.surface);
+	if (options.modal === true) {
+		entry.surface = entry;
+		retainSurface(entry);
 	}
+	entry.name = uniqueName(tool.name, entry.surface);
+	let baseName = tool.name;
 	entries.add(entry);
 	scheduleFlush();
 
@@ -215,14 +223,14 @@ export function registerWebMCPTool(
 				entries.delete(entry);
 				const context = getModelContext();
 				if (context && entry.controller) unregister(context, entry);
-				entry.name = uniqueName(nextTool.name);
+				entry.name = uniqueName(nextTool.name, entry.surface);
 				entries.add(entry);
 			}
 			scheduleFlush();
 		},
 		remove() {
 			if (!entries.delete(entry)) return;
-			if (entry.options.modal) releaseSurface(entry.surface);
+			if (entry.options.modal === true) releaseSurface(entry);
 			const context = getModelContext();
 			if (context && entry.controller) unregister(context, entry);
 			// The surface may have been the last: the tools below it come back.
@@ -245,14 +253,78 @@ export function holdWebMCPSurface(id: string): () => void {
 	};
 }
 
-/** What a `<Theme webmcp>` above the caller turned on, or `null`. Call during initialization. */
-export function useWebMCPConfig(): { readonly options: WebMCPOptions | null } {
+/** What `<Theme webmcp>` turned on and where the caller sits: read reactively. */
+export type WebMCPConfig = {
+	/** `null` while the option is off. */
+	readonly options: WebMCPOptions | null;
+	/** The modal Dialog around the caller, for a tool's `modal` option. */
+	readonly surface: string | undefined;
+};
+
+const SURFACE_CONTEXT = Symbol('webmcp-surface');
+
+/**
+ * Tells what renders below, portals included, which modal surface it belongs to. Call during
+ * initialization. `surface` gives `undefined` while it is not modal, for the one around it.
+ */
+export function provideWebMCPSurface(surface: () => string | undefined): void {
+	const parent = getContext<(() => string | undefined) | undefined>(SURFACE_CONTEXT);
+	setContext(SURFACE_CONTEXT, () => surface() ?? parent?.());
+}
+
+/** What a `<Theme webmcp>` above the caller turned on. Call during initialization. */
+export function useWebMCPConfig(): WebMCPConfig {
 	const theme = getContext<{ webmcp?: boolean | WebMCPOptions } | undefined>('entasisTheme');
+	const surface = getContext<(() => string | undefined) | undefined>(SURFACE_CONTEXT);
 	return {
 		get options() {
 			const webmcp = theme?.webmcp;
 			if (!webmcp) return null;
 			return webmcp === true ? {} : webmcp;
+		},
+		get surface() {
+			return surface?.();
 		}
 	};
+}
+
+/**
+ * Loads a component's `.webmcp.ts` file and starts what it exposes, until the returned function
+ * runs, however early that comes. The file holds what only an app that turned WebMCP on needs.
+ */
+export function startExposure<Module>(
+	load: () => Promise<Module>,
+	start: (module: Module) => () => void
+): () => void {
+	let stop: (() => void) | undefined;
+	let stopped = false;
+	void load().then((module) => {
+		if (!stopped) stop = start(module);
+	});
+	return () => {
+		stopped = true;
+		stop?.();
+	};
+}
+
+/** The `tool` prop as options; `true`, `false` and nothing give none. */
+export const toolOptions = (tool: WebMCPToolProp | undefined): WebMCPToolOptions =>
+	typeof tool === 'object' ? tool : {};
+
+/** Who may use a tool: its own `exposedTo`, else the Theme's. */
+export const exposureOf = (
+	tool: WebMCPToolProp | undefined,
+	config: WebMCPConfig
+): string[] | undefined => toolOptions(tool).exposedTo ?? config.options?.exposedTo;
+
+/**
+ * A rendered value as JSON can carry it, for a tool that reads data: a function or a snippet says
+ * nothing to a model, and a Date goes as text.
+ */
+export function toolValue(value: unknown): unknown {
+	if (value === null || value === undefined) return null;
+	if (value instanceof Date) return value.toISOString();
+	if (typeof value === 'function' || typeof value === 'symbol') return null;
+	if (typeof value === 'bigint') return value.toString();
+	return value;
 }

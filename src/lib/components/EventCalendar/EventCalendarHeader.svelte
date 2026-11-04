@@ -102,6 +102,7 @@
 </script>
 
 <div
+	data-webmcp-owned
 	data-event-calendar-part="header"
 	class={calendar.classes.header({
 		...chrome,

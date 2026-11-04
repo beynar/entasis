@@ -5,6 +5,7 @@ import type { Messages } from '$lib/i18n/en.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { PaginationThemeProps } from './pagination.theme.js';
 import type { PaginationState } from './pagination.state.svelte.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type PaginationVariant = 'pages' | 'count' | 'compact' | 'dots' | 'none';
 
@@ -158,6 +159,8 @@ type PaginationOwnProps = {
 	 * Accessible label for the pagination navigation landmark.
 	 */
 	label?: string;
+	/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+	tool?: WebMCPToolProp;
 	/**
 	 * Returns an href for a page. When omitted, controls render as buttons.
 	 */

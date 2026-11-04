@@ -2,6 +2,7 @@ import type { Sizes, Colors } from '$lib/types/theme.js';
 import type { WithSlot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { ButtonThemeProps } from './button.theme.js';
+import type { WebMCPToolOptions } from '$lib/utils/webmcp/webmcp.types.js';
 import type {
 	HTMLAnchorAttributes,
 	HTMLButtonAttributes,
@@ -23,16 +24,14 @@ type ButtonEventAttributes = {
 	onpointerleave?: PointerEventHandler<HTMLElement> | null;
 };
 type ButtonForwardedAnchorAttributes = Pick<HTMLAnchorAttributes, 'download'>;
-/** How a Button appears to AI agents under `<Theme webmcp>`. Everything has a default. */
-export type ButtonToolOptions = {
-	/** Tells the model what the button does, besides its text. */
-	description?: string;
-	/**
-	 * Whether the action is significant or hard to undo, so the browser may ask the user first.
-	 * Defaults to `color="danger"`.
-	 */
-	consequential?: boolean;
-};
+/**
+ * How a Button appears to AI agents under `<Theme webmcp>`: its text is its name, and `consequential`
+ * defaults to `color="danger"`.
+ */
+export type ButtonToolOptions = Pick<
+	WebMCPToolOptions,
+	'description' | 'consequential' | 'exposedTo'
+>;
 
 export type ButtonPrimitiveProps = WithAttachments<
 	WithSlot<

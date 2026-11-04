@@ -5,6 +5,7 @@ import type { MenuItem } from '$lib/components/Menu/menu.props.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { Colors, Density, DisclosureIndicator, Sizes } from '$lib/types/theme.js';
 import type { SidebarThemeProps } from './sidebar.theme.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type SidebarDisplayState = 'expanded' | 'collapsed' | 'hidden';
 export type SidebarState = SidebarDisplayState;
@@ -473,6 +474,8 @@ export type SidebarMenuButtonItem =
 	SidebarMenuButtonLinkItem | SidebarMenuButtonActionItem | SidebarMenuButtonMenuItem;
 
 type SidebarOwnProps = {
+	/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+	tool?: WebMCPToolProp;
 	/** Bindable reference to the root wrapper or panel. */
 	ref?: HTMLElement | null;
 	/** Bindable desktop open state. */

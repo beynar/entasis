@@ -381,4 +381,8 @@ The typed maps \`sidebarDataAttributes\` and \`sidebarCssVariables\` (from \`ent
 - Dropdown menus use Entasis \`PopupMenu\` and \`MenuItem[]\`.
 - The component uses semantic Entasis tokens. Do not add shadcn \`sidebar-*\` color tokens.
 - Snippet icons from \`entasis/icons/*\` are the preferred icon format.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, its links on this site join the \`navigate\` tool of AI agents, and its rows that only run a handler join \`run_command\`. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;
