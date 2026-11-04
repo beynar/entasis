@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.15.3 — 2026-11-04
+
 ### Security
 
 - `Markdown` and `AIMessage`: the list of attributes added in 0.15.2 checked names, not values, so a tag
