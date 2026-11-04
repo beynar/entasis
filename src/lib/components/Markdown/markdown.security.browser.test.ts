@@ -1,9 +1,10 @@
 // Markdown draws text a model or a stranger wrote: a row, an email, a web page. Whatever a tag in that
 // text says, it makes no active element and sets no attribute the built-in does not document.
-import { afterEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import AIMessageSecurityHarness from './AIMessageSecurityHarness.test.svelte';
 import MarkdownSecurityHarness from './MarkdownSecurityHarness.test.svelte';
+import { mdxAttributeNames, type MarkdownMdxTag } from './markdown.mdx.js';
 
 const PWNED = '__markdownPwned';
 const win = window as unknown as Record<string, unknown>;
@@ -168,6 +169,120 @@ describe('the rest of the text', () => {
 	])('%s makes no element', async (content) => {
 		expectInert(await draw(content));
 		expect(win[PWNED]).toBeUndefined();
+	});
+});
+
+describe('the value of an attribute', () => {
+	const HOSTILE = '1px;background:url(https://example.test/leak);position:fixed';
+	const TAGS: readonly MarkdownMdxTag[] = ['Stack', 'Grid', 'GridSpan', 'Card', 'Stat'];
+	const everyAttribute = TAGS.flatMap((tag) => mdxAttributeNames(tag).map((name) => [tag, name]));
+
+	const expectNoDeclarationAdded = (root: HTMLElement, label: string) => {
+		for (const element of root.querySelectorAll<HTMLElement>('[data-slot]')) {
+			expect(element.getAttribute('style') ?? '', label).not.toMatch(/url\(|example\.test/);
+			expect(element.style.backgroundImage, label).toBe('');
+			expect(element.style.position, label).toBe('');
+		}
+	};
+
+	test.each(everyAttribute)('%s %s adds no declaration', async (tag, name) => {
+		for (const written of [`${name}="${HOSTILE}"`, `${name}={${HOSTILE}}`]) {
+			const root = await draw(`<${tag} ${written}>x</${tag}>`);
+			expect(root.textContent, written).toContain('x');
+			expectNoDeclarationAdded(root, written);
+		}
+	});
+
+	// The browser stops recording at 250 entries, and the test modules alone fill that.
+	beforeEach(() => performance.clearResourceTimings());
+
+	const requestsFor = async (address: string) => {
+		for (let attempt = 0; attempt < 20; attempt++) {
+			const requests = performance
+				.getEntriesByType('resource')
+				.filter((entry) => entry.name.endsWith(address));
+			if (requests.length > 0) return requests;
+			await new Promise((resolve) => setTimeout(resolve, 50));
+		}
+		return [];
+	};
+
+	test('this check would see a request', async () => {
+		const address = '/__markdown-leak-control.png';
+		const image = document.createElement('div');
+		image.style.cssText = `width:10px;height:10px;background:url(${address})`;
+		document.body.append(image);
+		try {
+			// The first style pass of a page can take a while on a loaded machine.
+			await expect
+				.poll(
+					() => performance.getEntriesByType('resource').some((e) => e.name.endsWith(address)),
+					{
+						timeout: 10_000
+					}
+				)
+				.toBe(true);
+		} finally {
+			image.remove();
+		}
+	});
+
+	test.each([
+		['width', '1px'],
+		['height', '1px'],
+		['maxWidth', '1px'],
+		['minHeight', '1px'],
+		['wrap', 'nowrap']
+	])('Stack %s sends no request', async (name, valid) => {
+		const address = `/__markdown-leak-${name}.png`;
+		await draw(`<Stack ${name}="${valid};background:url(${address})">a</Stack>`);
+		expect(await requestsFor(address)).toEqual([]);
+	});
+
+	test('Grid maxWidth sends no request', async () => {
+		const address = '/__markdown-leak-grid.png';
+		await draw(`<Grid maxWidth="1px;background:url(${address})">a</Grid>`);
+		expect(await requestsFor(address)).toEqual([]);
+	});
+
+	test('a tag cannot cover the window', async () => {
+		const root = await draw(
+			'<Stack width="100vw;position:fixed;top:0;left:0;height:100vh;z-index:99999">a</Stack>'
+		);
+		const stack = root.querySelector<HTMLElement>('[data-slot="stack"]');
+		expect(stack).not.toBeNull();
+		expect(getComputedStyle(stack as HTMLElement).position).not.toBe('fixed');
+	});
+
+	test('a value the component can take still lays it out', async () => {
+		const root = await draw(
+			'<Stack width="100%" height="50vh" maxWidth="40rem" minHeight={120} wrap="wrap">a</Stack>'
+		);
+		const stack = root.querySelector<HTMLElement>('[data-slot="stack"]') as HTMLElement;
+		expect(stack.style.width).toBe('100%');
+		expect(stack.style.height).toBe('50vh');
+		expect(stack.style.maxWidth).toBe('40rem');
+		expect(stack.style.minHeight).toBe('120px');
+		const layout = stack.querySelector<HTMLElement>('[data-slot="stack-layout"]') as HTMLElement;
+		expect(layout.style.getPropertyValue('--stack-wrap-xs')).toBe('wrap');
+	});
+
+	test('a literal value does not throw a whole message away', async () => {
+		const root = await draw(
+			'<Stat label={true} value={42} unit={0}>a</Stat>\n\n<Card title={true}>b</Card>'
+		);
+		expect(root.textContent).toContain('42');
+		expect(root.textContent).toContain('b');
+	});
+
+	test('AIMessage inherits the same check', async () => {
+		const screen = await render(AIMessageSecurityHarness, {
+			props: { content: `<Stack width="${HOSTILE}" wrap="nowrap;${HOSTILE}">a</Stack>` }
+		});
+		await new Promise((resolve) => setTimeout(resolve));
+		const root = screen.container as HTMLElement;
+		expect(root.querySelector('[data-slot="stack"]')).not.toBeNull();
+		expectNoDeclarationAdded(root, 'AIMessage');
 	});
 });
 
