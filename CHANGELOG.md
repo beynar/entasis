@@ -6,6 +6,42 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- WebMCP, experimental (`<Theme webmcp>`, off by default): AI agents in the browser can use the
+  interface, with no code besides that option. Names, schemas and descriptions come from the props
+  components already have, such as `title`, `label`, `description` and a button's text. WebMCP is a
+  W3C Community Group draft in a Chrome origin trial, so this may change between minor versions.
+  Where the browser has no WebMCP the option does nothing and the tool code is not loaded. Guide:
+  `/docs/webmcp`.
+  - `Form`: one tool per form, which fills it in, validates it and runs `onSubmit`. It answers with
+    a status, field names and messages, never a value. Passwords can be filled in; file, voice and
+    signature fields stay with the user. `MultiStepForm` offers the current step's form, and `ask()`
+    adds `answer_dialog` and `cancel_dialog` while open.
+  - `Button`: `click_button`, and `click_danger_button` for `color="danger"`. `Command`, `PopupMenu`,
+    `MenuBar` and an open `ContextMenu`: `run_command` and `run_consequential_command`. `Sidebar`,
+    `NavigationMenu` and `Breadcrumbs`: `navigate`, limited to links on the site.
+  - `Tabs`: `select_tab`. `Pagination`: `go_to_page`. `DataTable`: `query_table`, `move_row`. `Chart`:
+    `read_chart_data`. `DocumentViewer`: `search_document`, `read_document`. `Kanban`: `read_board`,
+    `move_card`. `EventCalendar`: `read_calendar`, `show_calendar`, `move_event`.
+  - An agent is held to what a person can do: disabled and read-only controls refuse it, only the
+    topmost modal's tools stay available, a tool reads what the component shows, and a masked table
+    cell stays masked. Text in labels reaches the model, so `tool={false}` anything that quotes user
+    content.
+- `tool` prop on those components and on Form entries: `false` keeps it from agents, and
+  `{ name, title, description, consequential, exposedTo }` refines it. `consequential` lets the
+  browser ask the person first. It is on for forms that submit, danger buttons and menu rows, and
+  moves on a table, board or calendar.
+- `registerFormInputs`: `toolSchema`, a JSON Schema of the value, lets agents fill in an app-defined
+  input type. Without it, the field stays with the user.
+- `entasis/webmcp`: `useWebMCPTool`, `registerWebMCPTool` and `webmcpSupported`, for tools no
+  component covers.
+
+### Fixed
+
+- `TimeInput` and `PhoneInput` show a value set from outside, such as `field.setValue` or a parent's
+  `bind:value`. They kept showing the old text.
+
 ## 0.15.1 — 2026-11-03
 
 ### Fixed

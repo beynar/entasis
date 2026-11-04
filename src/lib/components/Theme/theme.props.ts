@@ -65,11 +65,11 @@ export type ThemeProps<T extends readonly string[] = readonly string[]> = Omit<
 	nonce?: string;
 	/**
 	 * Exposes the interface to AI agents running in the browser, through WebMCP. Off by default.
-	 * Each Form and each `ask()` dialog becomes a tool: its schema comes from the entries, its
-	 * name and description from the existing `title`, `label` and `description`. The agent acts
-	 * as a user would, through the same validation and the same `onSubmit`; passwords can be
-	 * filled in and no value is ever sent back. Does nothing where the browser has no WebMCP.
-	 * Experimental: the WebMCP API is still changing.
+	 * Forms, buttons, menus, links, tables and the other components that act or show data become
+	 * tools, with names and descriptions from their existing props. The agent acts as a user
+	 * would: a Form goes through the same validation and the same `onSubmit`, and passwords can
+	 * be filled in but are never sent back. Does nothing where the browser has no WebMCP.
+	 * Experimental: the WebMCP API is still changing. See `entasis/webmcp`.
 	 */
 	webmcp?: boolean | WebMCPOptions;
 	/**

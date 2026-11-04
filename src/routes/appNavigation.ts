@@ -39,6 +39,7 @@ const gettingStartedLinks: AppNavigationLink[] = [
 	{ href: '/docs/consistency', text: 'Consistency rules' },
 	{ href: '/docs/theme-transitions', text: 'Theme transitions' },
 	{ href: '/docs/i18n', text: 'Internationalization' },
+	{ href: '/docs/webmcp', text: 'WebMCP' },
 	{ href: '/changelog', text: 'Changelog' },
 	{ href: '/stress', text: 'Stress test' }
 ];

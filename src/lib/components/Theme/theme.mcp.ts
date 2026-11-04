@@ -194,7 +194,7 @@ and mirrored as a \`data-entasis-reduce-motion\` attribute on \`html\` for CSS-o
 
 ## Content Security Policy
 
-\`webmcp\` exposes the interface to AI agents running in the browser: each Form and open \`ask()\` dialog becomes a WebMCP tool, described from its existing props. Off by default, experimental, and without effect where the browser has no WebMCP. See \`entasis/webmcp\`.
+\`webmcp\` exposes the interface to AI agents running in the browser: forms, buttons, menus, links, tables and the other components that act or show data become WebMCP tools, described from their existing props. Off by default, experimental, and without effect where the browser has no WebMCP. See \`entasis/webmcp\`.
 
 \`nonce\` is stamped on every \`<script>\` and \`<style>\` the Theme and the components below it
 inject: the theme and viewport boot scripts, the design-token stylesheet, the \`transitionOnChange={false}\`

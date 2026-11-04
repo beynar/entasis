@@ -519,4 +519,8 @@ export const load = ({ locals }) => ({ nonce: locals.nonce });`;
 		motion and accessibility notes. Add it to a project for Claude Code:
 	</p>
 	<Code language="bash" code={mcpCode} />
+	<p class="text-neutral/70">
+		For agents that use your app in the browser rather than write it, see
+		<a class="underline" href={resolve('/docs/webmcp')}>WebMCP</a>.
+	</p>
 </article>

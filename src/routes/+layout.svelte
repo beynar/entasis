@@ -380,7 +380,7 @@
 	transition={themeTransition}
 	{designTokens}
 	motion={motionTokens}
-	webmcp={page.url.pathname.startsWith('/__webmcp-lab')}
+	webmcp={page.url.pathname.startsWith('/__webmcp-lab') || page.url.pathname === '/docs/webmcp'}
 >
 	{#snippet children(theme: ThemeState)}
 		<Ask />
