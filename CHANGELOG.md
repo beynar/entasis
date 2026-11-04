@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.15.2 — 2026-11-04
+
 ### Security
 
 - `Markdown` and `AIMessage`: a tag in the text could make an active element or run code. The filter
