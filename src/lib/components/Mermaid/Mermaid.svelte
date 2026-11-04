@@ -83,6 +83,7 @@
 		<div class={classes.buttons()} data-panzoom-ignore>
 			{#if has('fit')}
 				<Button
+					tool={false}
 					{...buttonProps}
 					label={t.zoomToFit}
 					onclick={diagram.zoomToFit}
@@ -91,6 +92,7 @@
 			{/if}
 			{#if has('zoomOut')}
 				<Button
+					tool={false}
 					{...buttonProps}
 					label={t.zoomOut}
 					onclick={diagram.zoomOut}
@@ -99,6 +101,7 @@
 			{/if}
 			{#if has('zoomIn')}
 				<Button
+					tool={false}
 					{...buttonProps}
 					label={t.zoomIn}
 					onclick={diagram.zoomIn}
@@ -107,6 +110,7 @@
 			{/if}
 			{#if has('expand')}
 				<Button
+					tool={false}
 					{...buttonProps}
 					label={t.fullscreen}
 					onclick={() => (expanded = true)}

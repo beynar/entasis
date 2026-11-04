@@ -155,6 +155,7 @@
 		</div>
 		{#if collapsible}
 			<Button
+				tool={false}
 				type="button"
 				variant="ghost"
 				color="neutral"

@@ -870,6 +870,7 @@
 
 		{#if shouldShowScrollButton}
 			<Button
+				tool={false}
 				squared
 				size="normal"
 				variant="outline"

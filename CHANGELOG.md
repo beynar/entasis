@@ -18,7 +18,12 @@ Unreleased section under the new version.
     a status, field names and messages, never a value. Passwords can be filled in; file, voice and
     signature fields stay with the user. `MultiStepForm` offers the current step's form, and `ask()`
     adds `answer_dialog` and `cancel_dialog` while open.
-  - `Button`: `click_button`, and `click_danger_button` for `color="danger"`. `Command`, `PopupMenu`,
+  - `Button`: `click_button`, and `click_danger_button` for `color="danger"`. Buttons inside
+    components that only change how a person looks at something (copy, zoom, scroll, minimize, text
+    formatting) are left out, as are a Form's `actions` when it has `onSubmit` or `tool={false}`.
+    Buttons that read the same are numbered, and `read_buttons` or `read_danger_buttons` says what
+    each belongs to, from its row, card or heading. A press is refused until the agent has read.
+    `Command`, `PopupMenu`,
     `MenuBar` and an open `ContextMenu`: `run_command` and `run_consequential_command`. `Sidebar`,
     `NavigationMenu` and `Breadcrumbs`: `navigate`, limited to links on the site.
   - `Tabs`: `select_tab`. `Pagination`: `go_to_page`. `DataTable`: `query_table`, `move_row`. `Chart`:

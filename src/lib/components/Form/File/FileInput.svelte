@@ -191,6 +191,7 @@
 								<div class="text-neutral/70 text-xs">{size}</div>
 							</div>
 							<Button
+								tool={false}
 								variant="ghost"
 								size="small"
 								squared
@@ -206,6 +207,7 @@
 				{/each}
 				{#if mode === 'multiple' && dropzone.files.length > 0 && dropzone.files.length < maxFiles}
 					<Button
+						tool={false}
 						variant="soft"
 						color="primary"
 						fullWidth

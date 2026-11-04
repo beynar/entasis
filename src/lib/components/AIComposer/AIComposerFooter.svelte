@@ -134,6 +134,7 @@
 		<div class={classes.actions({ side: 'start' })}>
 			{#if fileDropzone}
 				<Button
+					tool={false}
 					type="button"
 					squared
 					size="small"

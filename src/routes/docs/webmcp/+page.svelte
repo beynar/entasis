@@ -90,6 +90,24 @@
 	"message": "Nothing was submitted. Correct these fields and call the tool again."
 }`;
 
+	const homonymsCode = `// click_danger_button lists
+["Delete (1 of 3)", "Delete (2 of 3)", "Delete (3 of 3)"]
+
+// click_danger_button({ id: 'delete_2' }), unread
+{ "status": "read_first", "message": "Several options read the same. Call read_danger_buttons and pick by what it says." }
+
+// read_danger_buttons()
+{
+	"options": [
+		{ "id": "delete", "label": "Delete", "context": "Ada Martin" },
+		{ "id": "delete_2", "label": "Delete", "context": "Bob Durand" },
+		{ "id": "delete_3", "label": "Delete", "context": "Cleo Petit" }
+	]
+}
+
+// click_danger_button({ id: 'delete_2' })
+{ "status": "pressed", "id": "delete_2" }`;
+
 	const refineCode = `<!-- Keep a component from agents -->
 <Button tool={false} onclick={openDebugPanel}>Debug</Button>
 
@@ -173,8 +191,8 @@ await document.modelContext.executeTool(form, { email: 'ada@example.com' });`;
 		},
 		{
 			component: 'Button',
-			tools: 'click_button, click_danger_button',
-			note: 'One tool per page, listing the buttons a person could press. color="danger" goes to the second.'
+			tools: 'click_button, click_danger_button, read_buttons, read_danger_buttons',
+			note: 'One tool per page, listing the buttons a person could press. color="danger" goes to the second. The read tools appear when several read the same.'
 		},
 		{
 			component: 'Command, PopupMenu, MenuBar',
@@ -281,6 +299,8 @@ await document.modelContext.executeTool(form, { email: 'ada@example.com' });`;
 		Calling it runs the same validation and the same {@render ic('onSubmit')} as a person submitting the
 		form. It answers with a status, the field names and the error messages, never with a value. A form
 		without {@render ic('onSubmit')} is only filled in and validated, and the person acts on it.
+		{@render ic('actions')} are left out when the form has {@render ic('onSubmit')}, as the tool
+		already submits it. Give one its own {@render ic('tool')} to keep it, such as a save-as-draft.
 	</p>
 	<Code language="js" code={resultCode} />
 
@@ -369,6 +389,24 @@ await document.modelContext.executeTool(form, { email: 'ada@example.com' });`;
 		</table>
 	</div>
 
+	<Separator class="my-2" children="Buttons that read the same" />
+
+	<p class="text-neutral/70">
+		A person tells three “Delete” buttons apart by their rows. An agent gets them numbered, and has
+		to read what they belong to before pressing one:
+	</p>
+	<Code language="js" code={homonymsCode} />
+	<p class="text-neutral/70">
+		The text comes from around the button: its row or card, else the heading above it. It stays out
+		of the {@render ic('click_button')} list because it is often written by users, and the read tool marks
+		it as untrusted. A press is refused until the agent has read, and again if the row has changed since.
+	</p>
+	<p class="text-neutral/70">
+		When nothing tells two buttons apart, a danger button is left out, as an agent could only pick
+		at random, and any other stays numbered. Development builds warn about these. A distinct
+		{@render ic('tool.description')} on each one fixes it.
+	</p>
+
 	<Separator class="my-2" children="What an agent can't do" />
 
 	<p class="text-neutral/70">The tools hold an agent to what the interface holds a person to.</p>
@@ -393,8 +431,10 @@ await document.modelContext.executeTool(form, { email: 'ada@example.com' });`;
 		</li>
 		<li>
 			<strong class="text-neutral">Buttons.</strong> Disabled, loading, hidden and nameless buttons are
-			left out, as are links off the site and anything past the first 100. A button is checked again when
-			pressed, and a menu row that was removed or disabled can no longer run.
+			left out, as are links off the site and anything past the first 100. So are the buttons inside components
+			that only change how a person looks at something, such as copying code, zoom or text formatting.
+			A button is checked again when pressed, and a menu row that was removed or disabled can no longer
+			run.
 		</li>
 		<li>
 			<strong class="text-neutral">Links.</strong>

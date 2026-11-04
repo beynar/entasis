@@ -100,6 +100,9 @@ theirs statically, as it computes their Form's `tool` prop during render. Shared
 `run_command`, `navigate`) come from `src/lib/utils/webmcp`, through which every tool registers.
 An agent reaches what a person can: names come from existing props, what a control refuses is
 refused too, only the topmost modal's tools stay, and a tool reads only what the component shows.
+An internal Button gets `tool={false}` when it only changes how a person looks at something (copy,
+zoom, scroll, minimize, formatting), so `click_button` lists what acts. Props a consumer passes
+to a Button stay offered by default.
 
 ## Theme ownership
 

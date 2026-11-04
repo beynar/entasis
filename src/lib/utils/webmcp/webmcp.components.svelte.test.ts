@@ -4,10 +4,12 @@ import { tick, type Component } from 'svelte';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
 import { Chart } from '$lib/components/Chart/index.js';
+import Code from '$lib/components/Code/Code.svelte';
 import Command from '$lib/components/Command/Command.svelte';
 import { DataTable } from '$lib/components/DataTable/index.js';
 import { EventCalendar } from '$lib/components/EventCalendar/index.js';
 import { EventCalendarState } from '$lib/components/EventCalendar/eventCalendar.state.svelte.js';
+import Form from '$lib/components/Form/Form/Form.svelte';
 import MultiStepForm from '$lib/components/Form/MultiStepForm/MultiStepForm.svelte';
 import Kanban from '$lib/components/Kanban/Kanban.svelte';
 import MenuBar from '$lib/components/MenuBar/MenuBar.svelte';
@@ -17,10 +19,12 @@ import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
 import Sidebar from '$lib/components/Sidebar/Sidebar.svelte';
 import Tabs from '$lib/components/Tabs/Tabs.svelte';
 import ContextMenuHarness from './ContextMenuHarness.test.svelte';
+import HomonymsHarness from './HomonymsHarness.test.svelte';
 import MenuInDialogHarness from './MenuInDialogHarness.test.svelte';
 import TwoButtonsHarness from './TwoButtonsHarness.test.svelte';
 import TwoMenusHarness from './TwoMenusHarness.test.svelte';
 import WebMCPHarness from './WebMCPHarness.test.svelte';
+import WithMarkerHarness from './WithMarkerHarness.test.svelte';
 
 type Tool = {
 	name: string;
@@ -433,6 +437,142 @@ describe('DataTable', () => {
 		await tool('query_table');
 		await new Promise((resolve) => setTimeout(resolve, 80));
 		expect(tools.has('go_to_page')).toBe(false);
+	});
+});
+
+describe('Buttons a component holds', () => {
+	const titlesOf = (found: Tool) => found.inputSchema.properties.id.oneOf?.map((o) => o.title);
+	const inputs = { email: { type: 'email', label: 'Email' } };
+	const action = (children: string, more: object = {}) => ({
+		children,
+		onAction: () => {},
+		...more
+	});
+	const offeredBeside = async (component: unknown, props: Record<string, unknown>) => {
+		mount(WithMarkerHarness, { inner: component, ...props });
+		const found = await tool('click_button');
+		await waitFor(() => expect(titlesOf(found)).toContain('Marker'));
+		await new Promise((resolve) => setTimeout(resolve, 80));
+		return titlesOf(tools.get('click_button') as Tool);
+	};
+
+	test('a form with onSubmit leaves its actions to its own tool', async () => {
+		const props = { inputs, onSubmit: () => {}, actions: [action('Subscribe')] };
+		expect(await offeredBeside(Form, props)).toEqual(['Marker']);
+	});
+
+	test('a form without onSubmit offers its actions', async () => {
+		const props = { inputs, actions: [action('Save draft')] };
+		expect(await offeredBeside(Form, props)).toContain('Save draft');
+	});
+
+	test('a form kept from agents keeps its actions from them', async () => {
+		const props = { inputs, tool: false, actions: [action('Save draft')] };
+		expect(await offeredBeside(Form, props)).toEqual(['Marker']);
+	});
+
+	test('an action can ask to stay offered', async () => {
+		const props = {
+			inputs,
+			onSubmit: () => {},
+			actions: [action('Save draft', { tool: { description: 'Keeps it for later.' } })]
+		};
+		expect((await offeredBeside(Form, props))?.join()).toContain('Save draft');
+	});
+
+	test('the copy button of a code block is not offered', async () => {
+		const props = { code: 'const a = 1;', language: 'ts' };
+		expect(await offeredBeside(Code, props)).toEqual(['Marker']);
+	});
+});
+
+describe('Buttons that read the same', () => {
+	const titlesOf = (found: Tool) => found.inputSchema.properties.id.oneOf?.map((o) => o.title);
+	const danger = () => tool('click_danger_button');
+	const readDanger = async () =>
+		(await (await tool('read_danger_buttons')).execute({}, {})) as {
+			options: { id: string; label: string; context: string | null }[];
+		};
+
+	test('are numbered, without what tells them apart in the list', async () => {
+		mount(HomonymsHarness, {});
+		const found = await danger();
+		expect(titlesOf(found)).toEqual(['Delete (1 of 3)', 'Delete (2 of 3)', 'Delete (3 of 3)']);
+		expect(JSON.stringify(found.inputSchema)).not.toContain('Bob');
+		const read = await tool('read_danger_buttons');
+		expect(read.annotations).toMatchObject({ readOnlyHint: true, untrustedContentHint: true });
+	});
+
+	test('tells them apart from what surrounds them, without field values', async () => {
+		mount(HomonymsHarness, {});
+		const { options } = await readDanger();
+		expect(options.map(({ context }) => context)).toEqual([
+			'Ada Martin',
+			'Bob Durand',
+			'Cleo Petit'
+		]);
+		expect(JSON.stringify(options)).not.toContain('hidden-value');
+	});
+
+	test('must be read before one is pressed, then press the right one', async () => {
+		const onDelete = vi.fn();
+		mount(HomonymsHarness, { onDelete });
+		const found = await danger();
+		const { id } = (await readDanger()).options[1];
+		expect(await found.execute({ id }, {})).toMatchObject({ status: 'pressed' });
+		expect(onDelete).toHaveBeenCalledExactlyOnceWith('Bob Durand');
+	});
+
+	test('are refused unread', async () => {
+		const onDelete = vi.fn();
+		mount(HomonymsHarness, { onDelete });
+		const found = await danger();
+		const id = found.inputSchema.properties.id.enum?.[1];
+		expect(await found.execute({ id }, {})).toMatchObject({ status: 'read_first' });
+		expect(onDelete).not.toHaveBeenCalled();
+	});
+
+	test('are refused when the row changed since it was read', async () => {
+		const onDelete = vi.fn();
+		const { container } = mount(HomonymsHarness, { onDelete });
+		const found = await danger();
+		const { id } = (await readDanger()).options[1];
+		const cell = [...container.querySelectorAll('td')].find(
+			(td) => td.textContent === 'Bob Durand'
+		);
+		(cell as HTMLElement).textContent = 'Someone else';
+		expect(await found.execute({ id }, {})).toMatchObject({ status: 'read_first' });
+		expect(onDelete).not.toHaveBeenCalled();
+	});
+
+	test('use the heading above when nothing else holds them', async () => {
+		mount(HomonymsHarness, {});
+		const { options } = (await (await tool('read_buttons')).execute({}, {})) as {
+			options: { label: string; context: string }[];
+		};
+		expect(options.map(({ context }) => context)).toEqual(['Invoices', 'Quotes']);
+	});
+
+	test('a danger button nothing tells apart is left out, any other stays', async () => {
+		mount(HomonymsHarness, { flat: true });
+		const found = await tool('click_button');
+		await waitFor(() => expect(titlesOf(found)).toContain('Marker'));
+		const titles = titlesOf(tools.get('click_button') as Tool);
+		expect(titles).toEqual(['Open (1 of 2)', 'Open (2 of 2)', 'Marker']);
+		await new Promise((resolve) => setTimeout(resolve, 80));
+		expect(tools.has('click_danger_button')).toBe(false);
+		expect(tools.has('read_buttons')).toBe(false);
+	});
+
+	test('a distinct description makes them distinct', async () => {
+		mount(HomonymsHarness, { described: true });
+		const found = await tool('click_button');
+		await waitFor(() => expect(titlesOf(found)).toContain('Marker'));
+		expect(titlesOf(tools.get('click_button') as Tool)).toEqual([
+			'Open: The invoice.',
+			'Open: The quote.',
+			'Marker'
+		]);
 	});
 });
 

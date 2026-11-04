@@ -337,6 +337,7 @@
 			<div data-slot="signature-actions" class={classes.actions()}>
 				{#if strokes.length > 0}
 					<Button
+						tool={false}
 						variant="ghost"
 						color="neutral"
 						size="small"
@@ -349,6 +350,7 @@
 					</Button>
 				{/if}
 				<Button
+					tool={false}
 					variant="ghost"
 					color="neutral"
 					size="small"

@@ -106,6 +106,9 @@
 		},
 		() => !disabled
 	);
+	// An agent submits through the form's own tool, and a form kept from agents keeps its buttons
+	// from them too. Without `onSubmit`, the actions are what acts on the form.
+	const actionsTool = $derived(tool === false || onSubmit ? false : undefined);
 	const inputsEntries = $derived(Object.entries<FormInput>(inputs));
 	const visibleInputsEntries = $derived(
 		inputsEntries.filter(([, input]) =>
@@ -145,6 +148,7 @@
 		<FormActions
 			actions={input.actions}
 			form={formState}
+			tool={actionsTool}
 			{size}
 			{density}
 			label={input.label}
@@ -261,6 +265,7 @@
 				<FormActions
 					{actions}
 					form={formState}
+					tool={actionsTool}
 					{size}
 					{density}
 					class={classes.formActions({ density })}

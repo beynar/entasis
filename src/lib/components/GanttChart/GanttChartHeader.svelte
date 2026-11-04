@@ -103,6 +103,7 @@
 
 {#snippet zoomOutPart()}
 	<Button
+		tool={false}
 		type="button"
 		squared
 		size={chart.size}
@@ -117,6 +118,7 @@
 
 {#snippet zoomInPart()}
 	<Button
+		tool={false}
 		type="button"
 		squared
 		size={chart.size}
@@ -131,6 +133,7 @@
 
 {#snippet fitProjectPart()}
 	<Button
+		tool={false}
 		type="button"
 		squared
 		size={chart.size}
@@ -145,6 +148,7 @@
 
 {#snippet todayPart()}
 	<Button
+		tool={false}
 		type="button"
 		size={chart.size}
 		variant="outline"

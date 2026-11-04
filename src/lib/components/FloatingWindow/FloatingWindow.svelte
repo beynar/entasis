@@ -264,6 +264,7 @@
 			<div data-floating-window-no-drag class={classes.actions()}>
 				{#if minimizable}
 					<Button
+						tool={false}
 						type="button"
 						size="small"
 						variant="ghost"

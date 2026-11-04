@@ -30,6 +30,7 @@
 		{ value: 'corp', label: 'Entreprise', disabled: true }
 	];
 
+	let clientRows = $state(['Ada Martin', 'Bob Durand', 'Cleo Petit']);
 	let log = $state<string[]>([]);
 	const note = (entry: string) => log.push(entry);
 	let columns = $state([
@@ -154,6 +155,24 @@
 			address: { type: 'address', label: 'Address' }
 		}}
 	/>
+
+	<table>
+		<tbody>
+			{#each clientRows as name (name)}
+				<tr>
+					<td>{name}</td>
+					<td>
+						<Button
+							color="danger"
+							onclick={() => (clientRows = clientRows.filter((c) => c !== name))}
+						>
+							Supprimer
+						</Button>
+					</td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
 
 	<Form title="Formulaire privé" tool={false} inputs={{ a: { type: 'text', label: 'A' } }} />
 

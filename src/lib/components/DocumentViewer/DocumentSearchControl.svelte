@@ -98,6 +98,7 @@
 >
 	{#snippet trigger(popover)}
 		<Button
+			tool={false}
 			{...buttonProps}
 			label={t.search}
 			disabled={!viewer.isReady}
@@ -119,6 +120,7 @@
 	/>
 	<span class={classes.searchCount()}>{searchCount}</span>
 	<Button
+		tool={false}
 		{...buttonProps}
 		label={`${t.previous} ${t.match}`}
 		disabled={!viewer.matches.length}
@@ -126,6 +128,7 @@
 		prefix={caretUpIcon}
 	/>
 	<Button
+		tool={false}
 		{...buttonProps}
 		label={`${t.next} ${t.match}`}
 		disabled={!viewer.matches.length}

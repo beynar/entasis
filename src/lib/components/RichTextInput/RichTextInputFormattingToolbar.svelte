@@ -241,6 +241,7 @@
 
 {#snippet dismissControl({ reference, size, color, variant, disabled }: ToggleMenuCustomPayload)}
 	<Button
+		tool={false}
 		type="button"
 		label={t.richTextDismissToolbar}
 		prefix={xIcon}

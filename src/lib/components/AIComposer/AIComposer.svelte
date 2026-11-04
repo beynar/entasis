@@ -563,6 +563,7 @@
 		</span>
 		{#if fileController.notice}
 			<Button
+				tool={false}
 				type="button"
 				squared
 				size="small"

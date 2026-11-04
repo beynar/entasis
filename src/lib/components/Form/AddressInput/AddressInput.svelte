@@ -403,7 +403,13 @@
 					onSelect={({ item }) => choose(item.value)}
 				/>
 				{#if !field.disabled && !field.readOnly}
-					<Button variant="link" size="small" color="neutral" onclick={() => (manual = true)}>
+					<Button
+						tool={false}
+						variant="link"
+						size="small"
+						color="neutral"
+						onclick={() => (manual = true)}
+					>
 						{t.addressEnterManually}
 					</Button>
 				{/if}
