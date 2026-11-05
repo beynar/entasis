@@ -66,8 +66,13 @@ const defaultHeader = cva({
 });
 // Chat prose is a reading surface: `normal` sets 14px with a 1.625 line height (`large` 16px,
 // `small` 12px). Bubble tails sit on logical corners so they follow the writing direction.
+//
+// A bubble is as wide as its content, and a size container (a code block, a Stack, a Grid) says it
+// has no width of its own, so one alone in a message collapsed to the bubble's padding and a short
+// line beside one set its width. Here they ask for more than any bubble has, and get what its cap
+// allows.
 const defaultBubble = cva({
-	base: 'min-w-0 max-w-full break-words [&_*:first-child]:mt-0 [&_*:last-child]:mb-0',
+	base: "min-w-0 max-w-full break-words [&_*:first-child]:mt-0 [&_*:last-child]:mb-0 [&_[class*='@container']]:[contain-intrinsic-inline-size:100vw]",
 	variants: {
 		role: {
 			user: 'rounded-lg rounded-ee-sm',

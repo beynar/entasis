@@ -30,7 +30,7 @@ const peleColors = [
 // The outer element: the panzoom "owner" viewport. The expand control opens the same
 // diagram in a fullScreen Dialog rather than promoting this element to an overlay.
 const defaultMermaidRoot = cva({
-	base: `group/mermaid relative w-full overflow-hidden rounded-sm border border-neutral-muted bg-surface-raised text-neutral ${peleColors}`,
+	base: `@container group/mermaid relative w-full overflow-hidden rounded-sm border border-neutral-muted bg-surface-raised text-neutral ${peleColors}`,
 	variants: {
 		size: {
 			small: 'h-64 min-h-48',

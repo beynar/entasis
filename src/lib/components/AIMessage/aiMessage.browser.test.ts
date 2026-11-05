@@ -194,4 +194,62 @@ describe('AIMessage', () => {
 			}
 		}
 	);
+
+	describe('a block alone in a message', () => {
+		const FENCE = '```js\nconst answer = 42;\n```';
+		const bubbleWidth = () => q('[data-slot="ai-message-content"]').getBoundingClientRect().width;
+		const draw = async (props: Record<string, unknown>) => {
+			await render(Harness, { props: { width: 640, ...props } });
+			await expect
+				.poll(() => document.querySelector('[data-slot="ai-message-content"]'))
+				.not.toBeNull();
+		};
+
+		test.each([
+			['user', 'bubble'],
+			['user', 'minimal'],
+			['assistant', 'bubble'],
+			['assistant', 'minimal']
+		] as const)('%s %s draws a fence at a usable width', async (from, variant) => {
+			await draw({ from, variant, content: FENCE });
+			await expect.poll(() => q('[data-slot="code"]')).not.toBeNull();
+			const code = q('[data-slot="code"]').getBoundingClientRect();
+			expect(code.width).toBeGreaterThan(400);
+			expect(code.height).toBeGreaterThan(0);
+			expect(q('[data-slot="code"]').textContent).toContain('const answer = 42;');
+		});
+
+		test('a short line beside a fence does not set its width', async () => {
+			await draw({ content: `ok\n\n${FENCE}` });
+			await expect.poll(() => q('[data-slot="code"]')).not.toBeNull();
+			expect(q('[data-slot="code"]').getBoundingClientRect().width).toBeGreaterThan(400);
+		});
+
+		test('a very long line stays inside the message', async () => {
+			await draw({ content: `\`\`\`\n${'x'.repeat(400)}\n\`\`\`` });
+			await expect.poll(() => q('[data-slot="code"]')).not.toBeNull();
+			expect(q('[data-slot="code"]').getBoundingClientRect().width).toBeLessThanOrEqual(640);
+		});
+
+		test('a mermaid fence is not invisible either', async () => {
+			await draw({ content: '```mermaid\ngraph TD; A-->B\n```' });
+			expect(bubbleWidth()).toBeGreaterThan(400);
+		});
+
+		test('a Stack alone is not invisible either', async () => {
+			await draw({ content: '<Stack>hello</Stack>' });
+			expect(bubbleWidth()).toBeGreaterThan(400);
+		});
+
+		test('a user bubble keeps its reading cap', async () => {
+			await draw({ from: 'user', variant: 'bubble', content: FENCE, width: 1000 });
+			await expect.poll(() => q('[data-slot="code"]')).not.toBeNull();
+			expect(bubbleWidth()).toBeLessThanOrEqual(38 * 16 + 1);
+		});
+
+		test('a bubble of plain text still fits its text', async () => {
+			await draw({ from: 'user', variant: 'bubble', content: 'hello' });
+			expect(bubbleWidth()).toBeLessThan(120);
+		});
+	});
 });
