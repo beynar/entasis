@@ -6,6 +6,50 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `DataTable`: `api.commitEditing()` writes the open editor, for a save from outside the table. It resolves
+  `true` once nothing is left to write, and `false` when `onCellCommit` threw, which leaves the editor open.
+- `DataTable`: `getRowAttrs` and `getCellAttrs` add attributes to the `<tr>` and `<td>`, for a `data-*` the
+  theme reads, structural columns included.
+- `Mermaid`: a new `images` prop. A node's `img` metadata (`A@{ img: "https://…" }`) loads that address for
+  every reader with no click, so an app showing text it did not write can now turn that off. It stays on by
+  default. In `Markdown` and `AIMessage`, `peleOptions={{ images: false }}` does the same for a fence.
+
+### Changed
+
+- Icons: importing `entasis/icons/<name>` shipped all six of its weights, as a bundler could not tell that
+  an unused `icon()` call did nothing. Each call is now marked pure, so the weights not imported are dropped.
+  The export names are unchanged.
+
+### Security
+
+- Every component drawing a link from a prop (`Button`, `Card`, `Chip`, `MenuOption`, `Breadcrumbs`, `Command`,
+  `NavigationMenu`, `Sidebar`, `LinkPreview`, `Pagination`, `Tabbar`, `MetadataList`, `AIThread` sources and
+  `PDFViewer` links): an `href` was followed as written. `javascript:`, `vbscript:` and a `data:` document (HTML,
+  SVG, XML) are no longer links, and the component draws what it draws with no `href`. Every other address still
+  is: a path, `myapp://`, `file:`, `blob:` or a `data:` file to download.
+- `MetadataList`: `columns` is written into `style`, and now only takes a whole number from 1.
+
+### Fixed
+
+- `ColorInput`: a click outside closed the picker and opened it again at once, because focus returned to
+  the input, which opened the picker on focus. It now opens on a click and on ArrowDown, like `DateInput`,
+  so tabbing through the field no longer opens it either.
+- `Popover`, and so `ColorInput`, `DateInput` and `TimeInput`: a press outside took focus back to the
+  trigger or input, which blurred and refocused it. A pointer pressing outside a non-modal popover now
+  leaves focus where the press put it, whatever `focusOnClose` says. Escape and other keyboard closes
+  still return focus, as does a modal popover.
+- `TimeInput`: a value set after mounting, by a `Form` or a button, never showed in the input. The input now
+  follows `value` while the field has no focus, as `DateInput` does; a value set during typing shows when
+  focus leaves, and what a person typed stays as typed.
+- `Field`: a focused control removed during a reaction threw `state_unsafe_mutation`, through the `focusout`
+  Chromium sends as the node leaves. Every control built on `FieldState` had it.
+- `AIMessage`: a message holding only a code block was invisible, at 2 px wide, because a code block is
+  a size container and a bubble is as wide as its content. The same went for a Mermaid diagram, a
+  `Stack` or a `Grid` alone in a message, and a short line beside a code block set its width. They
+  now take the width the bubble is allowed.
+
 ## 0.15.3 — 2026-11-04
 
 ### Security
