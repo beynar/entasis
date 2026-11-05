@@ -12,6 +12,7 @@
 		getRowAttrs,
 		getCellAttrs,
 		theme,
+		interactionMode,
 		onApi
 	}: {
 		items: Person[];
@@ -19,6 +20,7 @@
 		getRowAttrs?: DataTableProps<Person>['getRowAttrs'];
 		getCellAttrs?: DataTableProps<Person>['getCellAttrs'];
 		theme?: DataTableProps<Person>['theme'];
+		interactionMode?: DataTableProps<Person>['interactionMode'];
 		onApi?: (api: DataTableApi<Person>) => void;
 	} = $props();
 
@@ -48,5 +50,6 @@
 		{getRowAttrs}
 		{getCellAttrs}
 		{theme}
+		{interactionMode}
 	/>
 </Theme>

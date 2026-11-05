@@ -57,6 +57,8 @@ Unreleased section under the new version.
   focus leaves, and what a person typed stays as typed.
 - `Field`: a focused control removed during a reaction threw `state_unsafe_mutation`, through the `focusout`
   Chromium sends as the node leaves. Every control built on `FieldState` had it.
+- `DataTable`: a pinned cell with keyboard focus lost its surface for the translucent tint of focus, so what
+  scrolled under it showed through. The tint now sits over the surface.
 - `AIMessage`: a message holding only a code block was invisible, at 2 px wide, because a code block is
   a size container and a bubble is as wide as its content. The same went for a Mermaid diagram, a
   `Stack` or a `Grid` alone in a message, and a short line beside a code block set its width. They

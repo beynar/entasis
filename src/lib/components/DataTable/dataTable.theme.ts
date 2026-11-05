@@ -138,11 +138,22 @@ const cell = cva({
 		},
 		pinned: { true: 'z-10 bg-surface', false: '' },
 		focused: {
-			true: 'z-20 bg-selected-muted/20 ring-2 ring-inset ring-selected/70',
+			true: 'z-20 ring-2 ring-inset ring-selected/70',
 			false: ''
 		},
 		editing: { true: 'overflow-visible p-0 ring-1 ring-inset ring-primary', false: '' }
 	},
+	compoundVariants: [
+		{ pinned: false, focused: true, class: 'bg-selected-muted/20' },
+		// The tint is translucent: as a background it would replace the surface, and what scrolls
+		// under a pinned cell would show through. Laid over the surface, under the content.
+		{
+			pinned: true,
+			focused: true,
+			class:
+				'before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:bg-selected-muted/20'
+		}
+	],
 	defaultVariants: {
 		density: 'normal',
 		align: 'start',
