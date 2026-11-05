@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.16.0 — 2026-11-05
+
 ### Added
 
 - WebMCP, experimental (`<Theme webmcp>`, off by default): AI agents in the browser can use the
