@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
 	import { caretDownIcon } from '$lib/components/Icons/caretDown.js';
 	import { caretUpDownIcon } from '$lib/components/Icons/caretUpDown.js';
@@ -222,9 +223,14 @@
 				</button>
 			{/snippet}
 		</PopupMenu>
-	{:else if href}
+	{:else if safeHref(href)}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
-		<a {href} data-slot="sidebar-menu-button" data-size={rowSize} class={buttonClass}>
+		<a
+			href={safeHref(href)}
+			data-slot="sidebar-menu-button"
+			data-size={rowSize}
+			class={buttonClass}
+		>
 			{@render buttonInner()}
 		</a>
 		<!-- eslint-enable svelte/no-navigation-without-resolve -->

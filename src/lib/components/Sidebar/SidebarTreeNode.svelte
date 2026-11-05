@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import { disclosurePanel } from '$lib/attachments/disclosurePanel.svelte.js';
 	import { openStateAttributes } from '$lib/utils/stateAttributes.js';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
@@ -167,10 +168,10 @@
 				{/each}
 			</ul>
 		{/if}
-	{:else if node.href}
+	{:else if safeHref(node.href)}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 		<a
-			href={node.href}
+			href={safeHref(node.href)}
 			data-slot={rowSlot}
 			data-sidebar={rowData}
 			data-active={node.isActive ? 'true' : undefined}

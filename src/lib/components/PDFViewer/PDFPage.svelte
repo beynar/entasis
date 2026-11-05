@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { untrack } from 'svelte';
 	import type {
@@ -259,7 +260,7 @@
 	<div class="pdf-link-layer">
 		{#each links as link, i (i)}
 			<a
-				href={link.url}
+				href={safeHref(link.url)}
 				target="_blank"
 				rel="noopener noreferrer external"
 				aria-label={t.linkTo(link.url)}

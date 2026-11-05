@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type { ChipProps } from './chip.props.js';
 	import { useChipTheme } from './chip.theme.js';
@@ -27,7 +28,8 @@
 
 	const classes = $derived(useChipTheme(theme));
 	const resolvedColor = $derived(useDefaultColor(color));
-	const as = $derived(href ? 'a' : onclick || onpointerenter || onpointerleave ? 'button' : 'div');
+	const link = $derived(safeHref(href));
+	const as = $derived(link ? 'a' : onclick || onpointerenter || onpointerleave ? 'button' : 'div');
 	const isEmpty = $derived(!children && !prefix && !suffix);
 </script>
 
@@ -42,7 +44,7 @@
 	data-chip-position={position}
 	{rel}
 	{target}
-	{href}
+	href={link}
 	type={as === 'button' ? type : undefined}
 	disabled={as === 'button' ? disabled : undefined}
 	aria-pressed={as === 'button' ? selected : undefined}

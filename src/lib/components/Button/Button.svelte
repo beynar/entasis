@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import type { Attachment } from 'svelte/attachments';
 	import { spinnerOverlay } from '$lib/attachments/spinnerOverlay.svelte.js';
 	import Slot from '../Slot/Slot.svelte';
@@ -46,7 +47,8 @@
 	const isSquared = $derived(
 		squared ?? !!((!children && prefix && !suffix) || (!children && !prefix && suffix))
 	);
-	const isAnchor = $derived(!!href);
+	const link = $derived(safeHref(href));
+	const isAnchor = $derived(!!link);
 	// Only a disabled <button> uses the native attribute, and only when it may leave the tab order.
 	// A loading button, or one that is `focusableWhenDisabled`, stays focusable, so a keyboard user
 	// keeps their place, and refuses activation through `aria-disabled` instead.
@@ -109,11 +111,11 @@
 	aria-disabled={inactive && !nativeDisabled ? true : undefined}
 	aria-busy={loading ? true : undefined}
 	role={role ?? (isAnchor ? 'link' : 'button')}
-	href={isAnchor && !disabled ? href : undefined}
+	href={isAnchor && !disabled ? link : undefined}
 	{rel}
 	{target}
 	{download}
-	{type}
+	type={href && !link ? 'button' : type}
 	tabindex={anchorTabindex}
 	bind:this={ref}
 	data-active={dataActive}

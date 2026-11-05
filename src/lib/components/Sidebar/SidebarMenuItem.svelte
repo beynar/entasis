@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import { disclosurePanel } from '$lib/attachments/disclosurePanel.svelte.js';
 	import { openStateAttributes } from '$lib/utils/stateAttributes.js';
 	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
@@ -95,7 +96,7 @@
 	const hasTrailingGlyph = $derived(
 		!!item.menu ||
 			(item.view !== undefined && !back) ||
-			(hasSubmenu && !item.href && item.collapsible !== false && collapseIcon !== 'none')
+			(hasSubmenu && !safeHref(item.href) && item.collapsible !== false && collapseIcon !== 'none')
 	);
 	// A suffix sits beside the row and stays visible before the action, so a row with one reserves
 	// the suffix's width and the action's box at every width, and its badge never steps aside.
@@ -128,7 +129,7 @@
 		isIconCollapsed &&
 			hasSubmenu &&
 			!item.menu &&
-			!item.href &&
+			!safeHref(item.href) &&
 			item.view === undefined &&
 			!item.disabled
 	);
@@ -250,11 +251,11 @@
 {/snippet}
 
 {#snippet leafButton()}
-	{#if item.href}
+	{#if safeHref(item.href)}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 		<a
 			bind:this={rowRef}
-			href={item.disabled ? undefined : item.href}
+			href={item.disabled ? undefined : safeHref(item.href)}
 			role={item.disabled ? 'link' : undefined}
 			data-slot="sidebar-menu-button"
 			data-sidebar="menu-button"
@@ -446,7 +447,7 @@
 		{:else if hasSubmenu && item.collapsible === false}
 			{@render leafButton()}
 		{:else if hasSubmenu}
-			{#if item.href}
+			{#if safeHref(item.href)}
 				{@render leafButton()}
 				<button
 					bind:this={submenuTriggerRef}

@@ -29,7 +29,10 @@ export type MetadataListItem = {
 	icon?: Slot;
 	/** Chip color for boolean/chip/chips values. */
 	color?: Colors;
-	/** Explicit link target; overrides the derived url/mailto:/tel: href. */
+	/**
+	 * Explicit link target; overrides the derived url/mailto:/tel: href. With `javascript:`, `vbscript:` or
+	 * a `data:` document the value is drawn as text.
+	 */
 	href?: string;
 };
 

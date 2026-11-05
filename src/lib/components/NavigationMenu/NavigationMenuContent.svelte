@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import Slot from '../Slot/Slot.svelte';
 	import { caretDownIcon } from '../Icons/caretDown.js';
 	import type { Density, Sizes } from '$lib/types/theme.js';
@@ -56,7 +57,7 @@
 {#snippet linkRow(link: NavigationMenuLink)}
 	<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 	<a
-		href={link.disabled ? undefined : link.href}
+		href={link.disabled ? undefined : safeHref(link.href)}
 		target={link.target}
 		rel={link.rel}
 		role={link.disabled ? 'link' : undefined}

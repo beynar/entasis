@@ -98,7 +98,7 @@ type TabItem = {
   label: string | Snippet;      // Tab label (required)
   prefix?: Snippet;              // Icon or content before label
   suffix?: Snippet;              // Icon or content after label
-  href?: string;                 // URL for navigation tabs
+  href?: string;                 // URL for navigation tabs; javascript:, vbscript: and a data: document draw a button
   disabled?: boolean;            // Disable the tab
   target?: string;               // Link target (e.g., "_blank")
   rel?: string;                  // Link relationship

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import { cx } from '$lib/utils/cva/index.js';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
@@ -131,10 +132,10 @@
 			</span>
 		{/if}
 	{/snippet}
-	{#if item.href}
+	{#if safeHref(item.href)}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 		<a
-			href={item.disabled ? undefined : item.href}
+			href={item.disabled ? undefined : safeHref(item.href)}
 			target={item.target}
 			rel={item.rel}
 			role={item.disabled ? 'link' : undefined}

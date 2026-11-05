@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import Slot from '../Slot/Slot.svelte';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import { caretDownIcon } from '../Icons/caretDown.js';
@@ -100,7 +101,7 @@
 						label: tab.label,
 						prefix: tab.prefix,
 						suffix: tab.suffix,
-						href: tab.href,
+						href: safeHref(tab.href),
 						disabled: tab.disabled ?? false,
 						target: tab.target,
 						rel: tab.rel,

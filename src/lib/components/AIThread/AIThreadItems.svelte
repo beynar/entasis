@@ -1,4 +1,5 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { VirtualItem } from '@tanstack/svelte-virtual';
 	import type { Attachment } from 'svelte/attachments';
@@ -342,7 +343,7 @@
 							<div data-slot="ai-thread-sources" data-size={messageSize} class={classes.sources()}>
 								<span class={classes.sourcesLabel()}>{t.aiThreadSources}</span>
 								{#each item.sources as source (source.id)}
-									{#if source.url}
+									{#if safeHref(source.url)}
 										<!-- eslint-disable svelte/no-navigation-without-resolve -- Sources are external URLs from the model; library links cannot depend on SvelteKit routing. -->
 										<a
 											data-slot="ai-thread-source"

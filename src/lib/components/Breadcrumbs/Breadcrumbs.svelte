@@ -1,4 +1,5 @@
 <script lang="ts" generics="Items extends BreadcrumbItem[] = BreadcrumbItem[]">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import Slot from '../Slot/Slot.svelte';
@@ -122,9 +123,10 @@
 						</PopupMenu>
 					{/if}
 				{:else}
+					{@const link = safeHref(item.href)}
 					<svelte:element
-						this={item.active ? 'span' : item.href ? 'a' : 'button'}
-						role={item.active ? 'link' : item.href ? 'link' : 'button'}
+						this={item.active ? 'span' : link ? 'a' : 'button'}
+						role={item.active ? 'link' : link ? 'link' : 'button'}
 						onclick={(event: MouseEvent) => {
 							if (item.disabled || item.active) {
 								event.preventDefault();
@@ -134,9 +136,9 @@
 							item.onclick?.(event);
 						}}
 						class={classes.link({ disabled: item.disabled, active: item.active })}
-						href={item.disabled || item.active ? undefined : item.href}
-						type={!item.active && !item.href ? 'button' : undefined}
-						disabled={!item.active && !item.href && item.disabled ? true : undefined}
+						href={item.disabled || item.active ? undefined : link}
+						type={!item.active && !link ? 'button' : undefined}
+						disabled={!item.active && !link && item.disabled ? true : undefined}
 						tabindex={item.disabled || item.active ? -1 : undefined}
 						aria-disabled={item.disabled || item.active}
 						aria-current={item.active ? 'page' : undefined}

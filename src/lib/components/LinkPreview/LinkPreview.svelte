@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import HoverCard from '../HoverCard/HoverCard.svelte';
 	import Skeleton from '../Skeleton/Skeleton.svelte';
@@ -191,7 +192,7 @@
 	{#snippet trigger()}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 		<a
-			href={disabled ? undefined : href}
+			href={disabled ? undefined : safeHref(href)}
 			{target}
 			rel={resolvedRel}
 			class={classes.trigger({ disabled, wrap, className })}

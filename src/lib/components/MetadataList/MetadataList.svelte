@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import { slide } from 'svelte/transition';
 	import Slot from '../Slot/Slot.svelte';
 	import Chip from '../Chip/Chip.svelte';
@@ -50,7 +51,12 @@
 	// Chip sizing: large lists get normal chips, everything else small.
 	const chipSize = $derived(size === 'large' ? 'normal' : 'small');
 
-	const columnsStyle = $derived(`grid-template-columns: repeat(${columns}, minmax(0, 1fr))`);
+	// Written into `style` as text: a count computed from a row must not be able to say more than that.
+	const columnCount = $derived.by(() => {
+		const count = Number(columns);
+		return Number.isInteger(count) && count >= 1 ? count : 1;
+	});
+	const columnsStyle = $derived(`grid-template-columns: repeat(${columnCount}, minmax(0, 1fr))`);
 
 	// `||` (not `??`) so maxItems=0 means "no limit" instead of hiding every item with no toggle.
 	const limit = $derived(maxItems || items.length);
@@ -119,6 +125,9 @@
 {#snippet valueContent(item: MetadataListItem, type: MetadataListItemType, formatted: string)}
 	{#if item.value === null || item.value === undefined}
 		<span class="text-neutral/70">—</span>
+	{:else if (type === 'url' || type === 'email' || type === 'phone') && !safeHref(resolveHref(item, type))}
+		<!-- An address a link must not follow still reads as what it is. -->
+		{formatted}
 	{:else if type === 'url' || type === 'email' || type === 'phone'}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs (and mailto:/tel: links); library links cannot depend on SvelteKit routing. -->
 		<a

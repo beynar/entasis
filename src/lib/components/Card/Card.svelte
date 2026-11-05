@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import Slot from '../Slot/Slot.svelte';
 	import Button from '../Button/Button.svelte';
 	import type { CardProps, CardActionSlot } from './card.props.js';
@@ -41,9 +42,10 @@
 	const hasFooterBorder = $derived(showBorders && hasFooter && (hasHeader || hasContent));
 	const hasAction = $derived(!!action);
 
-	const element = $derived(href ? 'a' : 'div');
-	const role = $derived(href ? 'link' : onclick ? 'button' : undefined);
-	const clickable = $derived(!disabled && (!!href || !!onclick));
+	const link = $derived(safeHref(href));
+	const element = $derived(link ? 'a' : 'div');
+	const role = $derived(link ? 'link' : onclick ? 'button' : undefined);
+	const clickable = $derived(!disabled && (!!link || !!onclick));
 
 	// Interactive descendants (footer buttons, the header action, links, form
 	// controls…) must keep working inside a clickable card: a click on them must
@@ -67,7 +69,7 @@
 		}
 		if (hitsInnerInteractive(event)) {
 			// Inner control owns this click; on link cards also stop the navigation.
-			if (href) event.preventDefault();
+			if (link) event.preventDefault();
 			return;
 		}
 		onclick?.(event);
@@ -77,7 +79,7 @@
 	// Only when the card itself is focused — keystrokes on inner controls bubble
 	// here too and must not re-trigger the card.
 	const handleKeydown = (event: KeyboardEvent) => {
-		if (href || !onclick || disabled) return;
+		if (link || !onclick || disabled) return;
 		if (event.target !== event.currentTarget) return;
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
@@ -110,11 +112,11 @@
 	data-variant={variant}
 	data-elevation={elevation}
 	data-clickable={clickable}
-	href={href && !disabled ? href : undefined}
+	href={link && !disabled ? link : undefined}
 	{target}
 	{rel}
 	{role}
-	tabindex={href ? (disabled ? -1 : undefined) : onclick && !disabled ? 0 : undefined}
+	tabindex={link ? (disabled ? -1 : undefined) : onclick && !disabled ? 0 : undefined}
 	class={classes.root({ color, variant, size, density, clickable, disabled, elevation, className })}
 	onclick={handleClick}
 	onkeydown={handleKeydown}

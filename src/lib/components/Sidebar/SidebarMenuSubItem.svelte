@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import type {
 		SidebarActiveVariant,
@@ -151,10 +152,10 @@
 	class="group/menu-sub-item relative"
 	style:--sidebar-suffix-width={sub.suffix ? suffixWidth.value : undefined}
 >
-	{#if sub.href}
+	{#if safeHref(sub.href)}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 		<a
-			href={sub.disabled ? undefined : sub.href}
+			href={sub.disabled ? undefined : safeHref(sub.href)}
 			role={sub.disabled ? 'link' : undefined}
 			data-slot="sidebar-menu-sub-button"
 			data-sidebar="menu-sub-button"

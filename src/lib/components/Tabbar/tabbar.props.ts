@@ -50,6 +50,7 @@ export type TabItem =
 			/**
 			 * Optional URL to navigate to. If provided, the tab renders as a link.
 			 */
+			/** With `javascript:`, `vbscript:` or a `data:` document the tab is a button; any other address is a link. */
 			href?: string;
 			/**
 			 * Whether this tab is disabled.

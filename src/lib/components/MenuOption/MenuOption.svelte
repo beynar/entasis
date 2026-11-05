@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type { MenuOptionProps } from './menuOption.props.js';
 	import { useMenuOptionTheme } from './menuOption.theme.js';
@@ -35,7 +36,8 @@
 	const classes = $derived(useMenuOptionTheme(theme));
 
 	// Determine element type: custom 'as', link if href, button if interactive, otherwise div
-	const elementType = $derived(as || (href ? 'a' : 'button'));
+	const link = $derived(safeHref(href));
+	const elementType = $derived(as || (link ? 'a' : 'button'));
 
 	// Explicit role wins (the listbox family passes 'option'); otherwise derive from the element.
 	const resolvedRole = $derived(
@@ -80,7 +82,7 @@
 	this={elementType}
 	type={elementType === 'button' ? 'button' : undefined}
 	role={resolvedRole}
-	href={elementType === 'a' && disabled ? undefined : href}
+	href={elementType === 'a' && disabled ? undefined : link}
 	{target}
 	{rel}
 	data-color={color}

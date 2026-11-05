@@ -1,4 +1,5 @@
 <script lang="ts" generics="Value extends string = string">
+	import { safeHref } from '$lib/utils/safeHref.js';
 	import { commandDialogTheme } from './command.dialog.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import type { CommandItem, CommandProps } from './command.props.js';
@@ -195,7 +196,7 @@
 		{@render item?.(it)}
 	{/snippet}
 	<MenuOption
-		as={it.href ? 'a' : 'div'}
+		as={safeHref(it.href) ? 'a' : 'div'}
 		role="option"
 		href={it.href}
 		color={resolvedColor}

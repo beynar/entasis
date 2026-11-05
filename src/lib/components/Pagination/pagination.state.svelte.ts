@@ -1,3 +1,4 @@
+import { safeHref } from '$lib/utils/safeHref.js';
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { en, type Messages } from '$lib/i18n/en.js';
 import type {
@@ -98,7 +99,7 @@ export class PaginationState extends createBindableStateClass<PaginationStateOpt
 
 	getPageHref = (nextPage: number, isDisabled: boolean) => {
 		if (isDisabled || !this.getHref) return undefined;
-		return this.getHref(this.clampPage(nextPage));
+		return safeHref(this.getHref(this.clampPage(nextPage)));
 	};
 
 	getPageItemPayload = (
