@@ -490,8 +490,11 @@ export class PopoverState<Payload = unknown>
 			initialFocus: () => this.focusOnOpen ?? (this.isModal ? 'first' : false),
 			restoreFocus: () => this.#focusEntered || this.activeTrigger !== null,
 			returnTo: () => this.#returnTarget(),
-			// Focus that moved on by itself (Tab past the end of the panel) is not taken back.
-			focusOnClose: () => (this.lastOpenChange?.reason === 'focus-out' ? false : this.focusOnClose),
+			// Focus that moved on by itself (Tab past the end of the panel) is not taken back, nor
+			// focus that a press outside let go of: giving it back would blur and refocus the trigger
+			// or input the person just left. A modal popover keeps the page inert, so focus still has
+			// nowhere else to go, and a press from assistive technology is not a pointer's.
+			focusOnClose: () => (this.#closedByFocusMoving() ? false : this.focusOnClose),
 			closeDetails: () => this.lastOpenChange
 		});
 		// The safe area tracks every open popover (menus ask it whether the pointer is on its way to
@@ -698,6 +701,17 @@ export class PopoverState<Payload = unknown>
 	#destroyed = false;
 	/** The open state `setOpen` last wrote, until the effect that sees it has run. */
 	#committed: boolean | null = null;
+	#closedByFocusMoving() {
+		const change = this.lastOpenChange;
+		if (change?.reason === 'focus-out') return true;
+		if (change?.reason !== 'outside-press' || this.isModal) return false;
+		return (
+			change.interaction === 'mouse' ||
+			change.interaction === 'touch' ||
+			change.interaction === 'pen'
+		);
+	}
+
 	/** Where focus returns when the popover closes; see `#returnTarget`. */
 	#opener: HTMLElement | null = null;
 	/** Whether focus has been inside the mounted panel. */

@@ -47,26 +47,27 @@ describe('pickers that hold dialog content (OV-14b audit)', () => {
 	test('ColorInput: Tab goes field to field; ArrowDown enters the picker and Escape comes back', async () => {
 		mount('color-input');
 		const input = page.getByRole('textbox').element() as HTMLElement;
-		// The swatch button stays out of the Tab order: Tab lands on the text field, which opens
-		// the picker on focus.
+		// The swatch button stays out of the Tab order: Tab lands on the text field, without opening
+		// the picker.
 		element('Before').focus();
 		await tab();
 		expect(document.activeElement).toBe(input);
+		expect(panelOpen()).toBe(false);
+
+		// ArrowDown opens the picker and moves focus onto its first control; Escape closes it and
+		// returns to the text field, which does not open it again.
+		await userEvent.keyboard('{ArrowDown}');
 		await expect.poll(panelOpen).toBe(true);
 		expect(panel()?.getAttribute('aria-label')).toMatch(/color/i);
-
-		// ArrowDown moves focus onto the picker's first control; Escape closes it and returns to
-		// the text field.
-		await userEvent.keyboard('{ArrowDown}');
 		await expect.poll(insidePanel).toBe(true);
 		await userEvent.keyboard('{Escape}');
 		await expect.poll(() => document.activeElement).toBe(input);
-
-		// Tab leaves the field for the next control and the picker closes behind it.
-		await tab();
-		expect(insidePanel()).toBe(false);
-		expect(document.activeElement).toBe(element('After'));
 		await expect.poll(panelOpen).toBe(false);
+
+		// Tab leaves the field for the next control.
+		await tab();
+		expect(document.activeElement).toBe(element('After'));
+		expect(panelOpen()).toBe(false);
 	});
 
 	test('MediaVolume: Tab on the open trigger reaches the slider in the panel', async () => {
@@ -82,6 +83,29 @@ describe('pickers that hold dialog content (OV-14b audit)', () => {
 		expect(insidePanel()).toBe(true);
 		await tab({ shift: true });
 		expect(document.activeElement).toBe(trigger);
+	});
+});
+
+describe('a press outside', () => {
+	test('a popover leaves focus where the press put it', async () => {
+		mount('dialog');
+		const trigger = element('Open');
+		await userEvent.click(trigger);
+		await expect.poll(panelOpen).toBe(true);
+		await userEvent.click(document.body, { position: { x: 2, y: 2 } });
+		await expect.poll(panelOpen).toBe(false);
+		await new Promise((resolve) => setTimeout(resolve, 100));
+		expect(document.activeElement).not.toBe(trigger);
+	});
+
+	test('Escape still returns to the trigger', async () => {
+		mount('dialog');
+		const trigger = element('Open');
+		await userEvent.click(trigger);
+		await expect.poll(panelOpen).toBe(true);
+		await userEvent.keyboard('{Escape}');
+		await expect.poll(panelOpen).toBe(false);
+		await expect.poll(() => document.activeElement).toBe(trigger);
 	});
 });
 

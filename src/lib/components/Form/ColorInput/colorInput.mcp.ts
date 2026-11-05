@@ -91,7 +91,7 @@ Extends all Field component props plus:
 
 ## Interaction
 
-- The swatch button toggles the picker popover; focusing the text input also opens it (like DateInput).
+- The swatch button toggles the picker popover; clicking the text input also opens it (like DateInput). Focus alone does not, so tabbing through or closing the picker never reopens it.
 - The text input is masked (Maskito) for the selected format: hex auto-inserts the leading \`#\` and
   takes up to 8 hex digits; rgb/hsl are structured templates that auto-insert the \`rgb(\` / \`hsl(\`
   prefix, the \`, \` separators and hsl's \`%\` suffixes as digits flow in (3 digits per channel, or

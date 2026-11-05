@@ -174,7 +174,8 @@ export type PopoverProps<Payload = unknown> = WithAttachments<{
 	 * keyboard close); when that control is gone or disabled, to the most recent element that is
 	 * still on the page. `false` leaves focus where it is, an element receives it, and a function
 	 * is called with the change details (`reason`, `interaction`…) and returns one of these, or
-	 * nothing to restore as usual. A close because focus moved on (`'focus-out'`) never moves it.
+	 * nothing to restore as usual. A close because focus moved on (`'focus-out'`) or because a
+	 * pointer pressed outside a non-modal popover never moves it.
 	 * @default true
 	 */
 	focusOnClose?: FocusOnClose;
