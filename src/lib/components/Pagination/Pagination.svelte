@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { transitionSize } from '$lib/attachments/transitionSize.js';
 	import { flip } from 'svelte/animate';
 	import { scale } from 'svelte/transition';
@@ -72,6 +73,7 @@
 		children,
 		pageItem,
 		summary,
+		tool,
 		...attachments
 	}: PaginationProps = $props();
 
@@ -150,6 +152,26 @@
 		get messages() {
 			return t;
 		}
+	});
+
+	useWebMCPExposure(() => import('./pagination.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get label() {
+			return label;
+		},
+		get disabled() {
+			return Boolean(disabled);
+		},
+		get page() {
+			return pagination.currentPage;
+		},
+		get pageCount() {
+			return pagination.pageCount;
+		},
+		href: (page) => pagination.getPageHref(page, false),
+		setPage: (page) => pagination.setPage(page)
 	});
 
 	// Neither form given: warn once so the silently empty render is traceable.

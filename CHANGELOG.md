@@ -8,6 +8,39 @@ Unreleased section under the new version.
 
 ### Added
 
+- WebMCP, experimental (`<Theme webmcp>`, off by default): AI agents in the browser can use the
+  interface, with no code besides that option. Names, schemas and descriptions come from the props
+  components already have, such as `title`, `label`, `description` and a button's text. WebMCP is a
+  W3C Community Group draft in a Chrome origin trial, so this may change between minor versions.
+  Where the browser has no WebMCP the option does nothing and the tool code is not loaded. Guide:
+  `/docs/webmcp`.
+  - `Form`: one tool per form, which fills it in, validates it and runs `onSubmit`. It answers with
+    a status, field names and messages, never a value. Passwords can be filled in; file, voice and
+    signature fields stay with the user. `MultiStepForm` offers the current step's form, and `ask()`
+    adds `answer_dialog` and `cancel_dialog` while open.
+  - `Button`: `click_button`, and `click_danger_button` for `color="danger"`. Buttons inside
+    components that only change how a person looks at something (copy, zoom, scroll, minimize, text
+    formatting) are left out, as are a Form's `actions` when it has `onSubmit` or `tool={false}`.
+    Buttons that read the same are numbered, and `read_buttons` or `read_danger_buttons` says what
+    each belongs to, from its row, card or heading. A press is refused until the agent has read.
+    `Command`, `PopupMenu`,
+    `MenuBar` and an open `ContextMenu`: `run_command` and `run_consequential_command`. `Sidebar`,
+    `NavigationMenu` and `Breadcrumbs`: `navigate`, limited to links on the site.
+  - `Tabs`: `select_tab`. `Pagination`: `go_to_page`. `DataTable`: `query_table`, `move_row`. `Chart`:
+    `read_chart_data`. `DocumentViewer`: `search_document`, `read_document`. `Kanban`: `read_board`,
+    `move_card`. `EventCalendar`: `read_calendar`, `show_calendar`, `move_event`.
+  - An agent is held to what a person can do: disabled and read-only controls refuse it, only the
+    topmost modal's tools stay available, a tool reads what the component shows, and a masked table
+    cell stays masked. Text in labels reaches the model, so `tool={false}` anything that quotes user
+    content.
+- `tool` prop on those components and on Form entries: `false` keeps it from agents, and
+  `{ name, title, description, consequential, exposedTo }` refines it. `consequential` lets the
+  browser ask the person first. It is on for forms that submit, danger buttons and menu rows, and
+  moves on a table, board or calendar.
+- `registerFormInputs`: `toolSchema`, a JSON Schema of the value, lets agents fill in an app-defined
+  input type. Without it, the field stays with the user.
+- `entasis/webmcp`: `useWebMCPTool`, `registerWebMCPTool` and `webmcpSupported`, for tools no
+  component covers.
 - `SortableList`: `customHandle`, for an `item` snippet that draws its own grip (an element marked
   `data-dnd-handle`), when it has to sit inside the row or do more than drag.
 - `JsonEditor` (`entasis/json-editor`, also `type: 'json'` in a Form): edits a JSON value through the
@@ -52,6 +85,8 @@ Unreleased section under the new version.
   trigger or input, which blurred and refocused it. A pointer pressing outside a non-modal popover now
   leaves focus where the press put it, whatever `focusOnClose` says. Escape and other keyboard closes
   still return focus, as does a modal popover.
+- `PhoneInput`: a value set from outside, such as `field.setValue` or a parent's `bind:value`, did not show. It
+  kept the old text.
 - `TimeInput`: a click in the input now opens the picker, like `DateInput` and `ColorInput`, with focus left in
   the input for typing. It only opened from ArrowDown and the clock button before.
 - `TimeInput`: a value set after mounting, by a `Form` or a button, never showed in the input. The input now

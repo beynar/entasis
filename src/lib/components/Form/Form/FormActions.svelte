@@ -22,7 +22,8 @@
 		containerClass,
 		label,
 		description,
-		labelPosition = 'top'
+		labelPosition = 'top',
+		tool
 	}: {
 		actions: Action[];
 		form: State & { loading: boolean };
@@ -33,6 +34,8 @@
 		label?: SlotValue;
 		description?: SlotValue;
 		labelPosition?: FieldLabelPosition;
+		/** How the actions appear to AI agents unless one says otherwise. */
+		tool?: ButtonProps['tool'];
 	} = $props();
 
 	const fieldClasses = $derived(useFieldTheme());
@@ -55,6 +58,7 @@
 	{#each actionStates as actionState, index (index)}
 		<Button
 			{...actionState.props}
+			tool={actionState.props.tool ?? tool}
 			size={actionState.size ?? size}
 			loading={form.loading || actionState.loading}
 			disabled={actionState.disabled}

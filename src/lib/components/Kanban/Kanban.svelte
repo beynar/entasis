@@ -1,4 +1,6 @@
 <script lang="ts" generics="C extends KanbanCard">
+	import type { KanbanToolSource } from './kanban.webmcp.js';
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { useDndList } from '$lib/utils/useDndList.svelte.js';
 	import { useOverflowObserver } from '$lib/utils/useOverflowObserver.svelte.js';
 	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
@@ -25,6 +27,7 @@
 		indicator = false,
 		animated = true,
 		ref = $bindable(null),
+		tool,
 		card,
 		columnHeader,
 		columnFooter,
@@ -128,6 +131,42 @@
 	// The MutationObserver inside the hook is what re-measures when columns or cards change.
 	const overflow = useOverflowObserver({ axis: 'x' });
 	const overflows = $derived(overflow.overflowing);
+
+	useWebMCPExposure<KanbanToolSource>(() => import('./kanban.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get label() {
+			return t.kanbanBoard;
+		},
+		get columns() {
+			return columns;
+		},
+		get disabled() {
+			return disabled;
+		},
+		get canDrag() {
+			return canDrag as KanbanToolSource['canDrag'];
+		},
+		get accepts() {
+			return accepts as KanbanToolSource['accepts'];
+		},
+		move(card, from, to, index) {
+			const moved = card as C;
+			const fromIndex = from.cards.indexOf(card);
+			if (from.id !== to.id) {
+				applyTransfer({
+					card: moved,
+					from: { columnId: from.id, index: fromIndex },
+					to: { columnId: to.id, index }
+				});
+				return;
+			}
+			const cards = (to.cards as C[]).filter((candidate) => candidate !== moved);
+			cards.splice(index, 0, moved);
+			applyReorder(to.id, cards, { item: moved, from: fromIndex, to: index });
+		}
+	});
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->

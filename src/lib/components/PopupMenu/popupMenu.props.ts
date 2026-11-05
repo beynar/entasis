@@ -2,6 +2,7 @@ import type { PopoverProps } from '../Popover/popover.props.js';
 import type { MenuProps } from '../Menu/menu.props.js';
 import type { PopupMenuRoot } from './popupMenu.context.js';
 import type { PopupMenuThemeProps } from './popupMenu.theme.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type PopupMenuProps = Omit<PopoverProps, 'children' | 'theme'> & {
 	/**
@@ -10,6 +11,8 @@ export type PopupMenuProps = Omit<PopoverProps, 'children' | 'theme'> & {
 	 * keyboard open, the menu itself after a pointer open, nothing after a hover open.
 	 */
 	menu: MenuProps;
+	/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+	tool?: WebMCPToolProp;
 	/**
 	 * Whether choosing a menu item (a button or link without `data-menu-keep-open="true"`)
 	 * closes the menu. Choosing an item inside a submenu closes every open submenu and the menu

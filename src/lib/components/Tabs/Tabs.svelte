@@ -1,4 +1,5 @@
 <script lang="ts" generics="Item extends TabItem = TabItem">
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { Tabbar } from '$lib/components/Tabbar/index.js';
 	import { Stepper } from '$lib/components/Stepper/index.js';
 	import { getTabValue, type TabItem } from '$lib/components/Tabbar/tabbar.props.js';
@@ -30,6 +31,7 @@
 		tabbar,
 		mount = 'lazy',
 		children: panel,
+		tool,
 		...attachments
 	}: TabsProps<Item> = $props();
 	const origin = untrack(() => getTabValueOrigin(value, defaultValue));
@@ -88,6 +90,28 @@
 		stepper.previous = () => stepToEnabledTab(stepper, -1);
 		if (BROWSER) api = stepper;
 	};
+
+	useWebMCPExposure(() => import('./tabs.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get tabs() {
+			return items.map((item, index) => ({
+				value: tabValues[index],
+				label: typeof item === 'string' ? item : item.label,
+				href: typeof item === 'string' ? undefined : item.href,
+				disabled: isTabDisabled(item)
+			}));
+		},
+		get active() {
+			return activeValue;
+		},
+		select(next) {
+			const index = tabValues.indexOf(next);
+			setActiveIndex(index);
+			emitChange(index, 'user');
+		}
+	});
 
 	const classes = $derived(useTabsTheme(theme));
 	// Tabs owns its own motion preset and forwards the resolved `{ in, out }` to the

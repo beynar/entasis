@@ -22,6 +22,7 @@ import type { Colors } from '$lib/types/theme.js';
 import { REDUCED_MOTION_QUERY, registerActiveTheme } from '$lib/utils/motion.svelte.js';
 import { registerCspNonce } from '$lib/utils/cspNonce.js';
 import { registerPortalContainer, type PortalContainerSource } from '$lib/attachments/portal.js';
+import type { WebMCPOptions } from '$lib/utils/webmcp/webmcp.types.js';
 
 type Events = 'scroll' | 'pointerdown' | 'keydown' | 'keyup';
 type EventPayload = {
@@ -55,6 +56,8 @@ interface ThemeOptions {
 	readonly nonce?: string;
 	/** The `<Theme portalContainer>` value: where portaled panels mount. */
 	readonly portalContainer?: PortalContainerSource;
+	/** The `<Theme webmcp>` value: whether components expose themselves to browser agents. */
+	readonly webmcp?: boolean | WebMCPOptions;
 }
 
 export class ThemeState extends createBindableStateClass<ThemeOptions>() {

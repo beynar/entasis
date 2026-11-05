@@ -112,6 +112,7 @@
 			pdf.previousMatch();
 			return searchState();
 		},
+		readUnit: pdf.readPage,
 		clearSearch: pdf.clearSearch,
 		print: pdf.print,
 		renderThumbnail: pdf.renderThumbnail

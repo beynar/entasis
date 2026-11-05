@@ -86,4 +86,8 @@ Dynamic \`import()\` cannot carry Subresource Integrity, so CDN URLs cannot be p
 - DOCX and PPTX render in worker mode through headless OOXML canvases with selectable text and sanitized links.
 - XLSX/XLS/CSV use a read-only, two-axis virtualized grid. Formulae show cached values; no formula recalculation occurs.
 - DOC and PPT are normalized best-effort previews and always show a visible fidelity warning.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, AI agents get \`search_document\` and \`read_document\`, both marked as untrusted content. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;

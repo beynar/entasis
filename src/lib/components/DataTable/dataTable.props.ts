@@ -3,6 +3,7 @@ import type { WithAttachments } from '$lib/types/props.js';
 import type { Density } from '$lib/types/theme.js';
 import type { Snippet } from 'svelte';
 import type { DataTableThemeProps } from './dataTable.theme.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type DataTableInteractionMode = 'table' | 'grid';
 export type DataTableProcessingMode = 'client' | 'manual';
@@ -293,6 +294,8 @@ type DataTableBaseProps<TData> = {
 	items: readonly TData[];
 	/** Column accessors, headers, rendering, and interaction policies. */
 	columns: readonly DataTableColumn<TData>[];
+	/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+	tool?: WebMCPToolProp;
 	/** Returns a stable row identifier that persists across sorting and pagination. */
 	getRowId: (row: TData, index: number, parent?: TData) => string;
 	/** Scroll viewport height while virtualizing. Defaults to filling a parent with a definite height. */

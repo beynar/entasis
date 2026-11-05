@@ -57,6 +57,7 @@
 
 {#snippet copyButton()}
 	<Button
+		tool={false}
 		variant="ghost"
 		color="neutral"
 		size="small"

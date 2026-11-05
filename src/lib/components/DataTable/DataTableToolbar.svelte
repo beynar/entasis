@@ -132,7 +132,7 @@
 </script>
 
 {#if isVisible}
-	<div class={classes.toolbar()}>
+	<div data-webmcp-owned class={classes.toolbar()}>
 		<div class={classes.toolbarGroup()}>
 			<Slot render={model.props.toolbarPrefix} {payload} />
 

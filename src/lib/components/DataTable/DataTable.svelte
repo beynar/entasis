@@ -1,4 +1,6 @@
 <script lang="ts" generics="TData extends object">
+	import type { DataTableToolSource } from './dataTable.webmcp.js';
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { createVirtualizer } from '@tanstack/svelte-virtual';
 	import { get } from 'svelte/store';
@@ -81,6 +83,7 @@
 		empty,
 		noResults,
 		errorContent,
+		tool,
 		...attachments
 	}: DataTableProps<TData> = $props();
 
@@ -563,6 +566,18 @@
 	});
 	const uid = $props.id();
 	const rowsPerPageId = `${uid}-rows-per-page`;
+	/** Moves a row of the page showing to a position on that page, as a drop there does. */
+	const moveRowTo = (rowId: string, index: number) => {
+		const from = rows.findIndex((row) => row.id === rowId);
+		const row = rows[from];
+		if (!rowReorderActive || !row || canDragRow?.(row.original as TData) === false) return false;
+		const pageOrder = rows.map((entry) => entry.original as TData);
+		const to = Math.max(0, Math.min(index, pageOrder.length - 1));
+		const [moved] = pageOrder.splice(from, 1);
+		pageOrder.splice(to, 0, moved);
+		return commitRowMove(moved, pageOrder, to);
+	};
+
 	const tableApi: DataTableApi<TData> = {
 		get state() {
 			return model.state;
@@ -593,6 +608,42 @@
 	// Published in the browser only: a server write would make Svelte replay the parent's markup.
 	// eslint-disable-next-line no-useless-assignment -- Assignment publishes the table api to bind:api.
 	if (BROWSER) api = tableApi;
+
+	useWebMCPExposure<DataTableToolSource>(() => import('./dataTable.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get label() {
+			return caption;
+		},
+		get columns() {
+			return columns as unknown as DataTableToolSource['columns'];
+		},
+		api: tableApi as unknown as DataTableToolSource['api'],
+		get searchable() {
+			return Boolean(search);
+		},
+		get loading() {
+			return loading;
+		},
+		get hidden() {
+			return tableState!.columnVisibility;
+		},
+		get pageRows() {
+			return rows as unknown as DataTableToolSource['pageRows'];
+		},
+		get customCells() {
+			return Boolean(cell);
+		},
+		setSorting: (sorting) => model.setSorting(sorting),
+		get canMoveRows() {
+			return rowReorderActive;
+		},
+		moveRow: moveRowTo,
+		get root() {
+			return ref;
+		}
+	});
 	const statePayload = $derived<DataTableToolbarPayload<TData>>({
 		state: tableApi.state,
 		selectedRows: [...tableApi.selectedRows],
@@ -785,6 +836,7 @@
 				/>
 			</div>
 			<Pagination
+				tool={false}
 				{totalPages}
 				value={Math.min(tableState!.pagination.page, totalPages)}
 				variant="pages"

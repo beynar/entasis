@@ -4,6 +4,7 @@ import type { PopupMenuProps } from '../PopupMenu/popupMenu.props.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { ContextMenuThemeProps } from './contextMenu.theme.js';
 import type { OpenChangeHandler } from '$lib/utils/openChange.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type ContextMenuProps = WithAttachments<{
 	/**
@@ -11,6 +12,8 @@ export type ContextMenuProps = WithAttachments<{
 	 * group or group).
 	 */
 	items: MenuItem[];
+	/** How this appears to AI agents under `<Theme webmcp>`. Its rows are on offer while it is open, as they act on what was right-clicked. `true` offers them at all times, for rows that do not depend on the target; options refine them while open; `false` never offers them. */
+	tool?: WebMCPToolProp;
 	/**
 	 * The right-click target — the content the context menu is attached to.
 	 */

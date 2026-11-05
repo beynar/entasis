@@ -585,6 +585,10 @@ export class PDFViewerState extends createBindableStateClass<PDFViewerOptions>()
 		return strs;
 	}
 
+	/** The text of a page, or `null` when no document is loaded. */
+	readPage = async (pageNumber: number): Promise<string | null> =>
+		this.doc ? (await this.pageText(pageNumber)).join(' ') : null;
+
 	search = async (query: string) => {
 		this.query = query;
 		const trimmed = query.trim();

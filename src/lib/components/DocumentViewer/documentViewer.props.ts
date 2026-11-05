@@ -4,6 +4,7 @@ import type { Colors, Sizes } from '../../types/index.js';
 import type { DocumentViewerAssetsOverride } from './documentViewer.assets.js';
 import type { DocumentViewerState } from './documentViewer.state.svelte.js';
 import type { DocumentViewerThemeProps } from './documentViewer.theme.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type DocumentFormat =
 	'pdf' | 'docx' | 'doc' | 'xlsx' | 'xls' | 'csv' | 'pptx' | 'ppt' | 'pages';
@@ -63,6 +64,8 @@ export type DocumentViewerProps = WithAttachments<
 			ref?: HTMLElement | null;
 			/** Document URL, blob, or binary data to load in the browser. */
 			src: DocumentSource;
+			/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+			tool?: WebMCPToolProp;
 			/** Explicit format override; otherwise detected from name, MIME type, then bytes. */
 			format?: DocumentFormat;
 			/** Name used for format detection and as the default download filename. */

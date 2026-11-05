@@ -154,4 +154,8 @@ Unknown IDs/keys and invalid operations throw EventCalendarError. API mutations 
 'density' defaults to 'normal'; 'theme' accepts EventCalendarThemeProps. Import 'eventCalendarTheme', 'setEventCalendarTheme', and 'useEventCalendarTheme' from 'entasis/event-calendar'. Stable parts cover chrome, month, time grid, items/interactions, agenda, and resources. CSS metrics include --event-calendar-slot-height, --event-calendar-time-gutter-width, --event-calendar-day-min-width, --event-calendar-resource-min-width, --event-calendar-item-min-height, and --event-calendar-sticky-offset.
 
 The active view exposes grids/groups/buttons/disclosures, roving focus, keyboard move/resize, Escape cancellation, two-click range selection, 24px interaction targets, polite announcements, reduced-motion behavior, narrow-container wrapping/scrolling, and RTL-aware physical movement. Keyboard mutation starts from a focused item, uses arrows to propose, Enter to commit, and Escape to cancel.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, AI agents get \`read_calendar\` (no custom fields), \`show_calendar\`, and \`move_event\` while dragging is on, which the browser may confirm and which goes through the same validation as a drag. Creating stays with the app's dialog, whose Form is its own tool. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;

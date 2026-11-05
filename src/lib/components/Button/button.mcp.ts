@@ -60,6 +60,7 @@ Describe the meaning; the Button writes the ARIA. Never pass an aria-* attribute
 
 ### Advanced Props
 - **label**: string - Accessible label applied as aria-label on the root element (required for icon-only buttons)
+- **tool**: boolean | { description, consequential } - How the button appears to AI agents under \`<Theme webmcp>\`. Its text is enough; \`false\` keeps it from agents. See \`entasis/webmcp\`
 - **ref**: HTMLElement - Reference to the button element
 - **class**: string - Additional CSS classes
 - **theme**: ComponentTheme - Custom theme overrides

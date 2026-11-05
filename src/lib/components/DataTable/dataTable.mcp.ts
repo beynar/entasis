@@ -271,4 +271,8 @@ columns mounted; grid mode additionally virtualizes center columns while pinned 
 mounted. Resize handles support pointer and
 keyboard resizing. Reorder handles support left/right keyboard movement and pointer movement within
 their current pin region. Logical inset positioning preserves RTL pinning.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, AI agents get \`query_table\`, which reads the rows of the page by column and, on screen too, searches, sorts, pages and applies text, select and boolean filters. A field no column shows stays out, and a column with a \`cell\` renderer reads as its drawn text, so a masked value stays masked. While rows can be reordered they also get \`move_row\`, which the browser may confirm. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;

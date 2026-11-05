@@ -171,6 +171,7 @@
 	>
 		{#if customActions}<Slot render={customActions} payload={actionState} />{:else}
 			{#if actionState.canCopy}<Button
+					tool={false}
 					type="button"
 					squared
 					size={buttonSize}

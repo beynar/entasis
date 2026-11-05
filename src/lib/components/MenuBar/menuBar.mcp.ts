@@ -79,4 +79,8 @@ type MenuBarMenu = Omit<MenuProps, 'focusOnMount'> & {
 ## Accessibility
 
 MenuBar uses the ARIA menubar/menu pattern. Its triggers use roving tabindex, expose expanded state and popup relationships, skip disabled entries, loop at either edge, and preserve nested submenu keyboard behavior.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, the rows of its menus join the \`run_command\` tool of AI agents, named after their menu. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;

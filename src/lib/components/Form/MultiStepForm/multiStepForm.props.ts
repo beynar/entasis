@@ -14,6 +14,7 @@ import type { ValidationMode } from '../Field/field.state.svelte.js';
 import type { MultiStepFormState } from './multiStepForm.state.svelte.js';
 import type { MultiStepFormThemeProps } from './multiStepForm.theme.js';
 import type { ButtonProps } from '$lib/components/Button/index.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type FormStep<I extends FormInputs = FormInputs> = {
 	/** Heading displayed at the top of this step's form. */
@@ -71,6 +72,8 @@ export type MultiStepFormProps<I extends MultiStepFormItems = FormStep[]> = With
 	{
 		/** Ordered items rendered as form steps. */
 		items: I & MultiStepFormItemsWithState<I>;
+		/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+		tool?: WebMCPToolProp;
 		/** When true, renders a progress meter above the stepper. */
 		showMeter?: boolean;
 		/** Color token applied to the progress meter segments. Defaults to neutral. */

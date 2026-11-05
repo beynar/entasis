@@ -32,6 +32,7 @@
 {/snippet}
 
 <Button
+	tool={false}
 	type="button"
 	color="neutral"
 	variant={active ? 'soft' : 'ghost'}

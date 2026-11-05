@@ -1,4 +1,5 @@
 <script lang="ts" generics="I extends MultiStepFormItems">
+	import { stepFormTool } from './multiStepForm.webmcp.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Stepper from '$lib/components/Stepper/Stepper.svelte';
 	import { useCardTheme } from '$lib/components/Card/card.theme.js';
@@ -18,6 +19,7 @@
 
 	let {
 		items,
+		tool,
 		onSubmitForm,
 		onSubmitStep,
 		children,
@@ -152,6 +154,14 @@
 							onValueChange={(nextValue) => form.setStepValue(index, nextValue, true)}
 							title={item.title}
 							description={item.description}
+							tool={stepFormTool(
+								tool,
+								item,
+								index,
+								form.activeStep,
+								items.length,
+								Boolean(activeButton.disabled || activeButton.loading)
+							)}
 							{variant}
 							{validationMode}
 							{validationDebounce}
@@ -177,6 +187,7 @@
 			{previousText}
 		</Button>
 		<Button
+			tool={false}
 			{...activeButton.forwardedProps}
 			suffix={form.isLastStep ? arrowCircleUpIcon : arrowRightIcon}
 			disabled={activeButton.disabled}

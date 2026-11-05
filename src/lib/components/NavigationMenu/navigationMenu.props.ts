@@ -6,6 +6,7 @@ import type { FSOProps } from '$lib/transitions/transition.js';
 import type { OpenChangeDetails } from '$lib/utils/openChange.js';
 import type { Slot } from '../Slot/slot.js';
 import type { NavigationMenuThemeProps } from './navigationMenu.theme.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 /** A link: a top-level entry of the bar, or a row inside a panel. */
 export type NavigationMenuLink = {
@@ -84,6 +85,8 @@ export type NavigationMenuValueChangePayload<Value extends string = string> = {
 export type NavigationMenuProps<Value extends string = string> = WithAttachments<{
 	/** The entries of the bar, in order. */
 	items: NavigationMenuItem<Value>[];
+	/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+	tool?: WebMCPToolProp;
 	/** Accessible name of the `nav` landmark. Give it when the page has more than one. */
 	label?: string;
 	/** Bindable reference to the `nav` element. */

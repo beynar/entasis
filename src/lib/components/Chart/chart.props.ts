@@ -10,6 +10,7 @@ import type {
 import type { ChartFrameDefinition } from './chart.geometry.props.js';
 import type { ChartMark } from './chart.mark.props.js';
 import type { ChartViewport } from './chart.viewport.props.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type * from './chart.annotation.props.js';
 export type * from './chart.analysis.props.js';
@@ -99,6 +100,8 @@ export type ChartPalette =
 export type ChartProps<TRow extends object> = WithAttachments<{
 	/** Rows shared by the chart marks; accessors read from this collection. */
 	data: readonly TRow[];
+	/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+	tool?: WebMCPToolProp;
 	/** One or more marks that define how rows are encoded and drawn. */
 	marks: readonly [ChartMark<TRow>, ...ChartMark<TRow>[]];
 	/** Horizontal position scale and axis configuration. */

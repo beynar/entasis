@@ -864,6 +864,11 @@
 			"types": "./dist/attachments/spinnerOverlay.svelte.d.ts",
 			"svelte": "./dist/attachments/spinnerOverlay.svelte.js",
 			"default": "./dist/attachments/spinnerOverlay.svelte.js"
+		},
+		"./webmcp": {
+			"types": "./dist/utils/webmcp/index.d.ts",
+			"svelte": "./dist/utils/webmcp/index.js",
+			"default": "./dist/utils/webmcp/index.js"
 		}
 	},
 	"typesVersions": {
@@ -1305,6 +1310,9 @@
 			],
 			"spinner-overlay": [
 				"dist/attachments/spinnerOverlay.svelte.d.ts"
+			],
+			"webmcp": [
+				"dist/utils/webmcp/index.d.ts"
 			]
 		}
 	},

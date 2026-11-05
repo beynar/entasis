@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { untrack } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
@@ -64,6 +65,7 @@
 		error,
 		class: className,
 		theme,
+		tool,
 		...attachments
 	}: DocumentViewerProps = $props();
 
@@ -246,6 +248,23 @@
 		}
 		return t.pdfLoadError;
 	};
+
+	useWebMCPExposure(() => import('./documentViewer.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get unitCount() {
+			return viewer.unitCount;
+		},
+		get loaded() {
+			return viewer.isReady;
+		},
+		search: async (query) => {
+			await viewer.search(query);
+			return viewer.searchState.matches;
+		},
+		readUnit: (unit) => viewer.readUnit(unit)
+	});
 </script>
 
 <div

@@ -75,6 +75,7 @@
 	>
 		{#if has('sidebar') && sidebar}
 			<Button
+				tool={false}
 				{...buttonProps}
 				label={isSidebarOpen ? t.hidePageThumbnails : t.showPageThumbnails}
 				variant={isSidebarOpen ? 'soft' : 'ghost'}
@@ -105,6 +106,7 @@
 		{/if}
 		{#if has('zoom')}
 			<Button
+				tool={false}
 				{...buttonProps}
 				label={t.zoomOut}
 				disabled={!viewer.canZoomOut}
@@ -112,6 +114,7 @@
 				prefix={magnifyingGlassMinusIcon}
 			/>
 			<Button
+				tool={false}
 				{...buttonProps}
 				label={t.zoomIn}
 				disabled={!viewer.canZoomIn}
@@ -121,6 +124,7 @@
 		{/if}
 		{#if has('fit')}
 			<Button
+				tool={false}
 				{...buttonProps}
 				variant={viewer.fit === 'width' ? 'soft' : 'ghost'}
 				label={t.fitToWidth}
@@ -130,6 +134,7 @@
 		{/if}
 		{#if has('mode')}
 			<Button
+				tool={false}
 				{...buttonProps}
 				label={viewer.mode === 'scroll'
 					? t.switchToSingleUnit(unitLabel)
@@ -140,6 +145,7 @@
 		{/if}
 		{#if has('orientation')}
 			<Button
+				tool={false}
 				{...buttonProps}
 				label={viewer.orientation === 'vertical'
 					? t.switchToHorizontalLayout
@@ -150,12 +156,14 @@
 		{/if}
 		{#if has('rotate')}
 			<Button
+				tool={false}
 				{...buttonProps}
 				label={`${t.rotate} ${t.counterclockwise}`}
 				onclick={() => viewer.rotate(-90)}
 				prefix={arrowCounterClockwiseIcon}
 			/>
 			<Button
+				tool={false}
 				{...buttonProps}
 				label={`${t.rotate} ${t.clockwise}`}
 				onclick={() => viewer.rotate(90)}

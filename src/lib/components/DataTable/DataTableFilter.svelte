@@ -86,6 +86,7 @@
 		<div class={classes.filterHeader()}>
 			<span class={classes.filterLabel()}>{t.filter}</span>
 			<Button
+				tool={false}
 				type="button"
 				variant="ghost"
 				color="neutral"

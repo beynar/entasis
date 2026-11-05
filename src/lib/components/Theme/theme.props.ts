@@ -4,6 +4,7 @@ import type { SpinnerVariant } from '../Spinner/spinner.props.js';
 import type { ThemeState } from './theme.state.svelte.js';
 import type { ThemeTransitionInput } from './themeTransition.js';
 import type { ThemeDesignTokenMap } from './theme.designTokens.js';
+import type { WebMCPOptions } from '$lib/utils/webmcp/webmcp.types.js';
 import type { DeepPartial, MotionTokens } from '$lib/tailwind/scales.js';
 import type { ComponentThemeRegistry } from '$lib/utils/cva/theme.js';
 
@@ -62,6 +63,15 @@ export type ThemeProps<T extends readonly string[] = readonly string[]> = Omit<
 	 * that same nonce yourself (`kit.csp` generates its own and cannot take this one).
 	 */
 	nonce?: string;
+	/**
+	 * Exposes the interface to AI agents running in the browser, through WebMCP. Off by default.
+	 * Forms, buttons, menus, links, tables and the other components that act or show data become
+	 * tools, with names and descriptions from their existing props. The agent acts as a user
+	 * would: a Form goes through the same validation and the same `onSubmit`, and passwords can
+	 * be filled in but are never sent back. Does nothing where the browser has no WebMCP.
+	 * Experimental: the WebMCP API is still changing. See `entasis/webmcp`.
+	 */
+	webmcp?: boolean | WebMCPOptions;
 	/**
 	 * Where portaled panels (dialogs, popovers, menus, tooltips, the floating-window layer) are
 	 * mounted. Defaults to `document.body`, or to the shadow root when the Theme renders inside

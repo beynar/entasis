@@ -2,6 +2,7 @@ import type { Sizes, Colors } from '$lib/types/theme.js';
 import type { WithSlot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { ButtonThemeProps } from './button.theme.js';
+import type { WebMCPToolOptions } from '$lib/utils/webmcp/webmcp.types.js';
 import type {
 	HTMLAnchorAttributes,
 	HTMLButtonAttributes,
@@ -23,6 +24,15 @@ type ButtonEventAttributes = {
 	onpointerleave?: PointerEventHandler<HTMLElement> | null;
 };
 type ButtonForwardedAnchorAttributes = Pick<HTMLAnchorAttributes, 'download'>;
+/**
+ * How a Button appears to AI agents under `<Theme webmcp>`: its text is its name, and `consequential`
+ * defaults to `color="danger"`.
+ */
+export type ButtonToolOptions = Pick<
+	WebMCPToolOptions,
+	'description' | 'consequential' | 'exposedTo'
+>;
+
 export type ButtonPrimitiveProps = WithAttachments<
 	WithSlot<
 		{
@@ -58,6 +68,11 @@ export type ButtonPrimitiveProps = WithAttachments<
 			 * `aria-haspopup`. A entasis surface sets this on its own trigger.
 			 */
 			haspopup?: 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | true;
+			/**
+			 * How the button appears to AI agents under `<Theme webmcp>`: its text is enough, options
+			 * refine it, and `false` keeps it from agents.
+			 */
+			tool?: boolean | ButtonToolOptions;
 			/**
 			 * Bindable reference to the root button or anchor element.
 			 */

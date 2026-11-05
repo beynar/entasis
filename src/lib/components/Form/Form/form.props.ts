@@ -12,9 +12,13 @@ import type {
 } from './form.js';
 import type { FormState } from './form.state.svelte.js';
 import type { FormThemeProps } from './form.theme.js';
+import type { WebMCPToolOptions, WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type FormVariant = 'plain' | 'sectioned' | 'card';
 export type FormLayout = 'vertical' | 'horizontal';
+
+/** How a Form appears to AI agents under `<Theme webmcp>`. */
+export type FormToolOptions = WebMCPToolOptions;
 
 export type FormProps<I extends FormInputs> = WithSlot<
 	{
@@ -101,6 +105,11 @@ export type FormProps<I extends FormInputs> = WithSlot<
 		 * cannot change them.
 		 */
 		readOnly?: boolean;
+		/**
+		 * How the form appears to AI agents under `<Theme webmcp>`: nothing to set for it to work,
+		 * options to name or describe it better, `false` to keep it from agents.
+		 */
+		tool?: WebMCPToolProp;
 	},
 	'header' | 'title' | 'description' | 'footer',
 	FormState<I>

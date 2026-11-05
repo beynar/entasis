@@ -67,4 +67,8 @@ element with contextmenu, keydown, and pointer handlers.
 
 - Anchoring uses a floating-ui virtual element (a zero-size DOMRect at clientX/clientY).
 - For a menu flush with the cursor, pass \`popup={{ offset: 0 }}\`.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, its rows join the \`run_command\` tool of AI agents only while it is open, since they act on what was right-clicked. \`tool={true}\` offers them at all times, for rows that do not depend on the target; options refine them while open; \`false\` never does. See \`entasis/webmcp\`.
 `;

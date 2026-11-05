@@ -6,6 +6,7 @@ import type { TabsThemeProps } from './tabs.theme.js';
 import type { Snippet } from 'svelte';
 import type { StepperState } from '../Stepper/stepper.state.svelte.js';
 import type { StepperMount } from '../Stepper/stepper.props.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type TabsPlacement = 'top' | 'bottom' | 'left' | 'right';
 
@@ -47,6 +48,8 @@ export type TabsProps<Item extends TabItem = TabItem> = WithAttachments<{
 	 * Inherited from Tabbar component.
 	 */
 	items: Item[];
+	/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+	tool?: WebMCPToolProp;
 	/**
 	 * The `value` of the active tab (a string item resolves to itself; objects use `value`,
 	 * else their string label, else their index). Bindable.

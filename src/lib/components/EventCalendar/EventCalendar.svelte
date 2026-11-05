@@ -2,6 +2,9 @@
 	lang="ts"
 	generics="TItemFields extends object = Record<never, never>, TResourceFields extends object = Record<never, never>"
 >
+	import type { EventCalendarToolSource } from './eventCalendar.webmcp.js';
+	import type { EventCalendarOccurrence } from './eventCalendar.types.js';
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
@@ -47,6 +50,7 @@
 		density = 'normal',
 		class: className,
 		ref = $bindable<HTMLElement | null>(null),
+		tool,
 		theme,
 		timeZone,
 		locale,
@@ -392,6 +396,31 @@
 			stopTimer();
 			document.removeEventListener('visibilitychange', handleVisibilityChange);
 		};
+	});
+
+	useWebMCPExposure<EventCalendarToolSource>(() => import('./eventCalendar.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get api() {
+			return calendar as unknown as EventCalendarToolSource['api'];
+		},
+		get disabled() {
+			return disabled;
+		},
+		get canDrag() {
+			return calendar.interactions.drag;
+		},
+		get timeZone() {
+			return calendar.timeZone;
+		},
+		canMove: (occurrence) =>
+			calendar.interaction.canMove(occurrence as unknown as EventCalendarOccurrence<TItemFields>),
+		canResize: (occurrence) =>
+			calendar.interaction.canResize(occurrence as unknown as EventCalendarOccurrence<TItemFields>),
+		get views() {
+			return calendar.enabledViews;
+		}
 	});
 </script>
 

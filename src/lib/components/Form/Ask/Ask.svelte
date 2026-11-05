@@ -8,6 +8,8 @@
 	import type { FormInputs, InferFormValue, LiveFormValue } from '../Form/form.js';
 	import type { AskButton, AskProps, AskResult } from './ask.props.js';
 	import { registerAskHost, type AskRequest } from './ask.js';
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
+	import { askFormTool, expose as exposeAsk, type AskToolSource } from './ask.webmcp.js';
 
 	type AskButtonOptions = Exclude<AskButton, string>;
 	type ResolvedAskButton = {
@@ -31,7 +33,6 @@
 
 	let { type }: AskProps = $props();
 	let asks = $state<AskViewState[]>([]);
-
 	function resolveButton(button: AskButton): ResolvedAskButton {
 		if (typeof button === 'string') {
 			return { text: button, disabled: false, props: {} };
@@ -56,6 +57,18 @@
 
 		asks.push(viewState);
 	}
+
+	useWebMCPExposure<AskToolSource>(async () => ({ expose: exposeAsk }), {
+		get asks() {
+			return asks;
+		},
+		cancel(id) {
+			const askState = asks.find((candidate) => candidate.id === id);
+			if (!askState?.open || askState.form?.loading) return false;
+			cancelAsk(askState);
+			return true;
+		}
+	});
 
 	function cancelAsk(askState: AskViewState): void {
 		if (!askState.open || askState.settled || askState.form?.loading) return;
@@ -143,6 +156,7 @@
 		closeOnEscape={askState.open && !askState.form?.loading}
 		closeOnClickOutside={false}
 		swipeToDismiss={false}
+		tool={false}
 		theme={{
 			header: { base: '-mx-4 shrink-0 px-4' },
 			footer: { base: 'border-neutral-muted -mx-4 mt-2 shrink-0 border-t px-4 pt-3' }
@@ -171,6 +185,7 @@
 				validationMode={askState.options.validationMode}
 				validationDebounce={askState.options.validationDebounce}
 				theme={askState.options.theme}
+				tool={askFormTool(askState.options)}
 			/>
 		</div>
 
@@ -184,6 +199,7 @@
 				<div class="flex flex-col gap-2 @sm:flex-row @sm:justify-end">
 					<Button
 						color="neutral"
+						tool={false}
 						{...cancelButton.props}
 						type="button"
 						size={cancelButton.size ?? askState.options.size}
@@ -197,6 +213,7 @@
 						{cancelButton.text}
 					</Button>
 					<Button
+						tool={false}
 						{...confirmButton.props}
 						type="button"
 						size={confirmButton.size ?? askState.options.size}

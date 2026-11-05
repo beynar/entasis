@@ -136,4 +136,8 @@ cardTitle, cardDescription, empty, footer (density).
 	}}
 />
 \`\`\`
+
+## AI agents
+
+Under \`<Theme webmcp>\`, AI agents get \`read_board\` (ids, titles and descriptions) and \`move_card\`, held to \`disabled\`, \`canDrag\`, \`accepts\` and \`limit\`, and which the browser may confirm. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;

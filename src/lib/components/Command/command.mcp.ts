@@ -132,4 +132,8 @@ default, or inside a modal Dialog (⌘K style) with \`dialog\`.
   drops it in from just above its resting place on \`duration: 'fast'\`.
 - Retune it with \`<Theme components={{ dialog: { motion } }}>\` or \`setDialogTheme({ motion })\`;
   reduced motion collapses it to 0.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, its enabled items join the \`run_command\` tool of AI agents, the palette needing no opening; \`tool={{ consequential: true }}\` moves them to \`run_consequential_command\`, for commands that matter. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;

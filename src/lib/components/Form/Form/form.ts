@@ -40,8 +40,24 @@ import type { Slot } from '$lib/components/Slot/slot.js';
 import type { ButtonProps } from '$lib/components/Button/index.js';
 import type { Component, Snippet } from 'svelte';
 import type { FormState } from './form.state.svelte.js';
+import type { WebMCPJsonSchema } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type MaybePromise<T> = T | Promise<T>;
+
+/** How one entry appears to AI agents under `<Theme webmcp>`; see `FormInputDefinition.toolSchema`. */
+export type FormEntryTool =
+	| false
+	| {
+			/** What the model reads about the field. Defaults to its `label` and `description`. */
+			description?: string;
+			/** JSON Schema of the value, for a `type: 'field'` control the form cannot infer. */
+			schema?: WebMCPJsonSchema;
+	  };
+
+type FormEntryToolOption = {
+	/** How this entry appears to AI agents; `false` keeps it from them. */
+	tool?: FormEntryTool;
+};
 
 /**
  * Input types an app adds to Form, ask() and every other Form-driven surface. Empty in the
@@ -91,6 +107,11 @@ export type FormInputDefinition<T extends RegisteredInputType = RegisteredInputT
 	isEmpty?: (value: FieldValue<T>) => boolean;
 	/** Validation every entry of this type gets, before the entry's own `onValidate`. */
 	validate?: (value: FieldValue<T>) => FieldValidatorResult;
+	/**
+	 * JSON Schema of the value, which lets AI agents fill this type in under `<Theme webmcp>`.
+	 * Without it the field stays for the user.
+	 */
+	toolSchema?: WebMCPJsonSchema;
 };
 
 export type FormValueRecord = Record<string, FieldValue<FieldType> | null | undefined>;
@@ -222,10 +243,11 @@ type BaseFormFieldInput =
 // The visibility property can be a boolean or a function that receives the form value
 export type FormFieldInput = BaseFormFieldInput extends infer T
 	? T extends { visible?: boolean }
-		? Omit<T, 'visible'> & {
-				visible?: FormVisibility;
-			}
-		: T
+		? Omit<T, 'visible'> &
+				FormEntryToolOption & {
+					visible?: FormVisibility;
+				}
+		: T & FormEntryToolOption
 	: never;
 
 type BaseFormRenderableInput = {
@@ -271,6 +293,7 @@ export type FormFieldController<T extends InputType> = FieldState<T>;
 
 export type FormFieldEntry<T extends InputType = InputType> = T extends InputType
 	? BaseFormRenderableInput &
+			FormEntryToolOption &
 			Omit<InputProps<T>, 'class' | 'name' | 'visible'> & {
 				type: 'field';
 				/** Built-in schema and value type used by the shared FieldState validation owner. */
@@ -284,6 +307,7 @@ export type FormFieldEntry<T extends InputType = InputType> = T extends InputTyp
 export type FormRegisteredInput<T extends RegisteredInputType = RegisteredInputType> =
 	T extends RegisteredInputType
 		? BaseFormRenderableInput &
+				FormEntryToolOption &
 				Omit<InputProps<T>, 'class' | 'name' | 'visible'> &
 				RegisteredInputProps<T> & {
 					type: T;

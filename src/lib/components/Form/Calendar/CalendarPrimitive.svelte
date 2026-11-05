@@ -262,6 +262,7 @@
 	<Slot render={header} class={classes.header({ picker: activeView === 'picker' })}>
 		{#if activeView === 'days'}
 			<Button
+				tool={false}
 				squared
 				size="small"
 				variant="ghost"
@@ -278,6 +279,7 @@
 			</Button>
 		{/if}
 		<Button
+			tool={false}
 			type="button"
 			bind:ref={viewTriggerElement}
 			size="normal"
@@ -296,6 +298,7 @@
 		</Button>
 		{#if activeView === 'days'}
 			<Button
+				tool={false}
 				squared
 				size="small"
 				variant="ghost"

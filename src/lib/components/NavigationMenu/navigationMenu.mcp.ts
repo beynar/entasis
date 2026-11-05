@@ -135,4 +135,8 @@ Disclosure navigation (the WAI-ARIA APG disclosure navigation pattern): every tr
 | Panel | Shift+Tab on the first control | The trigger; the panel stays open |
 | Panel | Escape | Closes; focus returns to the trigger with a ring |
 | Anywhere | Focus leaves the menu | Closes | A current-page link renders \`aria-current="page"\`.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, its links on this site, those of its panels included, join the \`navigate\` tool of AI agents. \`tool={false}\` keeps them from agents. See \`entasis/webmcp\`.
 `;

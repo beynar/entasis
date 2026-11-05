@@ -9,6 +9,7 @@
 
 	let {
 		items,
+		tool,
 		children,
 		menu,
 		disabled = false,
@@ -202,6 +203,7 @@
 
 <PopupMenu
 	{...popup}
+	tool={tool === true ? true : openState.value ? (tool ?? true) : false}
 	class={classes.panel({ class: popup?.class })}
 	trigger={false}
 	open={openState.value}

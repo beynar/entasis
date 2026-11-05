@@ -1,4 +1,5 @@
 <script lang="ts" generics="TRow extends object">
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import type { ChartProps } from './chart.props.js';
 	import { ChartState } from './chart.state.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
@@ -23,6 +24,7 @@
 		aspectRatio,
 		class: className,
 		ref = $bindable(null),
+		tool,
 		theme,
 		...attachments
 	}: ChartProps<TRow> = $props();
@@ -90,6 +92,24 @@
 		},
 		get idPrefix() {
 			return idPrefix;
+		}
+	});
+
+	useWebMCPExposure(() => import('./chart.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get label() {
+			return label;
+		},
+		get description() {
+			return ariaDescription;
+		},
+		get data() {
+			return data;
+		},
+		get marks() {
+			return marks;
 		}
 	});
 </script>

@@ -41,6 +41,7 @@
 {#snippet renderDefault()}
 	{#if cell.getIsGrouped()}
 		<Button
+			tool={false}
 			label={rowExpanded ? t.dataTableCollapseGroup : t.dataTableExpandGroup}
 			prefix={rowExpanded ? caretDownIcon : caretRightIcon}
 			variant="ghost"
@@ -64,6 +65,7 @@
 		{#if cell.column.id === firstDataColumnId && row.getCanExpand() && !row.getIsGrouped()}
 			<div aria-hidden="true" style:width={`${row.depth * 12}px`}></div>
 			<Button
+				tool={false}
 				label={rowExpanded ? t.dataTableCollapseRow : t.dataTableExpandRow}
 				prefix={rowExpanded ? caretDownIcon : caretRightIcon}
 				variant="ghost"

@@ -10,7 +10,8 @@
 	import FormInputRenderer from './FormInputRenderer.svelte';
 	import type { FormProps } from './form.props.js';
 	import { useFormTheme } from './form.theme.js';
-	import { useForm } from './form.state.svelte.js';
+	import { useForm, type FormState } from './form.state.svelte.js';
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { isRegisteredFormInput } from './form.registry.js';
 	import { formCardSurfaceContextKey, type FormCardSurfaceContext } from './form.context.js';
 	import FieldGroup from '../Field/FieldGroup.svelte';
@@ -39,7 +40,8 @@
 		readOnly = false,
 		validationMode,
 		validationDebounce,
-		errors
+		errors,
+		tool
 	}: FormProps<I> = $props();
 	// Every field below shares the form's disabled and read-only state.
 	provideFieldGroup({
@@ -85,6 +87,28 @@
 		}
 	});
 	if (form !== formState) form = formState;
+	useWebMCPExposure(
+		() => import('./form.webmcp.js'),
+		{
+			form: formState as unknown as FormState<FormInputs>,
+			get tool() {
+				return tool;
+			},
+			get title() {
+				return title;
+			},
+			get description() {
+				return description;
+			},
+			get canSubmit() {
+				return Boolean(onSubmit);
+			}
+		},
+		() => !disabled
+	);
+	// An agent submits through the form's own tool, and a form kept from agents keeps its buttons
+	// from them too. Without `onSubmit`, the actions are what acts on the form.
+	const actionsTool = $derived(tool === false || onSubmit ? false : undefined);
 	const inputsEntries = $derived(Object.entries<FormInput>(inputs));
 	const visibleInputsEntries = $derived(
 		inputsEntries.filter(([, input]) =>
@@ -124,6 +148,7 @@
 		<FormActions
 			actions={input.actions}
 			form={formState}
+			tool={actionsTool}
 			{size}
 			{density}
 			label={input.label}
@@ -240,6 +265,7 @@
 				<FormActions
 					{actions}
 					form={formState}
+					tool={actionsTool}
 					{size}
 					{density}
 					class={classes.formActions({ density })}

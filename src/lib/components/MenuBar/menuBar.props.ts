@@ -3,6 +3,7 @@ import type { Sizes } from '$lib/types/theme.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { MenuProps } from '../Menu/menu.props.js';
 import type { MenuBarThemeProps } from './menuBar.theme.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type MenuBarMenu = Omit<MenuProps, 'focusOnMount'> & {
 	/** Label rendered in the top-level menu trigger. */
@@ -18,6 +19,8 @@ export type MenuBarMenu = Omit<MenuProps, 'focusOnMount'> & {
 export type MenuBarProps = WithAttachments<{
 	/** Top-level menus rendered from left to right. */
 	menus: MenuBarMenu[];
+	/** How this appears to AI agents under `<Theme webmcp>`: nothing to set for it to work, options to refine it, `false` to keep it from agents. */
+	tool?: WebMCPToolProp;
 	/** Size applied to every top-level trigger and to the menu each one drops. A per-menu
 	 * `size` wins over it. */
 	size?: Sizes;

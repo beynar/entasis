@@ -63,6 +63,7 @@
 </script>
 
 <Button
+	tool={false}
 	{id}
 	{type}
 	variant="ghost"

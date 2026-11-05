@@ -13,6 +13,7 @@ import type {
 	DataTablePinning,
 	DataTableProps,
 	DataTableRowPayload,
+	DataTableSorting,
 	DataTableState
 } from './dataTable.props.js';
 import {
@@ -367,6 +368,10 @@ export class DataTableModel<TData> {
 
 	clearSelection() {
 		this.setState({ ...this.state, rowSelection: {} });
+	}
+
+	setSorting(sorting: DataTableSorting[]) {
+		this.updateSlice('sorting', sorting, { resetPage: true });
 	}
 
 	setGlobalFilter(value: string) {

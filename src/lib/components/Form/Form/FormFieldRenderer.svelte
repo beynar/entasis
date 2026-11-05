@@ -16,6 +16,7 @@
 	const FIELD_ENTRY_KEYS = new Set([
 		'type',
 		'visible',
+		'tool',
 		'class',
 		'name',
 		'required',

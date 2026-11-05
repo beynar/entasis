@@ -90,4 +90,8 @@ One public type (\`curve\`) is D3's \`CurveFactory\`, so TypeScript users add it
   timing of the viewport zoom settle; \`viewport.transition\` still overrides per chart.
 - Ladder: \`<Theme components={{ chart: { motion } }}>\` → \`setChartTheme({ motion })\` →
   \`theme.motion\`. Reduced motion collapses the duration to 0 and the chart snaps.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, AI agents get \`read_chart_data\`, limited to the fields its marks name by key in a data channel: a field read through an accessor function stays out, and a chart with none has no tool. \`tool={false}\` keeps it from agents. See \`entasis/webmcp\`.
 `;

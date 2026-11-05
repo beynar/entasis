@@ -10,6 +10,7 @@ export type IntlTelInputInstance = {
 	readonly promise: Promise<void>;
 	destroy(): void;
 	getNumber(): string;
+	setNumber(number: string): void;
 	getSelectedCountry(): { iso2: string } | null;
 	isValidNumber(): boolean | null;
 	setSelectedCountry(iso2: string): void;

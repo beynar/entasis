@@ -1,8 +1,9 @@
 <script lang="ts" generics="Value extends string = string">
 	import { safeHref } from '$lib/utils/safeHref.js';
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { commandDialogTheme } from './command.dialog.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
-	import type { CommandItem, CommandProps } from './command.props.js';
+	import type { CommandGroup, CommandItem, CommandProps } from './command.props.js';
 	import { useCommandTheme } from './command.theme.js';
 	import { CommandState } from './command.state.svelte.js';
 	import Dialog from '../Dialog/Dialog.svelte';
@@ -46,6 +47,7 @@
 		density = 'normal',
 		class: className,
 		theme,
+		tool,
 		...attachments
 	}: CommandProps<Value> = $props();
 	const openState = createBindableValue(
@@ -185,6 +187,20 @@
 	 * `commandState.open()`, ...
 	 */
 	export const commandState: CommandState<Value> = command;
+
+	const dialogId = `${id}-dialog`;
+	useWebMCPExposure(() => import('./command.webmcp.js'), {
+		get tool() {
+			return tool;
+		},
+		get groups() {
+			return items as unknown as CommandGroup[];
+		},
+		get surface() {
+			return dialog && openState.value ? dialogId : undefined;
+		},
+		select: (item) => command.select(item as unknown as CommandItem<Value>)
+	});
 </script>
 
 {#snippet optionRow(it: CommandItem<Value>)}
@@ -311,6 +327,7 @@
 
 {#if dialog}
 	<Dialog
+		id={dialogId}
 		open={openState.value}
 		onOpenChange={(next, details) => command.setOpen(next, details)}
 		type="modal"
