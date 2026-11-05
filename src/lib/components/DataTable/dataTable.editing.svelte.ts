@@ -92,9 +92,25 @@ export class DataTableEditing<TData> {
 		this.editing.error = null;
 	}
 
-	async commit(): Promise<boolean> {
-		if (!this.editing || this.editing.pending) return false;
-		const editing = this.editing;
+	commit(): Promise<boolean> {
+		if (!this.editing || this.editing.pending) return Promise.resolve(false);
+		// `start` refuses while a write is out, so there is only ever one.
+		const writing = this.write(this.editing).finally(() => {
+			if (this.writing === writing) this.writing = null;
+		});
+		this.writing = writing;
+		return writing;
+	}
+
+	/** For a caller outside the editor: whether nothing is left to write once this resolves. */
+	settle(): Promise<boolean> {
+		if (this.writing) return this.writing;
+		return this.editing ? this.commit() : Promise.resolve(true);
+	}
+
+	private writing: Promise<boolean> | null = null;
+
+	private async write(editing: NonNullable<typeof this.editing>): Promise<boolean> {
 		if (cellValuesEqual(editing.previousValue, editing.draft)) {
 			this.editing = null;
 			return true;

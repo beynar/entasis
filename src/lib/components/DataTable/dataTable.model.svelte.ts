@@ -437,6 +437,10 @@ export class DataTableModel<TData> {
 		return this.editTransactions.commit();
 	}
 
+	settleEditing(): Promise<boolean> {
+		return this.editTransactions.settle();
+	}
+
 	cancelEditing() {
 		this.editTransactions.cancel();
 	}

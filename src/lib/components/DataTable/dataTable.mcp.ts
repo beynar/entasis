@@ -137,6 +137,9 @@ mutations through \`bind:state\` are observed without calling that callback agai
 \`bind:api\` exposes a stable \`DataTableApi<TData>\` with reactive state, totals, visible
 rows, selected loaded rows, save status, and commands for global/column filters, selection clearing,
 page, and page size. Commands use the same guards and reset rules as built-in controls.
+\`commitEditing()\` writes the open editor, for a save from outside the table. It resolves \`true\` once
+nothing is left to write, also with no editor open and after a write under way, and \`false\` when
+\`onCellCommit\` threw, which leaves the editor open on its error.
 
 \`\`\`svelte
 <DataTable
@@ -178,6 +181,34 @@ Calendar selection synchronizes its draft before commit. Arrow keys remain owned
 - Row slots receive row identity, selection/expansion state, depth, and guarded toggle actions.
 - The row actions column is 36px, one icon button; set \`rowActionsWidth\` (pixels) for text
   buttons or several actions.
+
+## Row and cell state
+
+\`getRowAttrs(row)\` adds attributes to the \`<tr>\` and \`getCellAttrs({ row, columnId })\` to the \`<td>\`,
+for a \`data-*\` the theme reads. What the table writes itself, \`class\` included, stays its own, and
+neither is called for a group row. \`getCellAttrs\` also runs for the structural columns, \`__selection\`,
+\`__drag\` and \`__actions\`. Those are pinned with a background of their own, so a row tint names them:
+
+\`\`\`svelte
+<script lang="ts">
+  import { DataTable, type DataTableColumn } from 'entasis/data-table';
+
+  type Row = { id: string; name: string };
+  const items: Row[] = [{ id: 'a', name: 'Ada' }];
+  const columns: DataTableColumn<Row>[] = [{ id: 'name', accessor: 'name', header: 'Name' }];
+  const changes = new Map<string, string>([['a', 'added']]);
+</script>
+
+<DataTable
+  {items}
+  {columns}
+  getRowId={(row) => row.id}
+  getRowAttrs={(row) => ({ 'data-change': changes.get(row.id) })}
+  theme={{
+    row: { base: '[&[data-change=added]>td]:bg-success-muted data-[change=added]:bg-success-muted' }
+  }}
+/>
+\`\`\`
 
 ## Row activation
 

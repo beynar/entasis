@@ -234,6 +234,12 @@ export type DataTableApi<TData> = {
 	clearSelection: () => void;
 	setPage: (page: number) => void;
 	setPageSize: (pageSize: number) => void;
+	/**
+	 * Writes the open editor, for a save from outside the table. Resolves `true` once nothing is left
+	 * to write: also with no editor open, and after a write already under way. `false` when
+	 * `onCellCommit` threw, which leaves the editor open on its error.
+	 */
+	commitEditing: () => Promise<boolean>;
 };
 
 export type DataTableToolbarPayload<TData> = {
@@ -375,6 +381,18 @@ type DataTableBaseProps<TData> = {
 	 * keyboard users.
 	 */
 	onRowActivate?: (payload: DataTableRowActivation<TData>) => void;
+	/**
+	 * Attributes for a row's `<tr>`, for a `data-*` the theme reads. What the table writes itself,
+	 * `class` included, stays its own. Not called for a group row. The selection and actions columns
+	 * are pinned, with a background of their own: tint them too with `[&[data-x]>td]:bg-…`.
+	 */
+	getRowAttrs?: (row: TData) => Record<string, string | undefined>;
+	/**
+	 * Attributes for a cell's `<td>`, for a `data-*` the theme reads. What the table writes itself,
+	 * `class` included, stays its own. Not called for a group row. Called for the structural columns
+	 * too, as `__selection`, `__drag` and `__actions`.
+	 */
+	getCellAttrs?: (payload: { row: TData; columnId: string }) => Record<string, string | undefined>;
 	/** Additional content displayed below an expanded row. */
 	expandedContent?: Slot<DataTableRowPayload<TData>>;
 	/** Display the loading state while rows are being fetched. */

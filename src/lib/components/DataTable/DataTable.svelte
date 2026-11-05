@@ -72,6 +72,8 @@
 		rowActions,
 		rowActionsWidth,
 		onRowActivate,
+		getRowAttrs,
+		getCellAttrs,
 		expandedContent,
 		loading = false,
 		error,
@@ -585,7 +587,8 @@
 		clearFilters: () => model.clearFilters(),
 		clearSelection: () => model.clearSelection(),
 		setPage: (page) => model.setPage(page),
-		setPageSize: (size) => model.setPageSize(size)
+		setPageSize: (size) => model.setPageSize(size),
+		commitEditing: () => model.settleEditing()
 	};
 	// Published in the browser only: a server write would make Svelte replay the parent's markup.
 	// eslint-disable-next-line no-useless-assignment -- Assignment publishes the table api to bind:api.
@@ -730,6 +733,8 @@
 									{classes}
 									{density}
 									{interactionMode}
+									{getRowAttrs}
+									{getCellAttrs}
 									revision={modelRevision}
 									measureAttachment={measureRow}
 									detailMeasureAttachment={measureDetailRow(virtualRow.index)}

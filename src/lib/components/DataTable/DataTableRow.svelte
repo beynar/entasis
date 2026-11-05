@@ -13,7 +13,7 @@
 	} from './dataTable.model.svelte.js';
 	import type { DataTableColumnInstance, DataTableRowInstance } from './dataTable.table.js';
 	import type { DataTableClasses } from './dataTable.theme.js';
-	import type { DataTableCellPayload } from './dataTable.props.js';
+	import type { DataTableCellPayload, DataTableProps } from './dataTable.props.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 
 	let {
@@ -27,6 +27,8 @@
 		classes,
 		density,
 		interactionMode,
+		getRowAttrs,
+		getCellAttrs,
 		revision,
 		measureAttachment,
 		detailMeasureAttachment,
@@ -44,6 +46,8 @@
 		classes: DataTableClasses;
 		density: 'compact' | 'normal' | 'comfortable';
 		interactionMode: 'table' | 'grid';
+		getRowAttrs: DataTableProps<TData>['getRowAttrs'];
+		getCellAttrs: DataTableProps<TData>['getCellAttrs'];
 		revision: number;
 		measureAttachment: Attachment<HTMLElement>;
 		detailMeasureAttachment: Attachment<HTMLElement>;
@@ -70,6 +74,8 @@
 		return !!model.state.expanded[row.id];
 	});
 	const cells = $derived(row.getVisibleCells());
+	// A group row's `original` is one of its members, which says nothing about the group.
+	const rowAttrs = $derived(row.getIsGrouped() ? undefined : getRowAttrs?.(row.original as TData));
 	const firstDataColumnId = $derived(
 		allColumns.find(
 			(column) =>
@@ -222,6 +228,7 @@
 </script>
 
 <tr
+	{...rowAttrs}
 	aria-rowindex={ariaRowIndex}
 	aria-level={row.depth ? row.depth + 1 : undefined}
 	aria-expanded={row.getCanExpand() ? rowExpanded : undefined}
@@ -249,7 +256,11 @@
 			model.focusedCell.column === allIndex}
 		{@const isFocused = isRovingCell && model.hasFocusedCell}
 		{@const isEditing = model.editing?.row.id === row.id && model.editing.columnId === column.id}
+		{@const cellAttrs = row.getIsGrouped()
+			? undefined
+			: getCellAttrs?.({ row: row.original as TData, columnId: column.id })}
 		<td
+			{...cellAttrs}
 			role={interactionMode === 'grid' ? 'gridcell' : undefined}
 			aria-colindex={allIndex + 1}
 			tabindex={interactionMode === 'grid' ? (isRovingCell ? 0 : -1) : undefined}
