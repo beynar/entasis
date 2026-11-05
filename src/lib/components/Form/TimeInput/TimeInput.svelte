@@ -164,8 +164,12 @@
 		setPickerValue(getActiveTimeOption(hourOptions, selectedHour), minute);
 	};
 
+	// The value the input's own text last gave. That text stays as typed: "08", or empty for the
+	// 0 an emptied input gives.
+	let typedValue: unknown;
+
 	const maskAction = (input: HTMLInputElement) => {
-		untrack(() => {
+		return untrack(() => {
 			const mask = maskitoTimeOptionsGenerator(params);
 			const maskedElement = new Maskito(input, mask);
 
@@ -175,6 +179,7 @@
 			const off = on(input, 'input', () => {
 				const parsed = maskitoParseTime(input.value, params);
 				field.value = denormalizeTimeValue(parsed, as);
+				typedValue = field.value;
 			});
 
 			return () => {
@@ -183,6 +188,17 @@
 			};
 		});
 	};
+
+	// A value from elsewhere shows once the field has no focus, as in DateInput.
+	$effect(() => {
+		const next = field.value;
+		const input = field.node;
+		if (field.focused || !(input instanceof HTMLInputElement) || Object.is(next, typedValue))
+			return;
+		typedValue = undefined;
+		input.value =
+			typeof next === 'number' ? maskitoStringifyTime(normalizeTimeValue(next, as), params) : '';
+	});
 </script>
 
 <Popover

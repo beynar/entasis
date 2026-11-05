@@ -4,6 +4,7 @@ import * as v from 'valibot';
 import { schemas } from './schemas.js';
 import { getFormInputDefinition, getRegisteredInputSchema } from '../Form/form.registry.js';
 import { getContext, onDestroy, setContext, untrack } from 'svelte';
+import { on } from 'svelte/events';
 import type { Attachment } from 'svelte/attachments';
 import type { FormState } from '../Form/form.state.svelte.js';
 import type { Density, Sizes } from '$lib/types/theme.js';
@@ -730,14 +731,16 @@ export const createFieldState = <T extends FieldType>(
 		document.addEventListener('pointerdown', onPointerDown, true);
 		document.addEventListener('pointerup', onPointerUp, true);
 		document.addEventListener('pointercancel', onPointerUp, true);
-		document.addEventListener('focusin', onFocusIn, true);
-		document.addEventListener('focusout', onFocusOut, true);
+		// Through `on`: a focused control being removed sends these while the block removing it
+		// runs, where Svelte refuses a state write from a plain listener.
+		const stopFocusIn = on(document, 'focusin', onFocusIn, { capture: true });
+		const stopFocusOut = on(document, 'focusout', onFocusOut, { capture: true });
 		stopWatchingFocus = () => {
 			document.removeEventListener('pointerdown', onPointerDown, true);
 			document.removeEventListener('pointerup', onPointerUp, true);
 			document.removeEventListener('pointercancel', onPointerUp, true);
-			document.removeEventListener('focusin', onFocusIn, true);
-			document.removeEventListener('focusout', onFocusOut, true);
+			stopFocusIn();
+			stopFocusOut();
 			stopWatchingFocus = null;
 		};
 	}
