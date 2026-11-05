@@ -34,6 +34,8 @@ export type SortableListProps<T> = WithAttachments<
 			items: T[];
 			/** Drag mode and handle content in one prop. `false` (default): the whole row initiates the drag. `true`: only a grip handle drags, so the row text stays selectable. A snippet/string turns on handle mode and customizes what renders inside the handle (payload `{ item, index, isDragging }`). */
 			handle?: boolean | Slot<SortableListItemPayload<T>>;
+			/** The `item` snippet draws its own grip, an element marked `data-dnd-handle`; none is rendered. */
+			customHandle?: boolean;
 			/** Disables all dragging; rows still render but cannot be reordered. */
 			disabled?: boolean;
 			/**

@@ -38,6 +38,7 @@ export {
 	type FileInputType,
 	type InputProps,
 	type InputType,
+	type JsonInputType,
 	type KeyValueInputType,
 	type KeyValuePair,
 	type MultipleChoiceInputType,

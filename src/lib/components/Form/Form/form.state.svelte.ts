@@ -105,6 +105,7 @@ const supportedInputTypes = new Set<InputType>([
 	'tag',
 	'tag-group',
 	'keyvalue',
+	'json',
 	'pin',
 	'select',
 	'select-multiple',

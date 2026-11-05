@@ -25,6 +25,8 @@ Items need a stable, unique \`id\` property (primitive items are matched by valu
 ### Core Props
 - **items**: \`T[]\` (required, bindable)
   - The list items in display order. The bound array is reassigned once, at drop — the mid-drag motion is a render-only preview.
+- **customHandle**: \`boolean\` (default: \`false\`)
+  - The \`item\` snippet draws its own grip, an element marked \`data-dnd-handle\`, for a grip that has to sit inside the row or do more than drag. No grip is rendered, and the first marked element in a row is the one that drags.
 - **handle**: \`boolean | Snippet<[{ item, index, isDragging }]>\` (default: \`false\`)
   - Drag mode and handle content in one prop.
   - \`false\`: the whole row initiates the drag (grab cursor).

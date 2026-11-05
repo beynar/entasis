@@ -74,6 +74,8 @@ export const schemas: {
 
 		// Key/value input type
 		keyvalue: nonEmptyArray(keyValuePair),
+		// JsonEditor checks its value against its own schema, row by row.
+		json: v.any(),
 
 		// Date input types
 		datetime: v.date(),
@@ -142,6 +144,7 @@ export const schemas: {
 
 		// Key/value input type
 		keyvalue: optional(emptyArrayNull(v.array(keyValuePair))),
+		json: v.any(),
 
 		// Date input types
 		datetime: optional(v.date()),

@@ -32,6 +32,7 @@ Global theme setter: `import { setComponentNameTheme } from 'entasis/kebab-case-
 - [Autocomplete](#autocomplete)
 - [TagsInput](#tagsinput)
 - [KeyValueInput](#keyvalueinput)
+- [JsonEditor](#jsoneditor)
 - [Switch](#switch)
 - [RadioInput](#radioinput)
 - [CheckboxesInput](#checkboxesinput)
@@ -428,6 +429,45 @@ Option format: `{ value: string, label: string, description?: string }` (reused 
 ```
 
 ---
+
+## JsonEditor
+
+`import { JsonEditor } from 'entasis/json-editor'`
+
+Edits a JSON value through the right control for each field. With a JSON Schema, each type and format gets its input and the schema's limits become guards. Without one, the shape is inferred from the value and every type stays changeable. In a Form it is `type: 'json'`.
+
+| Prop           | Type                                          | Description                                                                     |
+| -------------- | --------------------------------------------- | ------------------------------------------------------------------------------- |
+| `schema`       | `JsonSchema`                                  | The schema. Left out, the shape comes from the value                            |
+| `value`        | `JsonValue \| null`                           | Bindable value; `defaultValue` and `onValueChange` as on every input            |
+| `mode`         | `'tree' \| 'json'`                            | Controls or JSON text, bindable                                                 |
+| `controls`     | `boolean \| ('expand' \| 'copy' \| 'mode')[]` | The toolbar                                                                     |
+| `typeIcons`    | `boolean`                                     | Icons for value types; default `true`                                           |
+| `expandDepth`  | `number`                                      | Levels that start open; closed rows are not mounted; default `2`                |
+| `descriptions` | `'inline' \| 'tooltip' \| 'none'`             | Where a schema's `description` shows                                            |
+| `keyWidth`     | `string`                                      | Width of the key column; default `38%`                                          |
+| `size`         | `'small' \| 'normal' \| 'large'`              | Default `small`                                                                 |
+| `api`          | `JsonEditorApi`                               | Bindable: `issues`, `validate()`, `expandAll()`, `collapseAll()`, `focus(path)` |
+
+```svelte
+<script lang="ts">
+	import { JsonEditor, type JsonSchema, type JsonValue } from 'entasis/json-editor';
+
+	const schema: JsonSchema = {
+		type: 'object',
+		required: ['name'],
+		properties: {
+			name: { type: 'string', title: 'Name', maxLength: 32 },
+			replicas: { type: 'integer', minimum: 1, default: 2 },
+			env: { type: 'array', items: { type: 'object', properties: { key: { type: 'string' } } } }
+		}
+	};
+	let value = $state<JsonValue | null>({ name: 'api' });
+</script>
+
+<JsonEditor {schema} bind:value label="Deployment" />
+<JsonEditor value={{ title: 'No schema: inferred from the value' }} />
+```
 
 ## KeyValueInput
 

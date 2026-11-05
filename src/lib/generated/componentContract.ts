@@ -1219,6 +1219,7 @@ export const componentInventory = [
 			'FileInputType',
 			'InputProps',
 			'InputType',
+			'JsonInputType',
 			'KeyValueInputType',
 			'KeyValuePair',
 			'MultipleChoiceInputType',
@@ -1636,6 +1637,46 @@ export const componentInventory = [
 		],
 		capabilities: ['svelte', 'component', 'forms'],
 		relatedComponents: ['multi-step-form'],
+		visibility: 'public'
+	},
+	{
+		id: 'json-editor',
+		subpath: 'entasis/json-editor',
+		sourceIndex: 'src/lib/components/Form/JsonEditor/index.ts',
+		exportedSymbols: [
+			'JsonEditor',
+			'JsonEditorApi',
+			'JsonEditorControl',
+			'JsonEditorDescriptions',
+			'JsonEditorIssue',
+			'JsonEditorMode',
+			'JsonEditorProps',
+			'JsonEditorTheme',
+			'JsonEditorThemeProps',
+			'JsonIssue',
+			'JsonIssueCode',
+			'JsonObject',
+			'JsonPath',
+			'JsonSchema',
+			'JsonSchemaObject',
+			'JsonType',
+			'JsonValue',
+			'inferJsonSchema',
+			'jsonEditorTheme',
+			'setJsonEditorTheme',
+			'useJsonEditorTheme',
+			'validateJson'
+		],
+		docs: [
+			{
+				id: 'json-editor',
+				route: '/components/json-editor',
+				category: 'Forms',
+				label: 'JSON editor'
+			}
+		],
+		capabilities: ['svelte', 'component', 'forms'],
+		relatedComponents: [],
 		visibility: 'public'
 	},
 	{
@@ -4855,6 +4896,7 @@ export const relatedComponents = {
 	'date-selector': ['date-input', 'calendar'],
 	'file-input': [],
 	form: ['multi-step-form'],
+	'json-editor': [],
 	'key-value-input': [],
 	'multi-step-form': ['form', 'stepper'],
 	'number-input': ['slider', 'text-input'],

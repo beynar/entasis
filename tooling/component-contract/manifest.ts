@@ -247,6 +247,7 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	component('form', 'components/Form/Form', 'Forms', 'Form', {
 		related: ['multi-step-form']
 	}),
+	component('json-editor', 'components/Form/JsonEditor', 'Forms', 'JSON editor'),
 	component('key-value-input', 'components/Form/KeyValueInput', 'Forms', 'Key value input'),
 	component('multi-step-form', 'components/Form/MultiStepForm', 'Forms', 'Multi-step form', {
 		related: ['form', 'stepper']
@@ -1291,6 +1292,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'FileInputType',
 		'InputProps',
 		'InputType',
+		'JsonInputType',
 		'KeyValueInputType',
 		'KeyValuePair',
 		'MultipleChoiceInputType',
@@ -1512,6 +1514,30 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'registerFormInputs',
 		'setFormTheme',
 		'useFormTheme'
+	],
+	'json-editor': [
+		'JsonEditor',
+		'JsonEditorApi',
+		'JsonEditorControl',
+		'JsonEditorDescriptions',
+		'JsonEditorIssue',
+		'JsonEditorMode',
+		'JsonEditorProps',
+		'JsonEditorTheme',
+		'JsonEditorThemeProps',
+		'JsonIssue',
+		'JsonIssueCode',
+		'JsonObject',
+		'JsonPath',
+		'JsonSchema',
+		'JsonSchemaObject',
+		'JsonType',
+		'JsonValue',
+		'inferJsonSchema',
+		'jsonEditorTheme',
+		'setJsonEditorTheme',
+		'useJsonEditorTheme',
+		'validateJson'
 	],
 	'key-value-input': [
 		'KeyValueInput',
