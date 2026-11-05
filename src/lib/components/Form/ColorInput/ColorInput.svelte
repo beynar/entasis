@@ -262,8 +262,9 @@
 				class={classes.input({ disabled: field.disabled, size: rest.size })}
 				{@attach colorMask({ format: () => format })}
 				onkeydown={(event) => {
-					// The swatch button is out of the Tab order: ArrowDown opens the picker (focus
-					// already does) and moves focus onto its first control.
+					// Keyboard users open the picker deliberately; tabbing through never pops it. The
+					// swatch button is out of the Tab order, so ArrowDown opens it and moves focus onto
+					// its first control.
 					if (event.key !== 'ArrowDown' || event.defaultPrevented || field.disabled) return;
 					event.preventDefault();
 					if (!isPickerOpen) popover.open();
@@ -272,9 +273,9 @@
 				oninput={handleInput}
 				onfocus={() => {
 					field.focused = true;
-					if (!field.disabled) {
-						isPickerOpen = true;
-					}
+				}}
+				onclick={() => {
+					if (!field.disabled) isPickerOpen = true;
 				}}
 				onblur={() => {
 					field.focused = false;
