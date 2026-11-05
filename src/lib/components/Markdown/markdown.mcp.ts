@@ -37,7 +37,7 @@ Card, Stat, Stack, Grid, and GridSpan are also available as built-in MDX compone
 - **Inline code** (\\\`codespan\\\`): a muted neutral chip at 0.9em of the surrounding text, readable on any surface.
 - **Lists** hang-indent: markers sit outside the text, so a wrapped line starts under the first word. **Tables** read at the surrounding text size, size their columns to content, and scroll with an edge fade when wider than their container.
 - **Code fences**: rendered by entasis's Code component — syntax highlighting and a copy button. The code block sizing follows \\\`size\\\`.
-- **Mermaid fences**: a fence tagged \\\`mermaid\\\` renders through entasis's Mermaid component with \\\`errorForgiving\\\` enabled, so a diagram that is still streaming in holds its last valid frame instead of flashing parse errors. Diagram size maps from the Markdown \\\`size\\\`.
+- **Mermaid fences**: a fence tagged \\\`mermaid\\\` renders through entasis's Mermaid component with \\\`errorForgiving\\\` enabled, so a diagram that is still streaming in holds its last valid frame instead of flashing parse errors. Diagram size maps from the Markdown \\\`size\\\`, and \\\`peleOptions={{ images: false }}\\\` stops a node's \\\`img\\\` metadata loading.
 
 ## Built-in MDX components
 

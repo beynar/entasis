@@ -76,6 +76,7 @@
 				<Mermaid
 					chart={payload.token.text}
 					errorForgiving
+					images={rest.peleOptions?.images}
 					size={markdownMermaidSizes[size]}
 					class={markdownCodeSizes[size].split(' ')[0]}
 				/>

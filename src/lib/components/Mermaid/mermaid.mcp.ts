@@ -14,6 +14,7 @@ Renders a [Mermaid](https://mermaid.js.org/) diagram (flowchart, sequence, gantt
 
 ### Core Props
 - **chart**: string (required) - The mermaid diagram source. Sanitized before rendering (BOM, zero-width/control chars, smart quotes, CRLF, HTML entities, flowchart arrow spacing, trailing semicolons). Re-renders reactively when it changes.
+- **images**: boolean (default: true) - Whether a node's \`img\` metadata loads its image. The source decides the address and it loads for every reader with no click, so turn this off for a diagram from text a model or a stranger wrote. In Markdown and AIMessage, \`peleOptions={{ images: false }}\` does the same for a fence.
 - **config**: MermaidConfig - Mermaid settings passed to the renderer (frontmatter and \`%%{init}%%\` directives in the source override them; support varies by diagram type), plus \`fontFamily\` to change the diagram font (default: the page font). Colours do not come from here: see Theming.
 - **size**: 'small' | 'normal' | 'large' (default: 'normal') - The height of the diagram viewport.
 

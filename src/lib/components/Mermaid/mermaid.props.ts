@@ -37,6 +37,12 @@ export type MermaidProps = WithAttachments<{
 	 */
 	config?: MermaidConfig;
 	/**
+	 * Whether a node's `img` metadata loads its image. The address is in the source and loads for every
+	 * reader with no click, so turn this off for a diagram from text a model or a stranger wrote.
+	 * @default true
+	 */
+	images?: boolean;
+	/**
 	 * The floating controls to show. `true` (default) shows all; `false` hides
 	 * the bar; an object toggles individual controls (`fit`, `zoomIn`, `zoomOut`,
 	 * `expand`, `download`).

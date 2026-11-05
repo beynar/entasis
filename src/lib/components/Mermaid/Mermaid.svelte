@@ -16,6 +16,7 @@
 	let {
 		chart,
 		config,
+		images = true,
 		controls = true,
 		mouseWheelZoom = true,
 		touchPan = false,
@@ -34,6 +35,9 @@
 		},
 		get config() {
 			return config;
+		},
+		get images() {
+			return images;
 		},
 		get mouseWheelZoom() {
 			return mouseWheelZoom;

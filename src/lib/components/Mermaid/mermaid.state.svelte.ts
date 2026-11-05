@@ -203,7 +203,14 @@ export const sanitizeMermaidCode = (code: string): string => {
 
 type MermaidOptions = Pick<
 	MermaidProps,
-	'chart' | 'config' | 'mouseWheelZoom' | 'touchPan' | 'errorForgiving' | 'onRender' | 'onError'
+	| 'chart'
+	| 'config'
+	| 'images'
+	| 'mouseWheelZoom'
+	| 'touchPan'
+	| 'errorForgiving'
+	| 'onRender'
+	| 'onError'
 >;
 
 /** The bound option props are declared by the base class, so `this.chart` & co. are typed
@@ -256,6 +263,7 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 		$effect(() => {
 			void this.chart;
 			void this.config;
+			void this.images;
 			untrack(() => {
 				if (this.mounted) void this.render();
 			});
@@ -308,6 +316,7 @@ export class MermaidState extends createBindableStateClass<MermaidOptions>() {
 				idPrefix: this.idPrefix,
 				// Natural size: the panzoom fits it to the viewport.
 				responsive: false,
+				images: this.images,
 				config
 			});
 			// A newer render superseded this one.
