@@ -248,6 +248,9 @@
 				{placeholder}
 				class={classes.input({ disabled: field.disabled, size: rest.size })}
 				disabled={field.disabled}
+				onclick={() => {
+					if (!field.disabled) popover.open();
+				}}
 				onkeydown={(event) => {
 					// The clock button is out of the Tab order (Tab goes to the next field), so the
 					// input opens the picker itself, as DateInput does.

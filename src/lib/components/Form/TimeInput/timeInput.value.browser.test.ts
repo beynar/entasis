@@ -74,6 +74,14 @@ test('emptying the input and leaving does not write midnight back', async () => 
 	await expect.element(field()).toHaveValue('');
 });
 
+test('typing right after the click that opens the picker goes in the input', async () => {
+	await render(TimeInputValueHarness);
+	await userEvent.click(field());
+	await userEvent.keyboard('0930');
+	await expect.element(field()).toHaveValue('09:30');
+	await expect.element(page.getByTestId('value')).toHaveTextContent('34200000');
+});
+
 test('a value typed, moved from outside and moved back shows again', async () => {
 	await render(TimeInputValueHarness);
 	await userEvent.click(field());

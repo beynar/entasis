@@ -17,11 +17,28 @@ describe.each(['color', 'date', 'time'] as const)('%s input', (kind) => {
 		await render(PickerFocusHarness, { props: { kind } });
 		await expect.poll(input).not.toBeNull();
 		await userEvent.click(input());
-		// A time field takes typing: its picker opens from the keyboard or its button, not a click.
-		if (kind === 'time') await userEvent.keyboard('{ArrowDown}');
 		await expect.poll(panel).not.toBeNull();
 		await new Promise((resolve) => setTimeout(resolve, 300));
 	};
+
+	test('a click opens the picker and leaves focus in the input, for typing', async () => {
+		await open();
+		expect(document.activeElement).toBe(input());
+		await userEvent.click(input());
+		await new Promise((resolve) => setTimeout(resolve, 300));
+		expect(panel()).not.toBeNull();
+		expect(document.activeElement).toBe(input());
+	});
+
+	test('tabbing into the field does not open the picker', async () => {
+		await render(PickerFocusHarness, { props: { kind } });
+		await expect.poll(input).not.toBeNull();
+		(page.getByTestId('other').element() as HTMLElement).focus();
+		await userEvent.keyboard('{Tab}');
+		await expect.poll(() => document.activeElement).toBe(input());
+		await new Promise((resolve) => setTimeout(resolve, 300));
+		expect(panel()).toBeNull();
+	});
 
 	test('a press on nothing closes the picker and the input stays blurred', async () => {
 		await open();

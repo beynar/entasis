@@ -52,6 +52,8 @@ Unreleased section under the new version.
   trigger or input, which blurred and refocused it. A pointer pressing outside a non-modal popover now
   leaves focus where the press put it, whatever `focusOnClose` says. Escape and other keyboard closes
   still return focus, as does a modal popover.
+- `TimeInput`: a click in the input now opens the picker, like `DateInput` and `ColorInput`, with focus left in
+  the input for typing. It only opened from ArrowDown and the clock button before.
 - `TimeInput`: a value set after mounting, by a `Form` or a button, never showed in the input. The input now
   follows `value` while the field has no focus, as `DateInput` does; a value set during typing shows when
   focus leaves, and what a person typed stays as typed.
