@@ -48,6 +48,7 @@ Without a schema, the value is enough:
 - **typeIcons**: boolean (default true) - An icon for the type of each value. Where a value may change type, the icon opens the list of types.
 - **expandDepth**: number (default 2) - How many levels start open. Closed rows are not mounted, so a low depth keeps a large document fast.
 - **descriptions**: 'inline' | 'tooltip' | 'none' (default 'inline') - Where a schema's \`description\` shows.
+- **tool**: false | { name, title, description, consequential, exposedTo } - How the editor appears to AI agents under \`<Theme webmcp>\`.
 - **keyWidth**: string (default '38%') - Width of the key column.
 - **size**: 'small' | 'normal' | 'large' (default 'small') - Geometry of the rows and controls.
 - **density**: 'compact' | 'normal' | 'comfortable' - Space between rows.
@@ -121,6 +122,10 @@ The whole value is one field: a problem anywhere stops the submit, shows every p
 - **Alt+Up / Alt+Down** in a control moves its row; **Up / Down** on the grip moves it too, and a move is announced.
 - **Enter** on the grip opens its menu: duplicate, move, remove.
 - **Enter** in a new key settles the name and moves to its value; **Escape** abandons it.
+
+## AI agents
+
+Under \`<Theme webmcp>\`, an editor outside a Form offers two tools. \`read_json\` answers with the value and its problems. \`edit_json\` replaces the whole value: it is refused while the editor is disabled or read-only, and when the value breaks the schema, with the problems listed. A person can take an edit back with Cmd+Z or Ctrl+Z. A value the editor masks (\`writeOnly\`, \`format: 'password'\`) reads as \`[hidden]\`, and writing \`[hidden]\` back keeps it. In a Form, the value is a field of the form's tool instead. \`tool={false}\` keeps the editor from agents; do that when it holds text you did not write, since the value reaches the model.
 
 ## Styling hooks
 

@@ -29,6 +29,8 @@ Unreleased section under the new version.
   - `Tabs`: `select_tab`. `Pagination`: `go_to_page`. `DataTable`: `query_table`, `move_row`. `Chart`:
     `read_chart_data`. `DocumentViewer`: `search_document`, `read_document`. `Kanban`: `read_board`,
     `move_card`. `EventCalendar`: `read_calendar`, `show_calendar`, `move_event`.
+  - `JsonEditor`: `read_json` and `edit_json` outside a Form, where it fills in like any other field. An edit is
+    held to the schema and a person can undo it. A `writeOnly` or `password` value reads as `[hidden]`.
   - An agent is held to what a person can do: disabled and read-only controls refuse it, only the
     topmost modal's tools stay available, a tool reads what the component shows, and a masked table
     cell stays masked. Text in labels reaches the model, so `tool={false}` anything that quotes user

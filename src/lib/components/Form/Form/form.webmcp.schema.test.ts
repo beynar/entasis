@@ -20,6 +20,49 @@ describe('fieldToolSchema', () => {
 		]);
 	});
 
+	test('a JSON field is offered, its $ref standing inside the tool', () => {
+		const schema = schemaOf({
+			type: 'json',
+			schema: {
+				type: 'object',
+				$defs: {
+					name: { type: 'string', maxLength: 4 },
+					node: { properties: { next: { $ref: '#/$defs/node' } } }
+				},
+				properties: {
+					title: { $ref: '#/$defs/name', description: 'Its title' },
+					$ref: { const: { $ref: 'kept, this is data' } },
+					tree: { $ref: '#/$defs/node' }
+				}
+			}
+		});
+		expect(schema).toEqual({
+			type: 'object',
+			properties: {
+				title: { type: 'string', maxLength: 4, description: 'Its title' },
+				$ref: { const: { $ref: 'kept, this is data' } },
+				tree: { properties: { next: {} } }
+			}
+		});
+	});
+
+	test('a JSON field takes any JSON without a schema, and nothing under `false`', () => {
+		expect(schemaOf({ type: 'json' })).toEqual({});
+		expect(schemaOf({ type: 'json', schema: true })).toEqual({});
+		expect(schemaOf({ type: 'json', schema: false })).toBeNull();
+	});
+
+	test('a JSON field is held to the whole schema', () => {
+		const input = {
+			type: 'json',
+			schema: { type: 'object', required: ['a'], oneOf: [{ properties: { a: { const: 1 } } }] }
+		} as unknown as FormValueInput;
+		expect(controlAccepts(input, { a: 1 }, null)).toBe(true);
+		expect(controlAccepts(input, { a: 2 }, null)).toBe(false);
+		expect(controlAccepts(input, {}, null)).toBe(false);
+		expect(controlAccepts(input, null, null)).toBe(true);
+	});
+
 	test('options that load on demand stay for the user', () => {
 		expect(schemaOf({ type: 'combobox', items: async () => [] })).toBeNull();
 	});

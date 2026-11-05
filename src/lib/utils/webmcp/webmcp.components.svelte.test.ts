@@ -10,6 +10,7 @@ import { DataTable } from '$lib/components/DataTable/index.js';
 import { EventCalendar } from '$lib/components/EventCalendar/index.js';
 import { EventCalendarState } from '$lib/components/EventCalendar/eventCalendar.state.svelte.js';
 import Form from '$lib/components/Form/Form/Form.svelte';
+import JsonEditor from '$lib/components/Form/JsonEditor/JsonEditor.svelte';
 import MultiStepForm from '$lib/components/Form/MultiStepForm/MultiStepForm.svelte';
 import Kanban from '$lib/components/Kanban/Kanban.svelte';
 import MenuBar from '$lib/components/MenuBar/MenuBar.svelte';
@@ -372,6 +373,102 @@ describe('MultiStepForm', () => {
 		});
 		await new Promise((resolve) => setTimeout(resolve, 80));
 		expect(tools.has('who')).toBe(false);
+	});
+});
+
+describe('JsonEditor', () => {
+	const schema = {
+		type: 'object',
+		required: ['name'],
+		properties: {
+			name: { type: 'string', maxLength: 8 },
+			token: { type: 'string', writeOnly: true },
+			keys: { type: 'array', items: { type: 'string', format: 'password' } }
+		}
+	};
+	const value = { name: 'Ada', token: 'secret', keys: ['k1'] };
+
+	test('reads what it shows, with a masked value hidden', async () => {
+		mount(JsonEditor, { label: 'Config', schema, value });
+		const read = await tool('read_json');
+		expect(read.annotations?.readOnlyHint).toBe(true);
+		const answer = await read.execute({}, {});
+		expect(answer).toEqual({
+			status: 'done',
+			value: { name: 'Ada', token: '[hidden]', keys: ['[hidden]'] }
+		});
+	});
+
+	test('an edit reports a change as a person does, and keeps what stayed hidden', async () => {
+		const onValueChange = vi.fn();
+		mount(JsonEditor, { label: 'Config', schema, value, onValueChange });
+		const edit = await tool('edit_json');
+		expect(edit.annotations?.consequentialHint).toBe(true);
+		const answer = await edit.execute(
+			{ value: { name: 'Bob', token: '[hidden]', keys: ['[hidden]', 'new'] } },
+			{}
+		);
+		expect(answer).toEqual({ status: 'done' });
+		expect(onValueChange).toHaveBeenLastCalledWith({
+			name: 'Bob',
+			token: 'secret',
+			keys: ['k1', 'new']
+		});
+	});
+
+	test('a person can take an edit back', async () => {
+		const onValueChange = vi.fn();
+		const { container } = mount(JsonEditor, { schema, value: { name: 'Ada' }, onValueChange });
+		await (await tool('edit_json')).execute({ value: { name: 'Bob' } }, {});
+		await tick();
+		const root = container.querySelector('[data-slot="json-editor"]') as HTMLElement;
+		root.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }));
+		await waitFor(() => expect(onValueChange).toHaveBeenLastCalledWith({ name: 'Ada' }));
+	});
+
+	test('a value that breaks the schema is refused and changes nothing', async () => {
+		const onValueChange = vi.fn();
+		mount(JsonEditor, { schema, value, onValueChange });
+		const answer = await (await tool('edit_json')).execute({ value: { name: 'far too long' } }, {});
+		expect(answer.status).toBe('invalid');
+		expect(answer.issues).toEqual([expect.objectContaining({ path: ['name'], code: 'maxLength' })]);
+		expect(onValueChange).not.toHaveBeenCalled();
+	});
+
+	test('a read-only editor is read and not edited, a disabled one too', async () => {
+		mount(JsonEditor, { schema, value, readOnly: true });
+		await tool('read_json');
+		expect(tools.has('edit_json')).toBe(false);
+		cleanup();
+		await new Promise((resolve) => setTimeout(resolve, 80));
+		mount(JsonEditor, { schema, value, disabled: true });
+		await tool('read_json');
+		expect(tools.has('edit_json')).toBe(false);
+	});
+
+	test('tool={false} removes it', async () => {
+		mount(JsonEditor, { schema, value, tool: false });
+		await new Promise((resolve) => setTimeout(resolve, 80));
+		expect(tools.size).toBe(0);
+	});
+
+	test('in a Form, the value is a field of its tool, held to the schema', async () => {
+		const onSubmit = vi.fn();
+		mount(Form, {
+			title: 'Deploy',
+			inputs: { config: { type: 'json', label: 'Config', schema } },
+			onSubmit
+		});
+		const form = await tool('deploy');
+		expect(tools.has('read_json')).toBe(false);
+		expect(tools.has('edit_json')).toBe(false);
+		expect(form.inputSchema.properties.config).toMatchObject({ type: 'object' });
+		const refused = await form.execute({ config: { name: 'far too long' } }, {});
+		expect(onSubmit).not.toHaveBeenCalled();
+		expect(refused.status).not.toBe('submitted');
+		await form.execute({ config: { name: 'Bob' } }, {});
+		await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+		expect(onSubmit.mock.calls[0][0]).toEqual({ config: { name: 'Bob' } });
 	});
 });
 

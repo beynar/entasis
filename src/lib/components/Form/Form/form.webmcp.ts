@@ -3,6 +3,8 @@
 // an app turned WebMCP on and the browser has it.
 
 import { tick } from 'svelte';
+import { jsonToolSchema, type JsonSchema } from '../JsonEditor/jsonEditor.schema.js';
+import { validateJson } from '../JsonEditor/jsonEditor.validate.js';
 import type { WebMCPExpose } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 import { watchWebMCPTool } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 import {
@@ -185,6 +187,8 @@ export function fieldToolSchema(input: FormValueInput): WebMCPJsonSchema | null 
 					countryCode: { type: 'string', description: 'ISO 3166-1 alpha-2 code, such as FR.' }
 				}
 			};
+		case 'json':
+			return props.schema === false ? null : jsonToolSchema(props.schema as JsonSchema | undefined);
 		case 'file':
 		case 'files':
 		case 'voice':
@@ -268,6 +272,8 @@ export function controlAccepts(input: FormValueInput, value: unknown, current: u
 	if (value === null) return true;
 	const props = input as unknown as EntryProps;
 	const type = input.type === 'field' ? input.fieldType : input.type;
+	if (type === 'json')
+		return validateJson(value, (props.schema ?? true) as JsonSchema).length === 0;
 	if (type === 'time') return timeWithinLimits(props, value);
 	if (type === 'rating') return (value as number) % (props.halfSteps ? 0.5 : 1) === 0;
 	if (type === 'slider' || type === 'slider-range') return thumbsStayPut(props, value, current);
@@ -446,7 +452,9 @@ async function fill(form: FormState<FormInputs>, values: FormToolInput) {
 			const value = remaining.get(name);
 			remaining.delete(name);
 			progressed = true;
-			if (fitsToolSchema(schema, value) && controlAccepts(input, value, field.value)) {
+			// The editor holds a value to the whole of its schema, which this short check does not read.
+			const isJson = (input.type === 'field' ? input.fieldType : input.type) === 'json';
+			if ((isJson || fitsToolSchema(schema, value)) && controlAccepts(input, value, field.value)) {
 				field.setValue(toFieldValue(input, value) as never);
 				filled.push(name);
 			} else {

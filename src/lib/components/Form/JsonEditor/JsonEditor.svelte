@@ -6,6 +6,7 @@
 	import { boundDefault, createBindableValue } from '$lib/utils/state.svelte.js';
 	import { useClipboard } from '$lib/utils/useClipboard.svelte.js';
 	import { useLiveAnnouncer } from '$lib/utils/useLiveAnnouncer.svelte.js';
+	import { useWebMCPExposure } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 	import { tooltip } from '../../Tooltip/tooltip.attachment.svelte.js';
 	import { arrowsInSimpleIcon } from '../../Icons/arrowsInSimple.js';
 	import { arrowsOutSimpleIcon } from '../../Icons/arrowsOutSimple.js';
@@ -32,6 +33,7 @@
 		type JsonEditorMenu
 	} from './jsonEditor.state.svelte.js';
 	import { useJsonEditorTheme } from './jsonEditor.theme.js';
+	import type { JsonEditorToolSource } from './jsonEditor.webmcp.js';
 
 	let {
 		defaultValue = null,
@@ -62,6 +64,7 @@
 		keyWidth,
 		i18n,
 		theme,
+		tool,
 		...rest
 	}: JsonEditorProps = $props();
 
@@ -201,6 +204,36 @@
 		}
 	});
 	setJsonEditor(editor);
+
+	useWebMCPExposure<JsonEditorToolSource>(
+		() => import('./jsonEditor.webmcp.js'),
+		{
+			get tool() {
+				return tool;
+			},
+			get label() {
+				return rest.label;
+			},
+			get schema() {
+				return schema;
+			},
+			get value() {
+				return editor.value;
+			},
+			get disabled() {
+				return field.disabled;
+			},
+			get readOnly() {
+				return field.readOnly;
+			},
+			get issues() {
+				return editor.issues;
+			},
+			replace: (next) => editor.replace(next)
+		},
+		// In a Form, the value is a field of the form's own tool.
+		() => field.form === undefined
+	);
 
 	// A submit, or `field.validate()`, checks the value against the schema, then the app's own rule.
 	function checkValue(next: JsonValue): FieldValidatorResult {
@@ -423,6 +456,7 @@
 		bind:open={menuOpen}
 		ref={menu.anchor}
 		trigger={false}
+		tool={false}
 		position="bottom-start"
 		offset={4}
 		fitTrigger={false}

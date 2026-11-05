@@ -352,6 +352,45 @@ const pickVariant = (
 	return best;
 };
 
+// Keywords holding data, and keywords whose keys are names a schema's author chose.
+const DATA_KEYWORDS = new Set(['const', 'default', 'enum', 'examples']);
+const NAMED_KEYWORDS = new Set(['properties', 'patternProperties', 'dependentSchemas']);
+
+const inlineRefs = (node: unknown, root: JsonSchema, seen: readonly string[]): unknown => {
+	if (Array.isArray(node)) return node.map((item) => inlineRefs(item, root, seen));
+	if (typeof node !== 'object' || node === null) return node;
+	const {
+		$ref,
+		$defs: _defs,
+		definitions: _definitions,
+		...rest
+	} = node as Record<string, unknown>;
+	const inlined: Record<string, unknown> = {};
+	if (typeof $ref === 'string' && !seen.includes($ref)) {
+		const target = inlineRefs(lookupRef($ref, root), root, [...seen, $ref]);
+		if (typeof target === 'object') Object.assign(inlined, target);
+	}
+	for (const [key, value] of Object.entries(rest)) {
+		if (DATA_KEYWORDS.has(key)) {
+			inlined[key] = value;
+		} else if (NAMED_KEYWORDS.has(key) && typeof value === 'object' && value !== null) {
+			inlined[key] = Object.fromEntries(
+				Object.entries(value).map(([name, item]) => [name, inlineRefs(item, root, seen)])
+			);
+		} else {
+			inlined[key] = inlineRefs(value, root, seen);
+		}
+	}
+	return inlined;
+};
+
+/**
+ * A schema that can stand as one property of a tool's input: a `$ref` would point into that input
+ * rather than this document, so each is replaced by its target, and a cycle ends in any value.
+ */
+export const jsonToolSchema = (schema: JsonSchema | undefined): Record<string, unknown> =>
+	typeof schema === 'object' ? (inlineRefs(schema, schema, []) as Record<string, unknown>) : {};
+
 /**
  * Reads a schema for one value: its types, its allowed values and, for a union, the branches and
  * the one in use. `preferred` is the branch the user picked, kept while the value fits it.

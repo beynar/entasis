@@ -1,4 +1,5 @@
 import type { Messages } from '$lib/i18n/en.js';
+import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 import type { InputProps } from '../Field/field.js';
 import type { JsonEditorThemeProps } from './jsonEditor.theme.js';
 import type { JsonPath, JsonSchema, JsonValue } from './jsonEditor.schema.js';
@@ -85,6 +86,11 @@ export type JsonEditorProps = Omit<InputProps<'json'>, 'theme' | 'size'> & {
 	onIssuesChange?: (issues: readonly JsonEditorIssue[]) => void;
 	/** Called when the value changes. */
 	onValueChange?: (value: JsonValue | null) => void;
+	/**
+	 * How the editor appears to AI agents under `<Theme webmcp>`: `false` keeps it from them. Outside a
+	 * Form, it offers `read_json` and `edit_json`; in one, its value is a field of the form's tool.
+	 */
+	tool?: WebMCPToolProp;
 	/** Per-instance i18n overrides merged over the global catalog. */
 	i18n?: Partial<Messages>;
 	/** Theme overrides for the editor's parts and its Field. */

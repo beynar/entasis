@@ -223,6 +223,11 @@ await document.modelContext.executeTool(form, { email: 'ada@example.com' });`;
 			note: 'Searching moves the viewer to the match, as it would for a person.'
 		},
 		{
+			component: 'JsonEditor',
+			tools: 'read_json, edit_json',
+			note: 'Outside a Form. Held to its schema, and masked values stay hidden. A person can undo an edit.'
+		},
+		{
 			component: 'Kanban',
 			tools: 'read_board, move_card',
 			note: 'Each card’s title and description. Follows the board’s own move rules.'

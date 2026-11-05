@@ -15,6 +15,7 @@ Nothing to set: names and descriptions come from the props a component already h
 - Command, PopupMenu, MenuBar, a Sidebar row that only runs a handler: \`run_command({ id })\` and \`run_consequential_command({ id })\`. ContextMenu joins only while open, as its rows act on what was right-clicked.
 - Sidebar, NavigationMenu, Breadcrumbs: \`navigate({ to })\`, limited to links on this site.
 - Tabs: \`select_tab\`. Pagination: \`go_to_page\`.
+- JsonEditor outside a Form: \`read_json\`, \`edit_json\`.
 - DataTable: \`query_table\`, and \`move_row\` while rows can be reordered. Chart: \`read_chart_data\`. DocumentViewer: \`search_document\`, \`read_document\`. Kanban: \`read_board\`, \`move_card\`. EventCalendar: \`read_calendar\`, \`show_calendar\`, \`move_event\`. What these read carries \`untrustedContentHint\`, and is limited to what the component shows: a cell as it is drawn when its column has a renderer (a virtualized row off screen reads as empty there), the fields a chart's marks name, a card's title and description. Labels of buttons and rows reach the model as option titles, so \`tool={false}\` one that quotes user content.
 
 Only the tools of the topmost modal Dialog stay available: page tools pause behind any modal, with or without a tool of its own.
