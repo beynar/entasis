@@ -359,18 +359,14 @@ const NAMED_KEYWORDS = new Set(['properties', 'patternProperties', 'dependentSch
 const inlineRefs = (node: unknown, root: JsonSchema, seen: readonly string[]): unknown => {
 	if (Array.isArray(node)) return node.map((item) => inlineRefs(item, root, seen));
 	if (typeof node !== 'object' || node === null) return node;
-	const {
-		$ref,
-		$defs: _defs,
-		definitions: _definitions,
-		...rest
-	} = node as Record<string, unknown>;
+	const { $ref, ...rest } = node as Record<string, unknown>;
 	const inlined: Record<string, unknown> = {};
 	if (typeof $ref === 'string' && !seen.includes($ref)) {
 		const target = inlineRefs(lookupRef($ref, root), root, [...seen, $ref]);
 		if (typeof target === 'object') Object.assign(inlined, target);
 	}
 	for (const [key, value] of Object.entries(rest)) {
+		if (key === '$defs' || key === 'definitions') continue;
 		if (DATA_KEYWORDS.has(key)) {
 			inlined[key] = value;
 		} else if (NAMED_KEYWORDS.has(key) && typeof value === 'object' && value !== null) {
