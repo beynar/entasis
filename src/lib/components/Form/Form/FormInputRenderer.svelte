@@ -12,6 +12,7 @@
 	import DateInput from '../DateInput/DateInput.svelte';
 	import DateSelectorInput from '../DateSelector/DateSelectorInput.svelte';
 	import FileInput from '../File/FileInput.svelte';
+	import JsonEditor from '../JsonEditor/JsonEditor.svelte';
 	import KeyValueInput from '../KeyValueInput/KeyValueInput.svelte';
 	import NumberInput from '../NumberInput/NumberInput.svelte';
 	import PasswordInput from '../PasswordInput/Password.svelte';
@@ -134,6 +135,8 @@
 	<TagsInput {...inputProps as FormInputProps<'tag'>} density={inheritedDensity} {name} />
 {:else if input.type === 'keyvalue'}
 	<KeyValueInput {...inputProps as FormInputProps<'keyvalue'>} {name} />
+{:else if input.type === 'json'}
+	<JsonEditor {...inputProps as FormInputProps<'json'>} {name} />
 {:else if input.type === 'pin'}
 	<PinInput {...inputProps as FormInputProps<'pin'>} {name} />
 {:else if input.type === 'time'}

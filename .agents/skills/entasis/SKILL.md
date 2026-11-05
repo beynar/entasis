@@ -316,7 +316,7 @@ Pattern: `import { set{Component}Theme } from 'entasis/{kebab-name}'`. Overrides
 
 **Display**: See [display.md](display.md) for Button, ButtonGroup, Avatar, Chip, Heading, Code, Meter, MetadataList, Rating, ToggleButton, ToggleButtonGroup, QRCode, DocumentViewer, Icons.
 
-**Form Inputs**: See [form-inputs.md](form-inputs.md) for TextInput, TextArea, NumberInput, RatingInput, PasswordInput, PhoneInput, DateInput, TimeInput, ColorInput, ColorPicker, Select, Combobox, Autocomplete, TagsInput, KeyValueInput, Switch, RadioInput, CheckboxesInput, FileInput, Calendar, MiniCalendar, Form, MultiStepForm.
+**Form Inputs**: See [form-inputs.md](form-inputs.md) for TextInput, TextArea, NumberInput, RatingInput, PasswordInput, PhoneInput, DateInput, TimeInput, ColorInput, ColorPicker, Select, Combobox, Autocomplete, TagsInput, KeyValueInput, JsonEditor, Switch, RadioInput, CheckboxesInput, FileInput, Calendar, MiniCalendar, Form, MultiStepForm.
 
 **Layout & Navigation**: See [layout.md](layout.md) for Tabs, Tabbar, Stepper, Breadcrumbs, NavigationMenu, Accordion, Collapsible, Separator, Menu, PopupMenu, MenuOption, Carousel, ScrollArea, AspectRatio, Marquee, Sidebar, AppShell, Grid/GridSpan — including `AppShell variant="framed"`, `Sidebar activeVariant`, and the `mount` axis on Tabs and Stepper.
 
@@ -451,6 +451,7 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 - `entasis/date-selector` — Date selector (/components/date-selector)
 - `entasis/file-input` — File (/components/file)
 - `entasis/form` — Form (/components/form)
+- `entasis/json-editor` — JSON editor (/components/json-editor)
 - `entasis/key-value-input` — Key value input (/components/key-value-input)
 - `entasis/multi-step-form` — Multi-step form (/components/multi-step-form)
 - `entasis/number-input` — Number input (/components/number-input)

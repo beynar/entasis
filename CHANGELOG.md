@@ -6,6 +6,21 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `SortableList`: `customHandle`, for an `item` snippet that draws its own grip (an element marked
+  `data-dnd-handle`), when it has to sit inside the row or do more than drag.
+- `JsonEditor` (`entasis/json-editor`, also `type: 'json'` in a Form): edits a JSON value through the
+  right control for each field. With a `schema` (drafts 2020-12 and 7: `$ref`, `allOf`, `oneOf`,
+  `anyOf`, `if`, `dependentRequired`, formats and validation keywords), each type and format gets
+  its input, and the schema's limits become guards: required, min and max, length, pattern, enum,
+  const, unique items, closed objects. Objects and arrays add, remove, duplicate, rename and reorder
+  their rows, by pointer or keyboard. Without a schema, the shape is inferred from the value and
+  every type stays changeable. A JSON text view stays in sync. Cmd+Z or Ctrl+Z takes back the last
+  edit, and Shift+Cmd+Z, Shift+Ctrl+Z or Ctrl+Y puts it back. `size`, `density`, `typeIcons`,
+  `expandDepth`, `descriptions`, `keyWidth`, `controls`, `mode`, `disabled`, `readOnly`, `api`.
+  `inferJsonSchema` and `validateJson` are exported too, and messages come from the i18n catalog.
+
 ## 0.15.1 — 2026-11-03
 
 ### Fixed

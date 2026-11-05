@@ -33,6 +33,7 @@ import type { RichTextInputProps } from '../../RichTextInput/richTextInput.props
 import type { PasswordInputProps } from '../PasswordInput/passwordInput.props.js';
 import type { CheckboxProps } from '../Checkbox/checkbox.props.js';
 import type { TagsInputProps } from '../TagsInput/tagsInput.props.js';
+import type { JsonEditorProps } from '../JsonEditor/jsonEditor.props.js';
 import type { KeyValueInputProps } from '../KeyValueInput/keyValueInput.props.js';
 import type { PinInputProps } from '../PinInput/pinInput.props.js';
 import type { Slot } from '$lib/components/Slot/slot.js';
@@ -210,6 +211,9 @@ type BaseFormFieldInput =
 	| ({
 			type: 'keyvalue';
 	  } & KeyValueInputProps)
+	| ({
+			type: 'json';
+	  } & JsonEditorProps)
 	| ({
 			type: 'pin';
 	  } & PinInputProps);

@@ -12,6 +12,7 @@
 	let {
 		items = $bindable([]),
 		handle = false,
+		customHandle = false,
 		disabled = false,
 		indicator = false,
 		size = 'normal',
@@ -47,6 +48,8 @@
 	// Any truthy `handle` turns on handle mode; a snippet/string additionally
 	// customizes the grip.
 	const handleMode = $derived(Boolean(handle));
+	// Only the grip drags in both, but here it is the row's to draw.
+	const dragsFromGrip = $derived(handleMode || customHandle);
 	const handleContent = $derived(typeof handle === 'boolean' ? undefined : handle);
 
 	// Primitive-friendly default row label, used only when no `item` snippet is
@@ -77,7 +80,7 @@
 		// Both horizontal and grid resolve before/after on the horizontal axis;
 		// the engine's wrapped-line handling covers the grid's row breaks.
 		axis: () => (orientation === 'vertical' ? 'vertical' : 'horizontal'),
-		handle: () => handleMode,
+		handle: () => dragsFromGrip,
 		disabled: () => disabled,
 		accepts: (source) =>
 			!!listGroup &&
@@ -133,10 +136,10 @@
 		{@const payload = { item: value, index, isDragging: idOf(value) === draggingId }}
 		<li
 			animate:flip={flipParams}
-			class={classes.item({ size, handle: handleMode, dragging: payload.isDragging, disabled })}
+			class={classes.item({ size, handle: dragsFromGrip, dragging: payload.isDragging, disabled })}
 			{@attach dnd.item(value)}
 		>
-			{#if handleMode}
+			{#if handleMode && !customHandle}
 				<button
 					type="button"
 					data-dnd-handle

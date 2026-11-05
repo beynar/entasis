@@ -204,6 +204,10 @@ export const componentNavigationSections = [
 				text: 'Form'
 			},
 			{
+				href: '/components/json-editor',
+				text: 'JSON editor'
+			},
+			{
 				href: '/components/key-value-input',
 				text: 'Key value input'
 			},

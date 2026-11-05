@@ -377,6 +377,11 @@
 			"svelte": "./dist/components/Form/Form/index.js",
 			"default": "./dist/components/Form/Form/index.js"
 		},
+		"./json-editor": {
+			"types": "./dist/components/Form/JsonEditor/index.d.ts",
+			"svelte": "./dist/components/Form/JsonEditor/index.js",
+			"default": "./dist/components/Form/JsonEditor/index.js"
+		},
 		"./key-value-input": {
 			"types": "./dist/components/Form/KeyValueInput/index.d.ts",
 			"svelte": "./dist/components/Form/KeyValueInput/index.js",
@@ -1002,6 +1007,9 @@
 			],
 			"form": [
 				"dist/components/Form/Form/index.d.ts"
+			],
+			"json-editor": [
+				"dist/components/Form/JsonEditor/index.d.ts"
 			],
 			"key-value-input": [
 				"dist/components/Form/KeyValueInput/index.d.ts"

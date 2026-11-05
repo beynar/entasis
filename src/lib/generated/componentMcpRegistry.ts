@@ -46,6 +46,7 @@ import { dateInputDescription } from '$lib/components/Form/DateInput/dateInput.m
 import { dateSelectorDescription } from '$lib/components/Form/DateSelector/dateSelector.mcp.js';
 import { fileInputDescription } from '$lib/components/Form/File/fileInput.mcp.js';
 import { formDescription } from '$lib/components/Form/Form/form.mcp.js';
+import { jsonEditorDescription } from '$lib/components/Form/JsonEditor/jsonEditor.mcp.js';
 import { keyValueInputDescription } from '$lib/components/Form/KeyValueInput/keyValueInput.mcp.js';
 import { multiStepFormDescription } from '$lib/components/Form/MultiStepForm/multiStepForm.mcp.js';
 import { numberInputDescription } from '$lib/components/Form/NumberInput/numberInput.mcp.js';
@@ -193,6 +194,7 @@ export const componentMcpRegistry = {
 	'date-selector': dateSelectorDescription,
 	'file-input': fileInputDescription,
 	form: formDescription,
+	'json-editor': jsonEditorDescription,
 	'key-value-input': keyValueInputDescription,
 	'multi-step-form': multiStepFormDescription,
 	'number-input': numberInputDescription,

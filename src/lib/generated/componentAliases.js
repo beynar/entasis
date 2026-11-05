@@ -49,6 +49,7 @@ export const componentAliases = {
 	'entasis/date-selector': './src/lib/components/Form/DateSelector/index.ts',
 	'entasis/file-input': './src/lib/components/Form/File/index.ts',
 	'entasis/form': './src/lib/components/Form/Form/index.ts',
+	'entasis/json-editor': './src/lib/components/Form/JsonEditor/index.ts',
 	'entasis/key-value-input': './src/lib/components/Form/KeyValueInput/index.ts',
 	'entasis/multi-step-form': './src/lib/components/Form/MultiStepForm/index.ts',
 	'entasis/number-input': './src/lib/components/Form/NumberInput/index.ts',

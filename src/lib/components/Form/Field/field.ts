@@ -8,6 +8,7 @@ import type { FieldThemeProps } from './field.theme.js';
 import type { Density, Sizes } from '$lib/types/theme.js';
 import type { FormInputRegistry } from '../Form/form.js';
 import type { Address } from '../../Address/address.js';
+import type { JsonValue } from '../JsonEditor/jsonEditor.schema.js';
 
 export type KeyValuePair = { key: string; value: string };
 
@@ -22,6 +23,7 @@ export type SliderRangeInputType = 'slider-range';
 export type TagInputType = 'tag';
 export type TagGroupInputType = 'tag-group';
 export type KeyValueInputType = 'keyvalue';
+export type JsonInputType = 'json';
 export type PinInputType = 'pin';
 export type DateInputType = 'datetime' | 'date';
 export type TimeInputType = 'time';
@@ -73,6 +75,7 @@ export type InputType =
 	| TagInputType
 	| TagGroupInputType
 	| KeyValueInputType
+	| JsonInputType
 	| PinInputType
 	| SingleOptionInputType
 	| CalendarInputType;
@@ -127,15 +130,17 @@ export type FieldValue<T extends FieldType> = T extends RegisteredInputType
 																		? string | string[] | null
 																		: T extends KeyValueInputType
 																			? KeyValuePair[]
-																			: T extends SingleOptionInputType
-																				? string
-																				: T extends 'calendar'
-																					? Date
-																					: T extends 'calendar-range'
-																						? [Date | null, Date | null]
-																						: T extends ColorInputType
-																							? string
-																							: never;
+																			: T extends JsonInputType
+																				? JsonValue
+																				: T extends SingleOptionInputType
+																					? string
+																					: T extends 'calendar'
+																						? Date
+																						: T extends 'calendar-range'
+																							? [Date | null, Date | null]
+																							: T extends ColorInputType
+																								? string
+																								: never;
 
 export type InputProps<T extends FieldType> = WithSlot<
 	{
