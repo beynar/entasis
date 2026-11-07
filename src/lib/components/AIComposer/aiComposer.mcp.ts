@@ -53,6 +53,8 @@ AIComposer embeds RichTextInput, which is built on edytor, an optional peer depe
 
 Enter sends and Shift+Enter inserts a newline (\`submitShortcut\` defaults to \`'enter'\`; pass \`'none'\` to make Enter a newline). When no direct submit callback is supplied, the nearest conversation receives a user message. Either way the draft clears once the send succeeds: a direct \`onSubmit\` clears it when it returns or its promise resolves, and keeps it when it throws or rejects, showing the error as a danger alert. Focus returns to the editor after every send that started in the composer (Enter, the send button even in Safari, the Queue button, or committing a queued edit), so the next message can be typed straight away. \`onStop\` overrides \`conversation.requestStop()\`; stop failures are also visible.
 
+\`submitDisabled\` holds sending without disabling the editor: the send and queue buttons are disabled and \`submitShortcut\`, a queued-message edit and the handle's \`submit()\` do nothing, while the editor keeps its caret and takes \`insertText\`, and attachments, \`actions\` and stop still work. Use it while the app dictates into the editor from its own microphone in \`actions\`; \`disabled\` would also lock the editor, and \`busy\` turns the send button into stop.
+
 The handle's \`submit(text?)\` sends the current draft, or \`text\` in its place, through the same path (queueing while busy) and focuses the editor; use it for submit-on-select prompt suggestions. For fill-on-select, set the input and call \`focus()\`: it lands in the editor with the caret after the new text, even when the value changed in the same tick.
 
 ## Trigger sources

@@ -17,6 +17,7 @@
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { useDirection } from '$lib/utils/useDirection.svelte.js';
 	import { useActivationDirection } from './tabs.direction.svelte.js';
+	import { useExternalPanels } from './tabs.external.svelte.js';
 
 	let {
 		items,
@@ -31,6 +32,7 @@
 		tabbar,
 		mount = 'lazy',
 		children: panel,
+		panels,
 		tool,
 		...attachments
 	}: TabsProps<Item> = $props();
@@ -132,6 +134,15 @@
 		orientation: () => effectiveTabbarOrientation,
 		direction
 	});
+	// Panels the caller renders (`panels`): Tabs ties them to their tabs and animates the switch.
+	const external = useExternalPanels({
+		panels: () => panels,
+		id,
+		values: () => tabValues,
+		activeValue: () => (activeIndex >= 0 ? tabValues[activeIndex] : undefined),
+		activationDirection: () => activationDirection.value,
+		motion: () => panelTransition
+	});
 </script>
 
 <div
@@ -142,7 +153,7 @@
 >
 	<Tabbar
 		id={`${id}-tabs`}
-		controlsPanels
+		controlsPanels={panels ? external.controls : true}
 		fullWidth={tabbar?.fullWidth}
 		label={tabbar?.label}
 		onValueChange={({ value: next, reason }) => emitChange(tabValues.indexOf(next), reason)}
@@ -159,22 +170,24 @@
 		class={tabbar?.class}
 		theme={tabbar?.theme}
 	/>
-	<Stepper
-		class={classes.content({ placement })}
-		bind:api={() => api, bindApi}
-		{items}
-		bind:value={() => activeIndex, setActiveIndex}
-		onValueChange={({ value: index }) => handleStepChange(index)}
-		panelRole="tabpanel"
-		panelId={(index) => `${id}-tabs-panel-${index}`}
-		panelAriaLabelledby={({ index }) => `${id}-tabs-tab-${index}`}
-		transition={panelTransition}
-		{mount}
-		panelActivationDirection={(index) =>
-			index === activeIndex ? activationDirection.value : undefined}
-	>
-		{#snippet children(payload)}
-			{@render panel?.(payload)}
-		{/snippet}
-	</Stepper>
+	{#if !panels}
+		<Stepper
+			class={classes.content({ placement })}
+			bind:api={() => api, bindApi}
+			{items}
+			bind:value={() => activeIndex, setActiveIndex}
+			onValueChange={({ value: index }) => handleStepChange(index)}
+			panelRole="tabpanel"
+			panelId={(index) => `${id}-tabs-panel-${index}`}
+			panelAriaLabelledby={({ index }) => `${id}-tabs-tab-${index}`}
+			transition={panelTransition}
+			{mount}
+			panelActivationDirection={(index) =>
+				index === activeIndex ? activationDirection.value : undefined}
+		>
+			{#snippet children(payload)}
+				{@render panel?.(payload)}
+			{/snippet}
+		</Stepper>
+	{/if}
 </div>

@@ -137,10 +137,11 @@ export type TabbarProps = WithAttachments<
 		 */
 		label?: string;
 		/**
-		 * When true, each tab gets `aria-controls` pointing at `{id}-panel-{index}`.
-		 * Set by `Tabs`, which renders the matching panels.
+		 * When true, each tab gets `aria-controls` pointing at `{id}-panel-{index}`; a function gives
+		 * each tab's panel id itself, or `undefined` for a tab with no panel.
+		 * Set by `Tabs`, which renders the matching panels or links the caller's.
 		 */
-		controlsPanels?: boolean;
+		controlsPanels?: boolean | ((index: number) => string | undefined);
 		/**
 		 * The size of the tabs.
 		 * @default 'normal'

@@ -50,6 +50,7 @@
 		queue = $bindable<AIComposerQueuedMessage[]>(),
 		busy,
 		disabled = false,
+		submitDisabled = false,
 		queueWhileBusy = true,
 		fileDropzone = false,
 		fileMultiple = true,
@@ -238,6 +239,7 @@
 
 	const submitController: AIComposerSubmitController = new AIComposerSubmitController(() => ({
 		disabled,
+		submitDisabled,
 		canSubmit,
 		busy: resolvedBusy,
 		queueWhileBusy,
@@ -306,6 +308,8 @@
 	 * button (queueing while busy), then returns focus to the editor.
 	 */
 	export async function submit(text?: string): Promise<void> {
+		// Held sending leaves the draft as it is too.
+		if (submitDisabled) return;
 		if (text !== undefined) {
 			tokens = [];
 			submitMetadata.clear();
@@ -597,6 +601,7 @@
 		{fileDropzone}
 		attachDisabled={disabled || isWorking || displayFiles.length >= resolvedMaxFiles}
 		{disabled}
+		{submitDisabled}
 		{isWorking}
 		isSubmitting={submitController.isSubmitting}
 		isStopping={submitController.isStopping}

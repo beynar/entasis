@@ -70,7 +70,12 @@
 	/** Index of the active tab; -1 when no tab is selected. */
 	const selectedIndex = $derived(selection.index);
 	const tabId = (index: number) => `${id}-tab-${index}`;
-	const panelId = (index: number) => (controlsPanels ? `${id}-panel-${index}` : undefined);
+	const panelId = (index: number) =>
+		typeof controlsPanels === 'function'
+			? controlsPanels(index)
+			: controlsPanels
+				? `${id}-panel-${index}`
+				: undefined;
 	// Every path into a selection (click, focus-follows-selection, menu entry) lands here, so a
 	// disabled tab can never be selected even when a key reaches it while it holds DOM focus.
 	const select = (index: number) => {

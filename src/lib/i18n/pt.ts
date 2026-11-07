@@ -582,6 +582,11 @@ export const pt: Messages = {
 	aiComposerFileTypeVideos: 'vídeos',
 	aiComposerFileTypeAudio: 'áudio',
 	aiComposerFileTypeText: 'arquivos de texto',
+	fileSizeUnits: ['B', 'KB', 'MB', 'GB', 'TB'],
+	aiFileStatusPending: 'Pendente',
+	aiFileStatusUploading: 'Enviando',
+	aiFileStatusUploaded: 'Enviado',
+	aiFileStatusFailed: 'Falhou',
 	// Seletor de modelo de IA
 	aiModelSelectorPlaceholder: 'Selecionar modelo',
 	aiModelSelectorSearch: 'Pesquisar modelos...',

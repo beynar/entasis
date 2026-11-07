@@ -1,3 +1,5 @@
+import { en } from '$lib/i18n/en.js';
+import { formatFileSize, type FileSizeMessages } from '$lib/utils/formatFileSize.js';
 import { fromEvent } from 'file-selector';
 import { untrack } from 'svelte';
 import { on } from 'svelte/events';
@@ -80,12 +82,9 @@ export class FileDropzone {
 		this.state = 'idle';
 	}
 
-	formatSize(bytes: number): string {
-		if (bytes === 0) return '0 Bytes';
-		const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-		const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
-		if (unitIndex === 0) return `${bytes} ${units[unitIndex]}`;
-		return `${(bytes / 1024 ** unitIndex).toFixed(1)} ${units[unitIndex]}`;
+	/** A size in the words of `messages` (the `I18n` catalog), English when left out. */
+	formatSize(bytes: number, messages: FileSizeMessages = en): string {
+		return formatFileSize(bytes, messages);
 	}
 
 	private get options(): FileDropzoneOptions {

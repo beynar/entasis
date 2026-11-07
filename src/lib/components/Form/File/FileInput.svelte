@@ -175,7 +175,7 @@
 		<div transition:slide class="h-fit w-full">
 			<Slot render={fileList} class={classes.fileList({ class: fileListClass, size: rest.size })}>
 				{#each dropzone.files as fil (fil.name + fil.size)}
-					{@const size = dropzone.formatSize(fil.size)}
+					{@const size = dropzone.formatSize(fil.size, t)}
 					<div transition:slide={{ duration: 300 }}>
 						<Slot render={file} class={classes.file({ class: fileClass, size: rest.size })}>
 							{#if isImage(fil)}

@@ -569,6 +569,11 @@ export const ja: Messages = {
 	aiComposerFileTypeVideos: '動画',
 	aiComposerFileTypeAudio: '音声',
 	aiComposerFileTypeText: 'テキストファイル',
+	fileSizeUnits: ['B', 'KB', 'MB', 'GB', 'TB'],
+	aiFileStatusPending: '待機中',
+	aiFileStatusUploading: 'アップロード中',
+	aiFileStatusUploaded: 'アップロード済み',
+	aiFileStatusFailed: '失敗',
 	// AI モデルセレクター
 	aiModelSelectorPlaceholder: 'モデルを選択',
 	aiModelSelectorSearch: 'モデルを検索...',

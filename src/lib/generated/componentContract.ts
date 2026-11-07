@@ -3654,6 +3654,7 @@ export const componentInventory = [
 			'Tabs',
 			'TabsActivationDirection',
 			'TabsApi',
+			'TabsPanels',
 			'TabsPlacement',
 			'TabsProps',
 			'TabsRenderPayload',
@@ -3661,6 +3662,7 @@ export const componentInventory = [
 			'TabsThemeProps',
 			'TabsValueChangePayload',
 			'TabsValueChangeReason',
+			'createTabsPanels',
 			'setTabsTheme',
 			'tabsTheme',
 			'useTabsTheme'

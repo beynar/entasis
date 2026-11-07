@@ -7,6 +7,7 @@
 	import type { AIFilePreviewProps, AIFilePreviewSource } from './aiFilePreview.props.js';
 	import { useAIFilePreviewTheme } from './aiFilePreview.theme.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { formatFileSize } from '$lib/utils/formatFileSize.js';
 
 	let {
 		ref = $bindable<HTMLDivElement | null>(null),
@@ -27,7 +28,13 @@
 	const fileName = $derived(name ?? file.name);
 	const fileType = $derived(file.type ?? '');
 	const fileSize = $derived(file.size);
-	const formattedSize = $derived(formatFileSize(fileSize));
+	const formattedSize = $derived(fileSize === undefined ? undefined : formatFileSize(fileSize, t));
+	const statusLabels = $derived({
+		pending: t.aiFileStatusPending,
+		uploading: t.aiFileStatusUploading,
+		uploaded: t.aiFileStatusUploaded,
+		failed: t.aiFileStatusFailed
+	});
 	const configuredPreviewUrl = $derived(
 		previewUrl ?? (isNativeFile(file) ? undefined : file.previewUrl)
 	);
@@ -54,15 +61,6 @@
 	function isNativeFile(source: AIFilePreviewSource): source is File {
 		return typeof File !== 'undefined' && source instanceof File;
 	}
-
-	function formatFileSize(value: number | undefined): string | undefined {
-		if (value === undefined) return undefined;
-		if (value >= 1_000_000) {
-			return `${(value / 1_000_000).toFixed(value >= 10_000_000 ? 0 : 1)} MB`;
-		}
-		if (value >= 1_000) return `${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)} KB`;
-		return `${value} B`;
-	}
 </script>
 
 <div
@@ -81,7 +79,7 @@
 		<div class={classes.name()} title={fileName}>{fileName}</div>
 		{#if status || formattedSize}
 			<div class={classes.meta()}>
-				{#if status}<span class="capitalize">{status}</span>{/if}
+				{#if status}<span>{statusLabels[status]}</span>{/if}
 				{#if status && formattedSize}<span aria-hidden="true">·</span>{/if}
 				{#if formattedSize}<span class="tabular-nums">{formattedSize}</span>{/if}
 			</div>

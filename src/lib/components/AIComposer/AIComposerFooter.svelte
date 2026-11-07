@@ -34,6 +34,7 @@
 		fileDropzone,
 		attachDisabled,
 		disabled,
+		submitDisabled,
 		isWorking,
 		isSubmitting,
 		isStopping,
@@ -68,6 +69,8 @@
 		fileDropzone: boolean;
 		attachDisabled: boolean;
 		disabled: boolean;
+		/** Holds the submit and queue buttons only. */
+		submitDisabled: boolean;
 		isWorking: boolean;
 		isSubmitting: boolean;
 		isStopping: boolean;
@@ -200,7 +203,7 @@
 						color="neutral"
 						data-slot="ai-composer-queue-action"
 						label={queueLabel}
-						disabled={disabled || isWorking}
+						disabled={disabled || submitDisabled || isWorking}
 					>
 						{@render listPlusIcon({ size: 16 })}
 					</Button>
@@ -226,6 +229,7 @@
 					label={submitLabel}
 					loading={isSubmitting}
 					disabled={disabled ||
+						submitDisabled ||
 						isWorking ||
 						submitState.isEmpty ||
 						(submitState.isBusy && !queueWhileBusy && !isEditing)}

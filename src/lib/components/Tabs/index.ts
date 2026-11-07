@@ -8,6 +8,7 @@ export type {
 	TabsValueChangeReason
 } from './tabs.props.js';
 export type { TabsActivationDirection } from './tabs.direction.svelte.js';
+export { createTabsPanels, TabsPanels } from './tabs.panels.svelte.js';
 export {
 	tabsTheme,
 	setTabsTheme,

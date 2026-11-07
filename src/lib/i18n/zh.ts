@@ -560,6 +560,11 @@ export const zh: Messages = {
 	aiComposerFileTypeVideos: '视频',
 	aiComposerFileTypeAudio: '音频',
 	aiComposerFileTypeText: '文本文件',
+	fileSizeUnits: ['B', 'KB', 'MB', 'GB', 'TB'],
+	aiFileStatusPending: '等待中',
+	aiFileStatusUploading: '上传中',
+	aiFileStatusUploaded: '已上传',
+	aiFileStatusFailed: '失败',
 	// AI 模型选择器
 	aiModelSelectorPlaceholder: '选择模型',
 	aiModelSelectorSearch: '搜索模型...',

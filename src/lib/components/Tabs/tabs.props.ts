@@ -7,6 +7,7 @@ import type { Snippet } from 'svelte';
 import type { StepperState } from '../Stepper/stepper.state.svelte.js';
 import type { StepperMount } from '../Stepper/stepper.props.js';
 import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
+import type { TabsPanels } from './tabs.panels.svelte.js';
 
 export type TabsPlacement = 'top' | 'bottom' | 'left' | 'right';
 
@@ -123,7 +124,19 @@ export type TabsProps<Item extends TabItem = TabItem> = WithAttachments<{
 	 */
 	mount?: StepperMount;
 	/**
-	 * Repeated panel renderer. Called once for each item.
+	 * Repeated panel renderer. Called once for each item. Not rendered with `panels`.
 	 */
 	children?: Snippet<[TabsRenderPayload<Item>]>;
+	/**
+	 * Panels the caller renders itself, from `createTabsPanels()`: Tabs then renders only its tab
+	 * list and drives the selection as usual. Each element tied with `{@attach panels.panel(value)}`
+	 * gets `role="tabpanel"`, `aria-labelledby` and, when it has none, an `id`, and its tab gets
+	 * `aria-controls`. Tabs never mounts, moves, re-parents or hides them: showing the active one
+	 * (`hidden`, `inert`) stays the caller's. On a switch the entering panel comes in with the
+	 * `motion` preset, from the side of `data-activation-direction` (written on it), and the leaving
+	 * one goes out while `panels.isExiting(value)` is true and it carries `data-tabs-exiting`, if the
+	 * caller keeps it shown meanwhile (otherwise there is an entry only). Reduced motion snaps. `api`, `mount` and
+	 * `children` do not apply.
+	 */
+	panels?: TabsPanels;
 }>;

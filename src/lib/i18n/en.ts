@@ -584,6 +584,12 @@ export const en = {
 	aiComposerFileTypeVideos: 'videos',
 	aiComposerFileTypeAudio: 'audio',
 	aiComposerFileTypeText: 'text files',
+	/** Unit words of a file size, from bytes to terabytes, in base 1024. */
+	fileSizeUnits: ['B', 'KB', 'MB', 'GB', 'TB'] as readonly string[],
+	aiFileStatusPending: 'Pending',
+	aiFileStatusUploading: 'Uploading',
+	aiFileStatusUploaded: 'Uploaded',
+	aiFileStatusFailed: 'Failed',
 	// AI model selector
 	aiModelSelectorPlaceholder: 'Select model',
 	aiModelSelectorSearch: 'Search models...',

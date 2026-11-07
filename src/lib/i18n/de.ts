@@ -584,6 +584,11 @@ export const de: Messages = {
 	aiComposerFileTypeVideos: 'Videos',
 	aiComposerFileTypeAudio: 'Audio',
 	aiComposerFileTypeText: 'Textdateien',
+	fileSizeUnits: ['B', 'KB', 'MB', 'GB', 'TB'],
+	aiFileStatusPending: 'Ausstehend',
+	aiFileStatusUploading: 'Wird hochgeladen',
+	aiFileStatusUploaded: 'Hochgeladen',
+	aiFileStatusFailed: 'Fehlgeschlagen',
 	// KI-Modellauswahl
 	aiModelSelectorPlaceholder: 'Modell auswählen',
 	aiModelSelectorSearch: 'Modelle suchen...',

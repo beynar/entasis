@@ -230,7 +230,7 @@ export class AIComposerFileController {
 		this.notice = describeRejections(rejections, {
 			accept: options.accept,
 			maxFiles: this.maxFiles,
-			maxFileSize: this.dropzone.formatSize(options.maxFileSize),
+			maxFileSize: this.dropzone.formatSize(options.maxFileSize, options.messages),
 			messages: options.messages
 		});
 	}

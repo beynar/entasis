@@ -6,6 +6,31 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `AIComposer`: `submitDisabled` holds sending (the send and queue buttons, `submitShortcut`, a queued-message
+  edit and the handle's `submit()`) while the editor, attachments, `actions` and stop stay usable, for an app that
+  dictates into the editor.
+- `Tabs`: `panels`, from `createTabsPanels()`, for panels the app renders itself, such as an editor's blocks that
+  must stay in the document. Tabs renders only its tab list and drives the selection as usual.
+  `{@attach panels.panel(value)}` ties an element to its tab (`role`, `aria-labelledby`, an `id` when it has
+  none, and `aria-controls` on the tab) without mounting, moving or hiding it. On a switch the entering panel
+  comes in with the Tabs `motion` preset from the side of `data-activation-direction`, and the leaving one plays
+  out while `panels.isExiting(value)` is true. Reduced motion snaps.
+- `Tabbar`: `controlsPanels` also takes a function giving each tab's panel id.
+
+### Changed
+
+- `FileInput` and `AIFilePreview` write file sizes the same way, in the `I18n` locale: base 1024, the locale's
+  number format and unit words, one decimal below 10. In English `512 Bytes` becomes `512 B` and `15.3 KB` becomes
+  `15 KB` in `FileInput`, and `AIFilePreview` moves from base 1000 to 1024. In French they read `512 o`, `1,5 Ko`.
+  The size limit in `AIComposer` messages follows.
+
+### Fixed
+
+- `AIFilePreview` showed its status in English in every locale; it now comes from the catalog.
+- French: the `AIComposer` messages for an unsupported or too large file no longer use an em dash.
+
 ## 0.16.1 — 2026-11-07
 
 ### Added

@@ -576,11 +576,11 @@ export const fr: Messages = {
 	aiComposerUploadFailed: (name: string | number) => `Impossible de téléverser ${name}.`,
 	aiComposerVoiceFailed: 'Le traitement de la saisie vocale a échoué.',
 	aiComposerFileUnsupported: (name: string | number, types: string | number) =>
-		`${name} n'est pas pris en charge — utilisez ${types}`,
+		`${name} n'est pas pris en charge : utilisez ${types}`,
 	aiComposerFilesUnsupported: (count: string | number, types: string | number) =>
-		`${count} fichiers ne sont pas pris en charge — utilisez ${types}`,
+		`${count} fichiers ne sont pas pris en charge : utilisez ${types}`,
 	aiComposerFileTooLarge: (name: string | number, size: string | number) =>
-		`${name} est trop volumineux — la limite est de ${size}`,
+		`${name} est trop volumineux : la limite est de ${size}`,
 	aiComposerFileDuplicate: (name: string | number) => `${name} est déjà joint`,
 	aiComposerFileLimit: (max: string | number) =>
 		`Vous pouvez joindre jusqu'à ${max} ${Number(max) === 1 ? 'fichier' : 'fichiers'}`,
@@ -589,6 +589,11 @@ export const fr: Messages = {
 	aiComposerFileTypeVideos: 'des vidéos',
 	aiComposerFileTypeAudio: "de l'audio",
 	aiComposerFileTypeText: 'des fichiers texte',
+	fileSizeUnits: ['o', 'Ko', 'Mo', 'Go', 'To'],
+	aiFileStatusPending: 'En attente',
+	aiFileStatusUploading: 'Téléversement',
+	aiFileStatusUploaded: 'Téléversé',
+	aiFileStatusFailed: 'Échec',
 	// Sélecteur de modèle IA
 	aiModelSelectorPlaceholder: 'Sélectionner un modèle',
 	aiModelSelectorSearch: 'Rechercher des modèles...',

@@ -570,6 +570,11 @@ export const ar: Messages = {
 	aiComposerFileTypeVideos: 'مقاطع الفيديو',
 	aiComposerFileTypeAudio: 'الصوت',
 	aiComposerFileTypeText: 'الملفات النصية',
+	fileSizeUnits: ['بايت', 'ك.ب', 'م.ب', 'ج.ب', 'ت.ب'],
+	aiFileStatusPending: 'قيد الانتظار',
+	aiFileStatusUploading: 'جارٍ الرفع',
+	aiFileStatusUploaded: 'تم الرفع',
+	aiFileStatusFailed: 'فشل',
 	// محدد نموذج الذكاء الاصطناعي
 	aiModelSelectorPlaceholder: 'اختيار النموذج',
 	aiModelSelectorSearch: 'البحث عن نماذج...',

@@ -2595,6 +2595,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'Tabs',
 		'TabsActivationDirection',
 		'TabsApi',
+		'TabsPanels',
 		'TabsPlacement',
 		'TabsProps',
 		'TabsRenderPayload',
@@ -2602,6 +2603,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'TabsThemeProps',
 		'TabsValueChangePayload',
 		'TabsValueChangeReason',
+		'createTabsPanels',
 		'setTabsTheme',
 		'tabsTheme',
 		'useTabsTheme'

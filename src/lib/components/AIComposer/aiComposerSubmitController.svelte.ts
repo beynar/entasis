@@ -13,6 +13,8 @@ import {
 
 type AIComposerSubmitControllerOptions = {
 	disabled: boolean;
+	/** Holds sending (submit, queue, a queued edit) without disabling the editor. */
+	submitDisabled: boolean;
 	canSubmit: boolean;
 	busy: boolean;
 	queueWhileBusy: boolean;
@@ -46,7 +48,7 @@ export class AIComposerSubmitController {
 	submit = async (event?: AIComposerSubmitEvent): Promise<void> => {
 		event?.preventDefault();
 		const options = this.options;
-		if (options.disabled || this.isWorking || !options.canSubmit) return;
+		if (options.disabled || options.submitDisabled || this.isWorking || !options.canSubmit) return;
 		const meta = options.buildMeta();
 		// A send that started inside the composer hands focus back to the editor once it settles:
 		// the editor is read-only while a send is in flight (which blurs it), and queueing or

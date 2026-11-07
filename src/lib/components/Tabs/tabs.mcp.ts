@@ -41,6 +41,7 @@ Use items for the tab collection and a single children snippet for the repeated 
 - transition: panel swap timing override (\`duration\` in ms, \`easing\`); responsive, and it beats the \`motion\` theme slot.
 - tabbar: props forwarded to the inner Tabbar as one object — \`{ size, orientation, color, alignment, fullWidth, variant, scrollFade, label, activateOnFocus, class, theme }\`. \`orientation\` overrides the placement-derived default. \`activateOnFocus: false\` switches to manual activation (see below).
 - mount: when a panel's content is created — \`lazy\` (default) on first activation and destroyed when the tab is left, \`once\` on first activation and kept, \`eager\` for every panel up front. Inactive panels are \`hidden\` and \`inert\` in every mode.
+- panels: a \`TabsPanels\` from \`createTabsPanels()\`, for panels the caller renders itself (see Panels the caller renders). api, mount and children do not apply then.
 - class: extra classes for the root.
 - theme: theme overrides for the Tabs wrapper.
 
@@ -61,6 +62,29 @@ By default the arrow keys select the tab they move to. With \`tabbar={{ activate
 ## Activation direction
 
 Tabs sets \`data-activation-direction\` on its root and on the active panel: where the active tab sits relative to the previously active one, along the tab list's axis. The value is \`left\` or \`right\` for a horizontal list (mirrored in a right-to-left document), \`up\` or \`down\` for a vertical one (\`placement\` left or right), and \`none\` until the selection first changes. A click, a key, \`api\` navigation and a change of the bound \`value\` all set it, in the same render as the new panel. Use it to style direction-aware panel animations, for example \`[data-activation-direction='right'] [role='tabpanel']:not([hidden])\`. It stays until the next change.
+
+## Panels the caller renders
+
+When the panels are elements Tabs must not own (an editor's blocks that stay in the document for its caret, selection, drag and drop and find), create the link with \`createTabsPanels()\` (from \`entasis/tabs\`), pass it as \`panels\`, and attach \`panels.panel(value)\` to each element by its tab's value. Tabs then renders only its tab list and drives the selection as it always does (value, defaultValue, onValueChange and its reasons, the fallback when a tab goes away).
+
+\`\`\`svelte
+<script lang="ts">
+	import { Tabs, createTabsPanels } from 'entasis/tabs';
+	const panels = createTabsPanels();
+	let value = $state('notes');
+</script>
+
+<Tabs items={['notes', 'tasks']} bind:value {panels} />
+{#each ['notes', 'tasks'] as tab (tab)}
+	<section hidden={tab !== value} {@attach panels.panel(tab)}>…</section>
+{/each}
+\`\`\`
+
+- Each attached element gets \`role="tabpanel"\`, \`aria-labelledby\` pointing at its tab and, when it has none, an \`id\`; its tab gets \`aria-controls\`. A tab without an attached element points at nothing.
+- Tabs never mounts, moves, re-parents or hides them, and never writes \`hidden\`, \`inert\` or \`aria-hidden\`: showing the active one stays the caller's.
+- On a switch the entering panel comes in with the \`motion\` preset (its duration and easing, \`in.x\` / \`in.y\` for the distance, 24px by default) from the side named by \`data-activation-direction\`, which Tabs writes on it. The leaving panel plays out while \`panels.isExiting(value)\` is true (reactive) and it carries \`data-tabs-exiting\`. A renderer that hides inactive panels keeps it shown meanwhile, \`hidden={value !== active && !panels.isExiting(value)}\`, and lays it out with \`[data-tabs-exiting]\` (for example absolutely, so it does not push the new one); otherwise there is an entry only. CSS alone cannot keep a \`hidden\` panel painted under Tailwind, whose preflight hides \`[hidden]\` with \`!important\` in a layer.
+- Reduced motion (the OS setting, Theme \`reduceMotion\`, or the \`data-entasis-reduce-motion\` attribute on the document) snaps.
+- An element its owner replaces is tied again when it is attached; tabs added, moved or removed keep their links, and a panel keeps its id when its tab moves.
 
 ## Composition Rules
 

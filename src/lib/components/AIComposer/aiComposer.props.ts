@@ -187,6 +187,12 @@ export type AIComposerProps = WithAttachments<
 		busy?: boolean;
 		/** Disables editing and composer actions. */
 		disabled?: boolean;
+		/**
+		 * Holds sending while the editor stays usable: the submit and queue buttons are disabled and
+		 * `submitShortcut` does nothing, but the editor keeps its caret and takes `insertText`, and
+		 * attachments, `actions` and stop still work (an app dictating into the editor).
+		 */
+		submitDisabled?: boolean;
 		/** Queues submissions made while busy instead of steering immediately. */
 		queueWhileBusy?: boolean;
 		/** Enables the file chooser, paste handling, and drag-and-drop surface. */
