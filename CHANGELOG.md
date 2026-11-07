@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.16.2 — 2026-11-08
+
 ### Added
 
 - `AIComposer`: `submitDisabled` holds sending (the send and queue buttons, `submitShortcut`, a queued-message
