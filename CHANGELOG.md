@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.16.1 — 2026-11-07
+
 ### Added
 
 - `Markdown`: `getMdxProps(tag, attributes)` is exported from `entasis/markdown`, with `MarkdownMdxTag` and
