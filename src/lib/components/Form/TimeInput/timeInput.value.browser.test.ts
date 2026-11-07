@@ -74,6 +74,27 @@ test('emptying the input and leaving does not write midnight back', async () => 
 	await expect.element(field()).toHaveValue('');
 });
 
+test('the picker opens on the value in each list, with focus left in the input', async () => {
+	await render(TimeInputValueHarness, { props: { value: 11.5 * 3600000 } });
+	await userEvent.click(field());
+	const listed = (label: string) => {
+		const dialog = document.querySelector('dialog[open]');
+		return [...(dialog?.querySelectorAll<HTMLElement>('button') ?? [])].find(
+			(button) => button.textContent?.trim() === label
+		);
+	};
+	const inView = (button: HTMLElement | undefined) => {
+		const viewport = button?.parentElement?.closest<HTMLElement>('[id$="-viewport"]');
+		if (!button || !viewport) return false;
+		const box = button.getBoundingClientRect();
+		const list = viewport.getBoundingClientRect();
+		return list.height > 0 && box.top >= list.top && box.bottom <= list.bottom;
+	};
+	await expect.poll(() => inView(listed('11'))).toBe(true);
+	await expect.poll(() => inView(listed('30'))).toBe(true);
+	expect(document.activeElement).toBe(field().element());
+});
+
 test('typing right after the click that opens the picker goes in the input', async () => {
 	await render(TimeInputValueHarness);
 	await userEvent.click(field());

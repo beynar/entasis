@@ -71,6 +71,8 @@
 		id,
 		enabled: () => !disabled,
 		enableHoverFocus: false,
+		// Escape belongs to the layer holding the control.
+		preventKeyboardDefault: false,
 		defaultFocusedIndex: () => (tabStopIndex >= 0 ? tabStopIndex : null),
 		// Selection follows the keyboard, but only a deliberate key move (an arrow, Home or End)
 		// selects. Tabbing in, a programmatic focus or the restore after a removal never changes

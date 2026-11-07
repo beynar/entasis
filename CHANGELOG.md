@@ -6,6 +6,35 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Markdown`: `getMdxProps(tag, attributes)` is exported from `entasis/markdown`, with `MarkdownMdxTag` and
+  `MdxAttributes`, so an override in `mdxComponents` can start from the rules the built-in tags use.
+- `DataTable`: `api.isEditing`, reactive, says whether a cell editor is open.
+- `useHasOpenLayer()` in `entasis/theme`: whether Escape belongs to an open entasis layer, for a layer the app keeps
+  itself.
+- `Sidebar`: an activity bar item takes `popover`, the props of a Popover whose panel it opens. The square is
+  then its trigger: popup ARIA, a press toggles it instead of closing it as an outside press, focus comes back on
+  close, and its tooltip hides while the panel is open.
+
+### Fixed
+
+- `Markdown` and `AIMessage`: a whole ` ```mermaid ` fence that could not draw left an empty frame, with no
+  source and no error. It now shows its source as a code block. A fence still being written keeps its frame, and
+  new text that draws brings the diagram back.
+- `Mermaid`: `images={false}` did not reach the full screen view, which loaded a node's `img` address. The same went
+  for `peleOptions={{ images: false }}` in `Markdown` and `AIMessage`.
+- `SegmentedControl` held on to Escape, so a popover or dialog around it did not close while it had focus.
+- `DataTable`: in a custom editor, Escape first closes a list the editor holds open, and the next one cancels. `commit`
+  and `cancel` from its payload give focus back to the cell when focus is still in the editor. The `select` and `date`
+  editors keep leaving on one Escape.
+- `TimeInput`: the picker opens with each list on its value, with focus left where it is.
+- `Calendar`, `DateInput` and `DateSelector`: with no `locale`, dates follow the locale set through `I18n`. Without one
+  they still follow the browser.
+- `Overlay` and `NavigationMenu`: an endless animation inside them, such as a `Spinner`, no longer holds their open or close forever, so `onAfterOpen` and `onAfterClose` fire.
+- `Sidebar`: the activity bar held on to Escape, so a popover or the mobile drawer around a focused square did not
+  close.
+
 ## 0.16.0 — 2026-11-05
 
 ### Added

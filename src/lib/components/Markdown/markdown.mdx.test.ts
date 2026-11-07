@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { getMdxProps as publicGetMdxProps } from './index.js';
 import { getMdxProps, type MarkdownMdxTag, type MdxAttributes } from './markdown.mdx.js';
 
 const kept = (tag: MarkdownMdxTag, name: string, value: MdxAttributes[string]) =>
@@ -193,4 +194,8 @@ describe('names outside the list', () => {
 	test('null and undefined never pass', () => {
 		expect(getMdxProps('Stack', { width: null, height: undefined })).toEqual({});
 	});
+});
+
+test('the rules are public, for an override in mdxComponents', () => {
+	expect(publicGetMdxProps).toBe(getMdxProps);
 });

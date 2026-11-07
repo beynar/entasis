@@ -1,5 +1,5 @@
 <script lang="ts" generics="Mode extends DateSelectorMode">
-	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useI18n, useI18nLocale } from '$lib/i18n/context.svelte.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Button from '$lib/components/Button/Button.svelte';
 	import { calendarBlankIcon } from '$lib/components/Icons/calendarBlank.js';
@@ -35,7 +35,7 @@
 		view = 'single',
 		weekStartsOnMonday = true,
 		weekdayLength = 'narrow',
-		locale,
+		locale: localeProp,
 		minDate,
 		maxDate,
 		disabledDates = [],
@@ -67,6 +67,7 @@
 
 	const classes = $derived(useDateSelectorTheme(theme));
 	const t = $derived(useI18n(i18n));
+	const locale = $derived(localeProp ?? useI18nLocale());
 	const calendarType = $derived(
 		(mode === 'date'
 			? 'calendar'

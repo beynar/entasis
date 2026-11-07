@@ -597,6 +597,9 @@
 		get isSaving() {
 			return isSaving;
 		},
+		get isEditing() {
+			return model.editing !== null;
+		},
 		setGlobalFilter: (value) => model.setGlobalFilter(value),
 		setColumnFilter: (columnId, value) => model.setColumnFilter(columnId, value),
 		clearFilters: () => model.clearFilters(),

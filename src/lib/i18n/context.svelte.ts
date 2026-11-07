@@ -41,6 +41,15 @@ export const useI18n = (local?: Partial<Messages>): Messages => {
 	return { ...en, ...global, ...local };
 };
 
+/**
+ * The locale the app set through `I18n` or `setI18n`, or `undefined` without one, for formatting
+ * that otherwise follows the browser. Call inside `$derived`, as `useI18n`.
+ */
+export const useI18nLocale = (): string | undefined => {
+	const ctx = getI18nContext();
+	return (typeof ctx === 'function' ? ctx() : ctx)?.locale;
+};
+
 export const useI18nDirection = (): I18nDirection | undefined => getI18nDirectionContext()?.();
 
 /**

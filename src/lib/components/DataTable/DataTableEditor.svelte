@@ -12,6 +12,7 @@
 	import type { DataTableModel } from './dataTable.model.svelte.js';
 	import type { DataTableRowInstance } from './dataTable.table.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useTheme } from '../Theme/theme.state.svelte.js';
 
 	let {
 		row,
@@ -27,6 +28,7 @@
 		density: 'compact' | 'normal' | 'comfortable';
 	} = $props();
 	const t = $derived(useI18n());
+	const layers = useTheme().layers;
 
 	const config = $derived(model.getColumnConfig(columnId));
 	const editor = $derived(config?.editor);
@@ -67,9 +69,18 @@
 		void model.commitEditing();
 	};
 
+	// A list a custom editor opened itself: Escape closes that first, as the layer does on its own.
+	// The select and date editors open theirs with the edit, so one Escape leaves both.
+	const holdsOpenLayer = (element: HTMLElement) =>
+		layers.open.some(
+			(layer) =>
+				layer.options.dismissOnEscape?.() && [...layer.nodes].some((node) => element.contains(node))
+		);
+
 	const handleKeydown = async (event: KeyboardEvent) => {
 		const editorElement = event.currentTarget as HTMLElement;
 		if (event.key === 'Escape') {
+			if (editor?.type === 'custom' && holdsOpenLayer(editorElement)) return;
 			event.preventDefault();
 			event.stopPropagation();
 			model.cancelEditing();
@@ -94,7 +105,10 @@
 		}
 	};
 
+	let editorElement: HTMLElement | null = null;
+
 	const editorKeyboard: Attachment<HTMLElement> = (element) => {
+		editorElement = element;
 		element.addEventListener('keydown', handleKeydown);
 		return () => element.removeEventListener('keydown', handleKeydown);
 	};
@@ -112,6 +126,29 @@
 
 		return false;
 	};
+
+	// Focus goes back to the cell only from inside the editor: a commit on blur, or from a press
+	// elsewhere, leaves it where the person put it.
+	const holdingFocus = () =>
+		editorElement && ownsClickTarget(editorElement, editorElement.ownerDocument.activeElement)
+			? editorElement
+			: null;
+
+	const customPayload = $derived(
+		payload && {
+			...payload,
+			commit: async () => {
+				const element = holdingFocus();
+				if (element) await commitAndFocusCell(element);
+				else await payload.commit();
+			},
+			cancel: () => {
+				const element = holdingFocus();
+				payload.cancel();
+				if (element) void focusCell(element);
+			}
+		}
+	);
 
 	const commitOnClickOutside: Attachment<HTMLElement> = (element) =>
 		on(element.ownerDocument, 'click', (event) => {
@@ -202,7 +239,7 @@
 				onValueChange={payload.setDraft}
 			/>
 		{:else}
-			<Slot render={editor.render} {payload} />
+			<Slot render={editor.render} payload={customPayload} />
 		{/if}
 
 		{#if errorMessage}

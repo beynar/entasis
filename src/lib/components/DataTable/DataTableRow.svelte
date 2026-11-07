@@ -134,7 +134,9 @@
 	) => {
 		if (interactionMode !== 'grid') return;
 		if (event.target !== event.currentTarget) {
-			if (event.key === 'Escape') {
+			// An open editor has its own Escape, and lets one through for a list it holds.
+			const editing = model.editing?.row.id === row.id && model.editing.columnId === column.id;
+			if (event.key === 'Escape' && !editing) {
 				event.preventDefault();
 				event.stopPropagation();
 				(event.currentTarget as HTMLElement).focus();

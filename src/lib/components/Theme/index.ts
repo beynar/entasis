@@ -1,5 +1,5 @@
 export { default as Theme } from './Theme.svelte';
-export { ThemeState, useDefaultColor, useTheme } from './theme.state.svelte.js';
+export { ThemeState, useDefaultColor, useHasOpenLayer, useTheme } from './theme.state.svelte.js';
 export type { ThemeProps } from './theme.props.js';
 export {
 	defaultThemeSpacingScale,

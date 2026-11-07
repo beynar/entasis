@@ -23,7 +23,7 @@ export interface OpenLifecycleOptions {
 	external?: () => boolean;
 	/**
 	 * The element a CSS-animated surface (no Svelte transition) animates: when no transition
-	 * function ran, completion waits for its running animations and transitions.
+	 * function ran, completion waits for its running animations and transitions, except endless ones.
 	 */
 	animated?: () => Element | null | undefined;
 }
@@ -92,7 +92,10 @@ export function useOpenLifecycle(options: OpenLifecycleOptions): OpenLifecycle {
 		await tick();
 		if (id !== phase || transitionStarted || completed || options.external?.()) return;
 		const element = options.animated?.();
-		const animations = element?.getAnimations?.({ subtree: true }) ?? [];
+		// An animation that never ends (a spinner in the surface) would hold the phase open forever.
+		const animations = (element?.getAnimations?.({ subtree: true }) ?? []).filter(
+			(animation) => animation.effect?.getComputedTiming().iterations !== Infinity
+		);
 		if (animations.length > 0) {
 			await Promise.allSettled(animations.map((animation) => animation.finished));
 		}

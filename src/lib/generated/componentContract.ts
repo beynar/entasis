@@ -4446,11 +4446,14 @@ export const componentInventory = [
 		sourceIndex: 'src/lib/components/Markdown/index.ts',
 		exportedSymbols: [
 			'Markdown',
+			'MarkdownMdxTag',
 			'MarkdownProps',
 			'MarkdownSize',
 			'MarkdownTheme',
 			'MarkdownThemeProps',
+			'MdxAttributes',
 			'buildMarkdownStreamdownTheme',
+			'getMdxProps',
 			'markdownCodeSizes',
 			'markdownDescription',
 			'markdownMermaidSizes',
@@ -4641,6 +4644,7 @@ export const componentInventory = [
 			'themeTransitions',
 			'typeScalePresets',
 			'useDefaultColor',
+			'useHasOpenLayer',
 			'useTheme'
 		],
 		docs: [],

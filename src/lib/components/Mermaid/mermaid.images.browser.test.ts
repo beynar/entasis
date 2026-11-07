@@ -20,6 +20,35 @@ describe('Mermaid images', () => {
 	const FENCE = `\`\`\`mermaid\n${SOURCE}\n\`\`\``;
 
 	test.each([
+		[
+			'a Mermaid',
+			{ chart: 'flowchart TD\n  A@{ img: "https://example.test/x.png" }', images: false }
+		],
+		[
+			'a fence in a message',
+			{
+				fence: '```mermaid\nflowchart TD\n  A@{ img: "https://example.test/x.png" }\n```',
+				images: false
+			}
+		]
+	])('`images: false` holds in the full screen view of %s', async (_, props) => {
+		const renderSpy = stub();
+		await render(MermaidImagesHarness, { props });
+		await expect.poll(() => renderSpy.mock.calls.length).toBeGreaterThan(0);
+		const full = () =>
+			document.querySelector<HTMLElement>(
+				'button[aria-label="Full screen"], button[aria-label="Fullscreen"]'
+			);
+		await expect.poll(full).not.toBeNull();
+		const before = renderSpy.mock.calls.length;
+		full()!.click();
+		await expect.poll(() => renderSpy.mock.calls.length).toBeGreaterThan(before);
+		for (const call of renderSpy.mock.calls as unknown as [string, { images?: boolean }][]) {
+			expect(call[1].images).toBe(false);
+		}
+	});
+
+	test.each([
 		['a Mermaid', { chart: SOURCE }, true],
 		['a Mermaid with `images={false}`', { chart: SOURCE, images: false }, false],
 		['a fence in a message', { fence: FENCE }, true],

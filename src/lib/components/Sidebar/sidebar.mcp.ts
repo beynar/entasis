@@ -231,6 +231,7 @@ Icon rail pinned to the outer edge of the sidebar, visible in every display stat
 - **badge**: string | number | Snippet - Corner badge pinned to the outer top corner. An empty string renders a bare dot. A string or number badge joins the accessible name (\`"Alerts, 3"\`); a dot and a Snippet badge are decorative, so put their meaning in \`label\`.
 - **disabled**: boolean - Blocks activation and skips the item during keyboard navigation.
 - **tooltip**: string | false - Tooltip override; \`false\` suppresses it.
+- **popover**: PopoverProps without \`trigger\` - Makes the square the trigger of a Popover whose panel is \`children\`. The square carries \`aria-haspopup\`, \`aria-expanded\` and \`aria-controls\`, toggles the panel (a press on it is not an outside press), gets focus back on close, and hides its tooltip while the panel is open. \`open\` with \`onOpenChange\` keeps it controlled; \`position\` defaults to the side facing the page. \`onclick\` runs first and \`event.preventDefault()\` there keeps it from toggling. The item renders a button, so \`href\` is ignored.
 
 ### SidebarMenuButtonItem
 Use for \`headerButton\`, \`footerButton\`, or direct \`<SidebarMenuButton />\` rows.

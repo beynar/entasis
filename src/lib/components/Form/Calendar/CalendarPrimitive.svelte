@@ -19,7 +19,7 @@
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
 	import Chip from '$lib/components/Chip/Chip.svelte';
 	import CalendarMonthYearPicker from './CalendarMonthYearPicker.svelte';
-	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useI18n, useI18nLocale } from '$lib/i18n/context.svelte.js';
 
 	let {
 		type,
@@ -35,7 +35,7 @@
 		weekStartsOn,
 		today,
 		weekdayLength = 'narrow',
-		locale,
+		locale: localeProp,
 		label,
 		disabled = false,
 		readOnly = false,
@@ -71,6 +71,7 @@
 	const id = $props.id();
 	const pickerId = `${id}-month-year-picker`;
 	const t = $derived(useI18n());
+	const locale = $derived(localeProp ?? useI18nLocale());
 	const resolvedLabel = $derived(label ?? t.calendar);
 
 	const doubleViewMinWidth = 576;

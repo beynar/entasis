@@ -5,9 +5,9 @@
 	import Card from '../Card/Card.svelte';
 	import Code from '../Code/Code.svelte';
 	import { Grid, GridSpan } from '../Grid/index.js';
-	import Mermaid from '../Mermaid/Mermaid.svelte';
 	import Stat from '../Stat/Stat.svelte';
 	import { Stack } from '../Stack/index.js';
+	import MarkdownMermaid from './MarkdownMermaid.svelte';
 	import { getMdxProps, type MarkdownMdxTag, type MdxAttributes } from './markdown.mdx.js';
 	import type { MarkdownProps } from './markdown.props.js';
 	import {
@@ -36,7 +36,7 @@
 
 	// The `token` carried by the code/mermaid override snippets is a marked
 	// `Tokens.Code`; we only need its raw source and language string here.
-	type CodePayload = { token: { text: string; lang?: string } };
+	type CodePayload = { token: { text: string; lang?: string }; incomplete?: boolean };
 	type MdxToken = Extract<StreamdownToken, { type: 'mdx' }>;
 	type ListItemToken = Extract<StreamdownToken, { type: 'list_item' }>;
 	type ListItemPayload = { token: ListItemToken; children: Snippet };
@@ -73,12 +73,13 @@
 		     handled here rather than relying solely on a `mermaid` snippet. -->
 		{#snippet code(payload: CodePayload)}
 			{#if payload.token.lang === 'mermaid'}
-				<Mermaid
+				<MarkdownMermaid
 					chart={payload.token.text}
-					errorForgiving
+					incomplete={payload.incomplete}
 					images={rest.peleOptions?.images}
-					size={markdownMermaidSizes[size]}
-					class={markdownCodeSizes[size].split(' ')[0]}
+					mermaidSize={markdownMermaidSizes[size]}
+					codeClass={markdownCodeSizes[size]}
+					frameClass={markdownCodeSizes[size].split(' ')[0]}
 				/>
 			{:else}
 				<Code

@@ -2,6 +2,7 @@ import type { Snippet } from 'svelte';
 import type { HTMLAttributes } from 'svelte/elements';
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { MenuItem } from '$lib/components/Menu/menu.props.js';
+import type { PopoverProps } from '$lib/components/Popover/popover.props.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { Colors, Density, DisclosureIndicator, Sizes } from '$lib/types/theme.js';
 import type { SidebarThemeProps } from './sidebar.theme.js';
@@ -126,6 +127,14 @@ export type SidebarActivityBarItem = {
 	disabled?: boolean;
 	/** Tooltip text. Defaults to label; set false to suppress the tooltip. */
 	tooltip?: string | false;
+	/**
+	 * Makes the square the trigger of a Popover rendered with these props, its panel in
+	 * `children`: the square carries `aria-haspopup`, `aria-expanded` and `aria-controls`, toggles
+	 * the panel, gets focus back when it closes, and hides its tooltip while it is open. `open` and
+	 * `onOpenChange` keep it controlled. `onclick` runs first; `event.preventDefault()` there keeps
+	 * it from toggling. The item renders a button, so `href` is ignored.
+	 */
+	popover?: Omit<PopoverProps, 'trigger'>;
 };
 
 export type SidebarActivityBarSelectPayload = {

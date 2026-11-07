@@ -3003,11 +3003,14 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	markdown: [
 		'Markdown',
+		'MarkdownMdxTag',
 		'MarkdownProps',
 		'MarkdownSize',
 		'MarkdownTheme',
 		'MarkdownThemeProps',
+		'MdxAttributes',
 		'buildMarkdownStreamdownTheme',
+		'getMdxProps',
 		'markdownCodeSizes',
 		'markdownDescription',
 		'markdownMermaidSizes',
@@ -3109,6 +3112,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'themeTransitions',
 		'typeScalePresets',
 		'useDefaultColor',
+		'useHasOpenLayer',
 		'useTheme'
 	],
 	i18n: [

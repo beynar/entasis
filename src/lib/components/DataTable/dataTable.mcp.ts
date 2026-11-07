@@ -171,6 +171,7 @@ active or recoverable. Columns with editors do not enter edit mode without \`onC
 issue a development warning.
 
 Enter and outside clicks commit, Escape cancels, and Tab commits without leaving the edited cell.
+In a custom editor, \`commit\` and \`cancel\` give focus back to the cell when focus is still in the editor, and Escape first closes a list the editor holds open.
 Calendar selection synchronizes its draft before commit. Arrow keys remain owned by editor controls.
 
 ## Slots

@@ -315,4 +315,23 @@ keyframes, and spinner CSS. Spacing, radius, typography scale, raised borders,
 \`pressedColor\`) belong to \`Theme.designTokens\`; colors remain CSS variables and can be
 overridden directly. \`ThemeState.defaultColor\` exposes the active role. Kit chrome should
 resolve omitted \`color\` props with \`useDefaultColor\`.
+
+## A layer the app keeps itself
+
+Entasis listens for Escape on \`window\`, so a side panel of your own may hear it first. \`useHasOpenLayer()\` from \`entasis/theme\` returns a reactive function that says whether Escape belongs to an open entasis layer: leave the key alone while it is true.
+
+\`\`\`svelte
+<script lang="ts">
+	import { useHasOpenLayer } from 'entasis/theme';
+
+	let { onClose }: { onClose: () => void } = $props();
+	const hasOpenLayer = useHasOpenLayer();
+</script>
+
+<svelte:window
+	onkeydown={(event) => {
+		if (event.key === 'Escape' && !hasOpenLayer()) onClose();
+	}}
+/>
+\`\`\`
 `;

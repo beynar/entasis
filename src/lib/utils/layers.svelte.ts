@@ -185,6 +185,11 @@ export class LayerStack {
 	);
 	topModal = $derived([...this.open].reverse().find((layer) => layer.isModal));
 
+	/** Whether Escape would dismiss the top layer now. */
+	get takesEscape(): boolean {
+		return !!this.open.at(-1)?.options.dismissOnEscape?.();
+	}
+
 	ofKind(kind: LayerKind) {
 		return this.open.filter((layer) => layer.kind === kind);
 	}

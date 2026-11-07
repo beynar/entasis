@@ -229,6 +229,8 @@ export type DataTableApi<TData> = {
 	readonly visibleRows: readonly TData[];
 	readonly selectedRows: readonly TData[];
 	readonly isSaving: boolean;
+	/** Whether a cell editor is open, a write under way included. Reactive. */
+	readonly isEditing: boolean;
 	setGlobalFilter: (value: string) => void;
 	setColumnFilter: (columnId: string, value: unknown) => void;
 	clearFilters: () => void;

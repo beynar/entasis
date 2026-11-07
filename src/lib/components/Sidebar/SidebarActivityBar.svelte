@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { safeHref } from '$lib/utils/safeHref.js';
+	import Popover from '$lib/components/Popover/Popover.svelte';
+	import type { PopoverApi } from '$lib/components/Popover/popover.api.js';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import { cx } from '$lib/utils/cva/index.js';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
@@ -77,6 +79,8 @@
 		orientation: () => orientation,
 		loop: true,
 		enableHoverFocus: false,
+		// Escape belongs to the layer around the rail: a square's popover, the mobile drawer.
+		preventKeyboardDefault: false,
 		defaultFocusedIndex: () => (activeIndex === -1 ? null : activeIndex)
 	});
 
@@ -112,9 +116,10 @@
 	}
 </script>
 
-{#snippet control(entry: Entry)}
+{#snippet control(entry: Entry, popover?: PopoverApi)}
 	{@const item = entry.item}
-	{@const content = tooltipContent(item)}
+	<!-- The tooltip would cover the panel the square opened, so it waits for it to close. -->
+	{@const content = popover?.isOpen ? undefined : tooltipContent(item)}
 	{#snippet inner()}
 		<SidebarIcon icon={item.icon} />
 		{#if item.badge != null}
@@ -132,7 +137,7 @@
 			</span>
 		{/if}
 	{/snippet}
-	{#if safeHref(item.href)}
+	{#if safeHref(item.href) && !item.popover}
 		<!-- eslint-disable svelte/no-navigation-without-resolve -- Package consumers supply URLs; library links cannot depend on SvelteKit routing. -->
 		<a
 			href={item.disabled ? undefined : safeHref(item.href)}
@@ -178,6 +183,7 @@
 				disabled: !!item.disabled
 			})}
 			{@attach navigation.itemReference}
+			{@attach popover?.trigger}
 			{@attach content ? tooltip(sidebarTooltip(content, tooltipPosition)) : undefined}
 			onclick={(event) => handleClick(event, entry)}
 		>
@@ -221,7 +227,16 @@
 					entry.pinned && (orientation === 'horizontal' ? 'ms-auto' : 'mt-auto')
 				)}
 			>
-				{@render control(entry)}
+				{#if entry.item.popover}
+					<!-- The panel opens toward the page, like the tooltip. -->
+					<Popover position={tooltipPosition()} {...entry.item.popover}>
+						{#snippet trigger(popover)}
+							{@render control(entry, popover)}
+						{/snippet}
+					</Popover>
+				{:else}
+					{@render control(entry)}
+				{/if}
 			</li>
 		{/each}
 	</ul>

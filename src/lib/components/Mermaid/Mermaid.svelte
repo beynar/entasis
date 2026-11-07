@@ -160,6 +160,7 @@
 			{chart}
 			{config}
 			{errorForgiving}
+			{images}
 			mouseWheelZoom
 			touchPan
 			controls={{

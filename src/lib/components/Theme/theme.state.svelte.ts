@@ -292,6 +292,16 @@ export const useTheme = () => {
 	return theme;
 };
 
+/**
+ * For a layer an app keeps itself, such as a side panel listening for Escape on `window`: whether
+ * Escape belongs to an open entasis layer right now. Call during component initialisation; the
+ * function it returns is reactive, and answers the same way inside an event handler.
+ */
+export const useHasOpenLayer = (): (() => boolean) => {
+	const { layers } = useTheme();
+	return () => layers.takesEscape;
+};
+
 /** Resolve a control color against Theme `defaultColor`. Call inside `$derived`. */
 export const useDefaultColor = (color?: Colors): Colors => {
 	return color ?? (getContext('entasisTheme') as ThemeState | undefined)?.defaultColor ?? 'neutral';

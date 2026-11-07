@@ -10,4 +10,5 @@ export {
 	type MarkdownTheme,
 	type MarkdownThemeProps
 } from './markdown.theme.js';
+export { getMdxProps, type MarkdownMdxTag, type MdxAttributes } from './markdown.mdx.js';
 export { markdownDescription } from './markdown.mcp.js';
