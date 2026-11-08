@@ -66,7 +66,11 @@
 	{/if}
 {/snippet}
 
-<div class={classes.root({ size, className })}>
+<!-- `inline` draws one line in the type of what holds it, so its wrapper is a span with no scale. -->
+<svelte:element
+	this={rest.inline ? 'span' : 'div'}
+	class={rest.inline ? className : classes.root({ size, className })}
+>
 	<Streamdown {content} theme={streamdownTheme} {mdxComponents} mdx={renderMdx} {...rest}>
 		<!-- Streamdown routes ```mermaid fences through the `code` snippet too (its
 		     mermaid branch consults snippets.code), so the mermaid case must be
@@ -111,4 +115,4 @@
 			</li>
 		{/snippet}
 	</Streamdown>
-</div>
+</svelte:element>

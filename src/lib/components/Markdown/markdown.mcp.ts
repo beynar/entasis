@@ -28,6 +28,8 @@ Card, Stat, Stack, Grid, and GridSpan are also available as built-in MDX compone
 - **class**: string - Additional CSS classes on the root wrapper.
 - **theme**: MarkdownThemeProps - Overrides for the root wrapper part (size variants live here).
 - **mdxComponents**: StreamdownProps['mdxComponents'] - Custom MDX components. Matching names override the built-in entasis components.
+- **inline**: boolean (default: false) - One line of inline Markdown (links, bold, italic, code) in a \\\`<span>\\\` with no paragraph and no type scale of its own, so it takes the type of what holds it: a title, a button, a table cell. \\\`# x\\\` and \\\`- x\\\` stay literal text; \\\`size\\\` does not apply.
+- **blockedLink**: 'badge' | 'label' (default: 'badge') - How a link the prefix lists refuse is drawn: its label with a blocked badge, or its label alone. A path on the page's own site (\\\`/docs\\\`) is always a link; \\\`//host\\\` and its look-alikes are judged as the https address they open.
 - **...streamdown passthroughs**: every other svelte-streamdown prop is forwarded except the ones entasis controls (\\\`content\\\`, \\\`theme\\\`, \\\`baseTheme\\\`, \\\`mergeTheme\\\`, \\\`class\\\`, \\\`code\\\`, \\\`mermaid\\\`, \\\`children\\\`, \\\`streamdown\\\`, \\\`element\\\`). Use these for streamdown features such as controlling which block types are parsed, link/image handling, and other renderer options — see the svelte-streamdown docs.
 
 ## Rendering

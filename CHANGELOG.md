@@ -6,6 +6,23 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Markdown`: `inline` draws one line of inline Markdown (links, bold, italic, code) in a `<span>` with no paragraph
+  and no type scale of its own, so it takes the type of what holds it: a title, a button, a table cell. `# x` and
+  `- x` stay literal text, and `size` does not apply.
+- `Markdown` and `AIMessage`: `blockedLink="label"` draws a refused link's label alone, without the blocked badge.
+
+### Fixed
+
+- `Markdown` and `AIMessage`: an address that only looks like a path (`//host`, a backslash or a tab after the
+  first `/`) was drawn as a link or an image whatever `allowedLinkPrefixes` and `allowedImagePrefixes` said, and
+  opened another site. It is now judged as the https address it opens. A real path (`/docs`) is still always a
+  link, in the same tab.
+- While a message streams, a `_`, `*`, `~` or `^` inside a link's address no longer gets closed as emphasis, which
+  broke links such as `wiki/Mercure_(planète)`.
+- These come from svelte-streamdown 5.1.0, now the minimum version.
+
 ## 0.16.3 — 2026-11-08
 
 ### Fixed
