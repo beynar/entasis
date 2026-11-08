@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.17.0 — 2026-11-08
+
 ### Added
 
 - `Markdown`: `inline` draws one line of inline Markdown (links, bold, italic, code) in a `<span>` with no paragraph
