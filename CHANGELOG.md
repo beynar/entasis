@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.16.3 — 2026-11-08
+
 ### Fixed
 
 - `Markdown` and `AIMessage`: changing, after mount, an option passed to `Markdown` with a spread or a value
