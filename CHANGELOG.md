@@ -6,6 +6,12 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- `Markdown` and `AIMessage`: changing, after mount, an option passed to `Markdown` with a spread or a value
+  in `AIMessage`'s `markdownProps` no longer throws `Cannot read properties of undefined (reading 'extensions')`
+  and empties the text. The fix is in svelte-streamdown 5.0.2, now the minimum version.
+
 ## 0.16.2 — 2026-11-08
 
 ### Added
