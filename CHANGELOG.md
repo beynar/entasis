@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.17.1 — 2026-11-10
+
 ### Added
 
 - `AIAskUserQuestion`: `questionTitle`, a snippet receiving `{ question, index }` (`AIAskUserQuestionTitleState`),
