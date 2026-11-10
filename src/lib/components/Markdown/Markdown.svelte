@@ -66,10 +66,10 @@
 	{/if}
 {/snippet}
 
-<!-- `inline` draws one line in the type of what holds it, so its wrapper is a span with no scale. -->
+<!-- `inline` draws one line in the type of what holds it: a span, its root theme kept, no scale. -->
 <svelte:element
 	this={rest.inline ? 'span' : 'div'}
-	class={rest.inline ? className : classes.root({ size, className })}
+	class={classes.root({ size, inline: Boolean(rest.inline), className })}
 >
 	<Streamdown {content} theme={streamdownTheme} {mdxComponents} mdx={renderMdx} {...rest}>
 		<!-- Streamdown routes ```mermaid fences through the `code` snippet too (its

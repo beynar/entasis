@@ -3,6 +3,7 @@ import type { Slot } from '$lib/components/Slot/slot.js';
 import type { WithAttachments } from '$lib/types/props.js';
 import type { AIAskUserQuestionThemeProps } from './aiAskUserQuestion.theme.js';
 import type { HTMLAttributes } from 'svelte/elements';
+import type { Snippet } from 'svelte';
 
 export type AIQuestionOption = {
 	id: string;
@@ -130,6 +131,13 @@ export type AIAskUserQuestionQuestionState = {
 	setValue: (value: AIAskAnswer) => void;
 };
 
+/** What `questionTitle` draws a question's title from. */
+export type AIAskUserQuestionTitleState = {
+	question: AIAskQuestion;
+	/** The question's position in `questions`, from 0. */
+	index: number;
+};
+
 export type AIAskUserQuestionState = {
 	questions: readonly AIAskQuestion[];
 	value: AIAskAnswers;
@@ -227,6 +235,14 @@ export type AIAskUserQuestionProps = WithAttachments<
 		empty?: Slot<AIAskUserQuestionState>;
 		/** Custom renderer for an individual question. */
 		question?: Slot<AIAskUserQuestionQuestionState>;
+		/**
+		 * Draws a question's title in place of its text, for a title with links or marks
+		 * (`<Markdown inline content={question.title} />`). It goes inside the title element, which
+		 * keeps its id (the options' accessible name), its required marker and its theme part.
+		 * `question.title` stays the accessible name of the options, and what the step dots and
+		 * the summary read.
+		 */
+		questionTitle?: Snippet<[AIAskUserQuestionTitleState]>;
 		/** Class applied to the root question flow. */
 		class?: string;
 		/** Theme overrides for the question shell and semantic regions. */

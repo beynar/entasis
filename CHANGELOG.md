@@ -6,6 +6,32 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `AIAskUserQuestion`: `questionTitle`, a snippet receiving `{ question, index }` (`AIAskUserQuestionTitleState`),
+  draws a question's title in place of its text, for a title with links or marks
+  (`<Markdown inline content={question.title} />`). The title element keeps its id, its required marker and its
+  theme part, and `question.title` stays the options' accessible name and what the step dots and the summary read.
+  A link in the title keeps its keys: Enter opens it and never continues or submits, and a step change still
+  gives focus to the first option.
+- `SpinnerText`: `truncate` fits a row narrower than the message. The root takes the row's free width (`flex-1`,
+  never wider than its container), the viewport track shrinks to it, and the message ends with an ellipsis instead
+  of being clipped or widening the row. The transitions are unchanged and the status region still announces the
+  full text. Off by default: without it the viewport keeps the longest message's width.
+
+### Fixed
+
+- `Markdown`: `inline` dropped the `root` theme part, so a link colour set in the `<Theme components>` registry,
+  a `setMarkdownTheme` or the instance `theme` never reached an inline line. The root theme now applies in both
+  modes; under `inline` only the size scale and the block width drop.
+- `Markdown`: a link's hover kept svelte-streamdown's `hover:text-blue-600/80`, which outranked a root's
+  `[&_a]:…` colour on hover. It is now `hover:text-primary-readable/70`, in both modes.
+- `Markdown` and `AIMessage`: a path that resolves to another host (`/app/..//evil.example/x`,
+  `/a/.%2e//evil.example`) was drawn as `//evil.example/x` and opened that site in the same tab, under any
+  prefix list. It is now judged as the https address it opens: a link in a new tab if the list allows it,
+  refused otherwise, for links and images. An address the URL parser refuses (`[x](//)`, `[x](/\)`) no longer
+  throws and fails the whole message; it is refused. From svelte-streamdown 5.1.1, now the minimum version.
+
 ## 0.17.0 — 2026-11-08
 
 ### Added

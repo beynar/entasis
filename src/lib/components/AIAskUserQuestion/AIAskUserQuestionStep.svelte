@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { tick, type Snippet } from 'svelte';
 	import CheckboxesInput from '../Form/CheckboxesInput/CheckboxesInput.svelte';
 	import RadioInput from '../Form/RadioInput/RadioInput.svelte';
 	import TextArea from '../Form/TextArea/TextArea.svelte';
@@ -22,6 +22,7 @@
 		AIAskAnswer,
 		AIAskQuestion,
 		AIAskUserQuestionQuestionState,
+		AIAskUserQuestionTitleState,
 		AIMultipleQuestion,
 		AISingleQuestion
 	} from './aiAskUserQuestion.props.js';
@@ -32,6 +33,8 @@
 
 	let {
 		question,
+		index = 0,
+		questionTitle,
 		value,
 		errorMessage,
 		disabled = false,
@@ -44,6 +47,9 @@
 		theme
 	}: {
 		question: AIAskQuestion;
+		/** The question's position in `questions`, handed to `questionTitle`. */
+		index?: number;
+		questionTitle?: Snippet<[AIAskUserQuestionTitleState]>;
 		value: AIAskAnswer | undefined;
 		errorMessage?: string;
 		disabled?: boolean;
@@ -184,8 +190,17 @@
 		/>
 	{:else}
 		<div class={classes.question()}>
-			<div id={`${id}-title`} class={classes.questionTitle()}>
-				{question.title}{#if required}<span
+			<!-- data-autofocus-skip: a link in a custom title never takes the focus a step change gives. -->
+			<div
+				id={`${id}-title`}
+				data-slot="ai-ask-user-question-title"
+				data-autofocus-skip
+				class={classes.questionTitle()}
+			>
+				{#if questionTitle}{@render questionTitle({
+						question,
+						index
+					})}{:else}{question.title}{/if}{#if required}<span
 						data-slot="ai-ask-user-question-required"
 						class={classes.requiredMarker()}
 						><span aria-hidden="true">*</span><span class="sr-only">{t.aiAskRequiredMarker}</span

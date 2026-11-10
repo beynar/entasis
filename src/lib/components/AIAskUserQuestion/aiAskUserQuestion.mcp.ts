@@ -91,5 +91,7 @@ Props: \`questions\`, \`value\`, \`title\` (string, or \`false\` to hide the "Yo
 
 The \`question\` slot receives \`{ question, value, setValue }\`. Its setter preserves central validation, change callbacks, and single-choice auto-advance; no public compound subcomponents are required.
 
+\`questionTitle\` (\`Snippet<[{ question, index }]>\`, \`AIAskUserQuestionTitleState\`) draws a question's title in place of its text, for a title with links or marks: \`{#snippet questionTitle({ question })}<Markdown inline content={question.title} />{/snippet}\`. It renders inside the title element, which keeps its id, its required marker and its \`questionTitle\` theme part, and it leaves the options, "Other…" and validation to the default step (the \`question\` slot replaces all of that). \`question.title\` stays a required string: it is still the options' accessible name and what the step dots, \`AIAskUserQuestionSummary\` and the schemas read. A link in the title keeps its keys: Enter opens it and never continues or submits, Tab reaches it before the options, and a step change still gives focus to the first option, not to the link.
+
 The root forwards native div attributes and exposes bindable \`ref\`, \`class\`, and \`theme\`. Theme parts cover root, header text/requester/progress group/steps, the body region, step content, question title, required marker and description, textarea, option/other/file regions, the per-question error, the submit-failure alert, empty state, footer, and the summary parts.
 `;

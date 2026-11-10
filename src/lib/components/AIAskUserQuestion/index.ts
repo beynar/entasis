@@ -12,6 +12,7 @@ export type {
 	AIAskUserQuestionProps,
 	AIAskUserQuestionQuestion,
 	AIAskUserQuestionQuestionState,
+	AIAskUserQuestionTitleState,
 	AIAskUserQuestionState,
 	AIAskUserQuestionSubmitPayload,
 	AIAskUserQuestionSummaryItem,

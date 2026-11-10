@@ -23,6 +23,13 @@ type SpinnerTextBaseProps = {
 	delay?: number;
 	/** Motion used when replacing the active message. */
 	transition?: SpinnerTextTransition;
+	/**
+	 * Fits a row narrower than the message: the root takes the row's free width (`flex-1`, never
+	 * wider than its container) and the message ends with an ellipsis instead of being clipped or
+	 * widening the row. The status region still announces the full text.
+	 * @default false
+	 */
+	truncate?: boolean;
 	/** Applies the shimmer utility to the active message. */
 	shimmer?: boolean;
 	/** Whether to render the leading spinner. */

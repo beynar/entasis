@@ -61,6 +61,7 @@
 		onDiscard,
 		onValueChange,
 		question: questionSlot,
+		questionTitle,
 		header,
 		footer,
 		empty,
@@ -206,7 +207,12 @@
 		);
 		// A custom `children` body has no step element: its first control takes focus.
 		const scope = step ?? bodyElement;
-		if (scope) resolveInitialFocus(scope).focus({ preventScroll: true });
+		if (!scope) return;
+		// A link in a `questionTitle` is not where the answer goes: with nothing else to take focus,
+		// the step does, so Enter keeps continuing.
+		const target = resolveInitialFocus(scope);
+		const inTitle = target.closest('[data-slot="ai-ask-user-question-title"]') !== null;
+		(inTitle && step ? step : target).focus({ preventScroll: true });
 	}
 
 	function scheduleAdvance(question: AIAskQuestion, answer: AIAskAnswer): void {
@@ -401,6 +407,8 @@
 							errorMessage={errorQuestionId === item.id ? errorMessage : undefined}
 							disabled={controlsDisabled}
 							renderer={questionSlot}
+							{questionTitle}
+							index={questionItems.indexOf(item)}
 							other={otherAnswers.get(item.id)}
 							onValueChange={(answer, options) =>
 								setAnswer(item.id, answer, options?.advance ?? true)}

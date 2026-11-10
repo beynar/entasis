@@ -7,16 +7,20 @@ import type { Sizes } from '$lib/types/theme.js';
 // The root wrapper part. Owns the overall type/spacing scale for the rendered
 // markdown; the size variant is echoed into `buildMarkdownStreamdownTheme` so every
 // child element scales in sync.
+// Under `inline` the root is a span in the type of what holds it: the size scale and the block
+// width drop, while the registry, a `setMarkdownTheme` subtree and the instance `theme` still apply.
 const defaultMarkdownRoot = cva({
-	base: 'w-full min-w-0',
+	base: '',
 	variants: {
-		size: {
-			small: 'text-xs leading-normal',
-			normal: 'text-sm leading-relaxed',
-			large: 'text-base leading-relaxed'
-		}
+		size: { small: '', normal: '', large: '' },
+		inline: { true: '', false: 'w-full min-w-0' }
 	},
-	defaultVariants: { size: 'normal' }
+	compoundVariants: [
+		{ inline: false, size: 'small', class: 'text-xs leading-normal' },
+		{ inline: false, size: 'normal', class: 'text-sm leading-relaxed' },
+		{ inline: false, size: 'large', class: 'text-base leading-relaxed' }
+	],
+	defaultVariants: { size: 'normal', inline: false }
 });
 
 export const markdownTheme = {
@@ -131,7 +135,7 @@ export const buildMarkdownStreamdownTheme = (size: MarkdownSize): StreamdownProp
 
 	return {
 		link: {
-			base: 'text-primary-readable wrap-anywhere font-medium underline underline-offset-4',
+			base: 'text-primary-readable wrap-anywhere font-medium underline underline-offset-4 hover:text-primary-readable/70',
 			blocked: 'text-neutral/70'
 		},
 		h1: {

@@ -692,6 +692,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'AIAskUserQuestionProps',
 		'AIAskUserQuestionQuestion',
 		'AIAskUserQuestionQuestionState',
+		'AIAskUserQuestionTitleState',
 		'AIAskUserQuestionState',
 		'AIAskUserQuestionSubmitPayload',
 		'AIAskUserQuestionSummary',

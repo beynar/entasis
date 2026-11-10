@@ -80,6 +80,7 @@ export const componentInventory = [
 			'AIAskUserQuestionProps',
 			'AIAskUserQuestionQuestion',
 			'AIAskUserQuestionQuestionState',
+			'AIAskUserQuestionTitleState',
 			'AIAskUserQuestionState',
 			'AIAskUserQuestionSubmitPayload',
 			'AIAskUserQuestionSummary',

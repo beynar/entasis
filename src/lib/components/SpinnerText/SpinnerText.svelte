@@ -17,6 +17,7 @@
 		delay = 2200,
 		transition: transitionMode = 'vertical',
 		shimmer = false,
+		truncate = false,
 		showSpinner = true,
 		spinnerVariant,
 		spinner,
@@ -79,11 +80,12 @@
 	data-spinner-variant={resolvedSpinnerVariant}
 	data-transition={transitionMode}
 	data-shimmer={shimmer || undefined}
+	data-truncate={truncate || undefined}
 	role="status"
 	aria-live="polite"
 	aria-atomic="true"
 	aria-label={activeText ? undefined : (label ?? t.loading)}
-	class={classes.root({ size, color, className })}
+	class={classes.root({ size, color, truncate, className })}
 	{@attach cycleTexts}
 	{...attachments}
 >
@@ -108,17 +110,17 @@
 	{/if}
 
 	{#if texts.length > 0}
-		<span aria-hidden="true" class={classes.viewport({ size })}>
-			<span class={classes.sizer()}>
+		<span aria-hidden="true" class={classes.viewport({ size, truncate })}>
+			<span class={classes.sizer({ truncate })}>
 				{#each texts as text, index (`${index}:${text}`)}
-					<span class={classes.sizerItem()}>{text}</span>
+					<span class={classes.sizerItem({ truncate })}>{text}</span>
 				{/each}
 			</span>
 
 			{#if transitionMode === 'reveal'}
 				{#key activeKey}
 					<span
-						class={classes.message({ shimmer })}
+						class={classes.message({ shimmer, truncate })}
 						in:revealTransition={{ role: 'in' }}
 						out:revealTransition={{ role: 'out' }}
 					>
@@ -128,7 +130,7 @@
 			{:else}
 				{#key activeKey}
 					<span
-						class={classes.message({ shimmer })}
+						class={classes.message({ shimmer, truncate })}
 						in:verticalTransition={{ role: 'in' }}
 						out:verticalTransition={{ role: 'out' }}
 					>

@@ -26,6 +26,7 @@ SpinnerText combines the existing Spinner with a stable-width sequence of loadin
 - **texts**: \`readonly string[]\` (required) - Messages displayed in sequence. The first message is rendered during SSR.
 - **delay**: \`number\` (default: \`2200\`) - Milliseconds between message changes. Zero, negative, and non-finite values pause cycling.
 - **transition**: \`'vertical' | 'reveal'\` (default: \`'vertical'\`) - Moves the outgoing message down while the next enters from above, or replaces both through opposing left-to-right clip reveals.
+- **truncate**: \`boolean\` (default: \`false\`) - For a row narrower than the message (a step in a card row, a narrow side panel): the root takes the row's free width (\`flex-1\`, never wider than its container), the viewport track shrinks to it (\`minmax(0,1fr)\`) and the message ends with "…" instead of being clipped or widening the row. The vertical and reveal transitions are unchanged, and the status region still announces the full text. Without it, the viewport keeps the longest message's width.
 - **shimmer**: \`boolean\` (default: \`false\`) - Applies the Entasis shimmer utility to the active message.
 - **showSpinner**: \`boolean\` (default: \`true\`) - Shows or hides the leading Spinner.
 - **spinnerVariant**: \`'default' | 'grid' | 'pulse' | 'puff' | 'lines' | 'circles'\` (default: Theme \`spinnerVariant\`, then \`'default'\`) - Overrides the global spinner animation for this instance.

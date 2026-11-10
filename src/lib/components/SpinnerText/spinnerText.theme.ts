@@ -14,6 +14,11 @@ const defaultRoot = cva({
 			normal: 'gap-sm',
 			large: 'gap-md'
 		},
+		// In a row narrower than its message: the root takes the row's free width and stops at it.
+		truncate: {
+			true: 'max-w-full flex-1',
+			false: null
+		},
 		color: {
 			primary: 'text-primary-readable',
 			secondary: 'text-secondary-readable',
@@ -26,7 +31,8 @@ const defaultRoot = cva({
 	},
 	defaultVariants: {
 		size: 'normal',
-		color: 'neutral'
+		color: 'neutral',
+		truncate: false
 	}
 });
 
@@ -46,6 +52,8 @@ const defaultSpinner = cva({
 	}
 });
 
+// Under `truncate` the track no longer holds the longest message's width: it shrinks to the row,
+// and the messages end with an ellipsis.
 const defaultViewport = cva({
 	base: 'relative isolate grid min-w-0 overflow-hidden',
 	variants: {
@@ -53,19 +61,42 @@ const defaultViewport = cva({
 			small: 'h-4 text-xs leading-4',
 			normal: 'h-5 text-sm leading-5',
 			large: 'h-6 text-base leading-6'
+		},
+		truncate: {
+			true: 'grid-cols-[minmax(0,1fr)]',
+			false: null
 		}
 	},
 	defaultVariants: {
-		size: 'normal'
+		size: 'normal',
+		truncate: false
 	}
 });
 
 const defaultSizer = cva({
-	base: 'invisible col-start-1 row-start-1 grid pointer-events-none select-none'
+	base: 'invisible col-start-1 row-start-1 grid pointer-events-none select-none',
+	variants: {
+		truncate: {
+			true: 'min-w-0 grid-cols-[minmax(0,1fr)]',
+			false: null
+		}
+	},
+	defaultVariants: {
+		truncate: false
+	}
 });
 
 const defaultSizerItem = cva({
-	base: 'col-start-1 row-start-1 whitespace-nowrap'
+	base: 'col-start-1 row-start-1 whitespace-nowrap',
+	variants: {
+		truncate: {
+			true: 'truncate',
+			false: null
+		}
+	},
+	defaultVariants: {
+		truncate: false
+	}
 });
 
 const defaultMessage = cva({
@@ -74,10 +105,15 @@ const defaultMessage = cva({
 		shimmer: {
 			true: 'shimmer',
 			false: null
+		},
+		truncate: {
+			true: 'truncate',
+			false: null
 		}
 	},
 	defaultVariants: {
-		shimmer: false
+		shimmer: false,
+		truncate: false
 	}
 });
 
