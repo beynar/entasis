@@ -3,13 +3,23 @@ export const basicDataTableCode = ({
 	selectionMode,
 	search,
 	stickyHeader,
-	editable
+	editable,
+	columnsMenu,
+	pagination,
+	animateRows,
+	loading,
+	disabled
 }: {
 	density: string;
 	selectionMode: string;
 	search: boolean;
 	stickyHeader: boolean;
 	editable: boolean;
+	columnsMenu: boolean;
+	pagination: boolean;
+	animateRows: boolean;
+	loading: boolean;
+	disabled: boolean;
 }) => {
 	const props = [
 		density !== 'normal' && `density="${density}"`,
@@ -17,7 +27,12 @@ export const basicDataTableCode = ({
 		search && `search={{ placeholder: 'Search the directory', debounce: 120 }}`,
 		!stickyHeader && 'stickyHeader={false}',
 		editable && `interactionMode="grid"`,
-		editable && 'onCellCommit={commitCell}'
+		editable && 'onCellCommit={commitCell}',
+		columnsMenu && 'showColumnVisibilityControl',
+		animateRows && 'animateRows',
+		loading && 'loading',
+		disabled && 'disabled',
+		pagination ? 'pagination={{ pageSize: 25, pageSizes: [25, 50, 100] }}' : 'pagination={false}'
 	].filter(Boolean);
 
 	return `<script lang="ts">
@@ -94,8 +109,7 @@ export const basicDataTableCode = ({
     {items}
     {columns}
     getRowId={(person) => person.id}
-${props.map((prop) => `    ${prop}\n`).join('')}    pagination={{ pageSize: 25, pageSizes: [25, 50, 100] }}
-  />
+${props.map((prop) => `    ${prop}\n`).join('')}  />
 </div>`;
 };
 

@@ -40,7 +40,12 @@
 		},
 		{ name: 'search', type: 'switch', label: 'Search', value: true },
 		{ name: 'stickyHeader', type: 'switch', label: 'Sticky header', value: true },
-		{ name: 'editable', type: 'switch', label: 'Editable', value: false }
+		{ name: 'editable', type: 'switch', label: 'Editable', value: false },
+		{ name: 'columnsMenu', type: 'switch', label: 'Columns menu', value: true },
+		{ name: 'pagination', type: 'switch', label: 'Pagination', value: true },
+		{ name: 'animateRows', type: 'switch', label: 'Animate rows', value: false },
+		{ name: 'loading', type: 'switch', label: 'Loading', value: false },
+		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false }
 	]);
 </script>
 
@@ -82,6 +87,11 @@
 				search={controls.value.search}
 				stickyHeader={controls.value.stickyHeader}
 				editable={controls.value.editable}
+				columnsMenu={controls.value.columnsMenu}
+				pagination={controls.value.pagination}
+				animateRows={controls.value.animateRows}
+				loading={controls.value.loading}
+				disabled={controls.value.disabled}
 			/>
 		</div>
 	</ComponentCard>

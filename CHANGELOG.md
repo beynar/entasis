@@ -6,6 +6,21 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Changed
+
+- `DataTable`: the column menu is plain menu rows. Sort ascending and Sort descending are new radio
+  rows (pressing the checked one clears the sort; Shift+click on the header still multi-sorts); pin
+  is a Pin column submenu of Left, Right and Not pinned; grouping is a checkbox row; Clear filter
+  shows while the column's filter applies. Select, multi-select and boolean filters are radio or
+  checkbox rows of a Filter submenu instead of form controls in a footer; text, number, date and
+  custom filters are fields above the rows, drawn like a menu's search field. The panel fits its
+  rows (at most 20rem) instead of a fixed 18rem. The toolbar's Columns menu uses checkbox rows.
+- `DataTable` theme: `filterPanel` takes a `layout` variant (`field`, `fields`, `custom`) instead of
+  `separated`, and `filterIcon` and `filterInput` are new; `filterHeader`, `filterLabel`,
+  `filterFields` and the four `filterCheckbox*` parts are removed with the controls they styled.
+- i18n: `dataTableSortAscending`, `dataTableSortDescending`, `dataTablePin`, `dataTablePinnedLeft`,
+  `dataTablePinnedRight`, `dataTableNotPinned` and `dataTableClearFilter`, in all 8 locales.
+
 ## 0.17.2 — 2026-11-11
 
 ### Added

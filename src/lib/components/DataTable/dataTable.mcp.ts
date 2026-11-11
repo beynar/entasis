@@ -125,6 +125,17 @@ A custom filter is \`{ type: 'custom', render, predicate }\`. Its renderer recei
 current value, active state, \`setValue(value)\`, and \`clear()\`; \`predicate(row, value,
 columnValue)\` owns client matching. Filtering, searching, sorting, and grouping reset page one.
 
+## Column menu
+
+The header's options button opens a PopupMenu of plain menu rows: Sort ascending and Sort
+descending (radio rows; pressing the checked one clears the sort), a Filter submenu, a Pin column
+submenu (Left, Right, Not pinned), Group by this column (a checkbox row), Reset width, and Hide
+column, in separated groups; a row the column cannot use is left out, and Clear filter shows while
+the column's filter applies. Select and boolean filters are radio rows of the Filter submenu,
+starting on All values; multi-select filters are checkbox rows (with a search field past eight
+options). Text, number, date, and custom filters are fields above the rows, drawn like a menu's
+search field, in the \`filterPanel\` theme part. The toolbar's Columns menu is checkbox rows.
+
 ## State and external composition
 
 Use \`createDataTableState(columns, initialState?, pageSize?)\` for controlled state. The bindable

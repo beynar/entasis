@@ -2,7 +2,6 @@
 	import { onDestroy, untrack } from 'svelte';
 	import Button from '../Button/Button.svelte';
 	import TextInput from '../Form/TextInput/TextInput.svelte';
-	import { checkIcon } from '../Icons/check.js';
 	import { columnsIcon } from '../Icons/columns.js';
 	import { xIcon } from '../Icons/x.js';
 	import type { MenuItem } from '../Menu/menu.props.js';
@@ -72,19 +71,14 @@
 		).length;
 		return hideableColumns.map((column): MenuItem => {
 			const header = model.getColumnConfig(column.id)?.header;
+			const visible = model.state.columnVisibility[column.id] !== false;
 			return {
-				type: 'option',
+				type: 'checkbox',
+				key: column.id,
 				title: typeof header === 'string' ? header : column.id,
-				suffix: model.state.columnVisibility[column.id] !== false ? checkIcon : undefined,
-				attrs: {
-					role: 'menuitemcheckbox',
-					'aria-checked': model.state.columnVisibility[column.id] !== false,
-					'data-menu-keep-open': 'true'
-				},
-				disabled:
-					model.props.disabled ||
-					(visibleCount <= 1 && model.state.columnVisibility[column.id] !== false),
-				onclick: () => column.toggleVisibility()
+				value: visible,
+				disabled: model.props.disabled || (visibleCount <= 1 && visible),
+				onValueChange: (next) => column.toggleVisibility(next)
 			};
 		});
 	});
@@ -169,9 +163,8 @@
 
 			{#if model.props.showColumnVisibilityControl && hideableColumns.length > 0 && model.publicColumns.length > 1}
 				<PopupMenu
-					closeOnItemClick={false}
 					mobileSheet
-					menu={{ items: visibilityItems, density: 'compact' }}
+					menu={{ items: visibilityItems }}
 					trigger={{
 						label: t.dataTableChooseColumns,
 						content: t.dataTableColumns,

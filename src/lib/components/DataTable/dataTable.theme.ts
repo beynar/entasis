@@ -85,7 +85,7 @@ const headerMenuPanel = cva({
 	variants: {
 		sheet: {
 			true: 'w-full max-w-none',
-			false: 'w-72 max-w-[calc(100vw-2rem)]'
+			false: 'w-max min-w-56 max-w-[min(20rem,calc(100vw-2rem))]'
 		}
 	},
 	defaultVariants: { sheet: false }
@@ -234,23 +234,24 @@ const editorFieldLabel = cva({ base: 'sr-only' });
 const editorError = cva({
 	base: 'absolute top-full left-0 z-50 mt-xs rounded-sm bg-danger px-md py-xs text-xs text-danger-contrast shadow'
 });
+// The filter fields of a text, number, date or custom filter sit above the menu rows, in a strip
+// drawn like the Menu's own search field (row height, leading icon, translucent divider below).
+// Option filters (select, multi-select, boolean) are menu rows of the Filter submenu instead.
 const filterPanel = cva({
-	base: 'grid w-full gap-xs p-lg',
+	base: 'w-full border-b border-neutral/15',
 	variants: {
-		separated: {
-			true: 'mt-xs border-t border-neutral-muted',
-			false: ''
+		layout: {
+			field: 'flex h-control-md items-center gap-md px-md',
+			fields: 'grid grid-cols-2 gap-sm p-sm',
+			custom: 'grid gap-sm p-sm'
 		}
 	},
-	defaultVariants: { separated: false }
+	defaultVariants: { layout: 'field' }
 });
-const filterHeader = cva({ base: 'flex items-center justify-between gap-lg' });
-const filterLabel = cva({ base: 'text-xs font-medium text-neutral/70' });
-const filterFields = cva({ base: 'grid grid-cols-2 gap-md' });
-const filterCheckboxGroup = cva({ base: '!gap-xs' });
-const filterCheckboxContainer = cva({ base: '!gap-xs' });
-const filterCheckboxItem = cva({ base: '!min-h-row-sm !py-xs !pl-layout-lg' });
-const filterCheckboxIndicator = cva({ base: '!top-2 !size-4' });
+const filterIcon = cva({ base: 'size-4 shrink-0 opacity-50' });
+const filterInput = cva({
+	base: 'w-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-neutral/70 disabled:opacity-50'
+});
 const stateRow = cva({ base: 'grid min-h-40' });
 const stateCell = cva({ base: 'relative grid min-w-0' });
 const stateContent = cva({
@@ -309,13 +310,8 @@ export const dataTableTheme = {
 	editorFieldLabel,
 	editorError,
 	filterPanel,
-	filterHeader,
-	filterLabel,
-	filterFields,
-	filterCheckboxGroup,
-	filterCheckboxContainer,
-	filterCheckboxItem,
-	filterCheckboxIndicator,
+	filterIcon,
+	filterInput,
 	stateRow,
 	stateCell,
 	stateContent,

@@ -24,13 +24,23 @@
 		selectionMode = 'none',
 		search = true,
 		stickyHeader = true,
-		editable = false
+		editable = false,
+		columnsMenu = true,
+		pagination = true,
+		animateRows = false,
+		loading = false,
+		disabled = false
 	}: {
 		density?: Density;
 		selectionMode?: DataTableSelectionMode;
 		search?: boolean;
 		stickyHeader?: boolean;
 		editable?: boolean;
+		columnsMenu?: boolean;
+		pagination?: boolean;
+		animateRows?: boolean;
+		loading?: boolean;
+		disabled?: boolean;
 	} = $props();
 
 	let people = $state(createPeople(137));
@@ -169,6 +179,10 @@
 		{stickyHeader}
 		interactionMode={editable ? 'grid' : 'table'}
 		onCellCommit={editable ? commitCell : undefined}
-		pagination={{ pageSize: 25, pageSizes: [25, 50, 100] }}
+		pagination={pagination ? { pageSize: 25, pageSizes: [25, 50, 100] } : false}
+		showColumnVisibilityControl={columnsMenu}
+		{animateRows}
+		{loading}
+		{disabled}
 	/>
 </div>

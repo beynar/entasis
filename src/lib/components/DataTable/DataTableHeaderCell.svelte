@@ -4,14 +4,15 @@
 	import Button from '../Button/Button.svelte';
 	import Hitbox from '../Hitbox/Hitbox.svelte';
 	import { arrowCounterClockwiseIcon } from '../Icons/arrowCounterClockwise.js';
-	import { arrowLineLeftIcon } from '../Icons/arrowLineLeft.js';
-	import { arrowLineRightIcon } from '../Icons/arrowLineRight.js';
 	import { checkIcon } from '../Icons/check.js';
 	import { dotsThreeVerticalIcon } from '../Icons/dotsThreeVertical.js';
 	import { eyeSlashIcon } from '../Icons/eyeSlash.js';
-	import { pushPinSlashIcon } from '../Icons/pushPinSlash.js';
+	import { funnelSimpleIcon } from '../Icons/funnelSimple.js';
+	import { funnelSimpleXIcon } from '../Icons/funnelSimpleX.js';
+	import { pushPinIcon } from '../Icons/pushPin.js';
 	import { sortAscendingIcon } from '../Icons/sortAscending.js';
 	import { sortDescendingIcon } from '../Icons/sortDescending.js';
+	import { stackIcon } from '../Icons/stack.js';
 	import type { MenuItem } from '../Menu/menu.props.js';
 	import PopupMenu from '../PopupMenu/PopupMenu.svelte';
 	import Slot from '../Slot/Slot.svelte';
@@ -86,9 +87,20 @@
 		if (sorted === 'desc') return 'descending';
 		return 'none';
 	});
+	const filterValue = $derived(
+		model.state.columnFilters.find((entry) => entry.id === column.id)?.value
+	);
+	// Text, number, date and custom filters are fields above the rows; option filters are rows.
+	const hasFilterFields = $derived(
+		config?.filter?.type === 'text' ||
+			config?.filter?.type === 'number' ||
+			config?.filter?.type === 'date' ||
+			config?.filter?.type === 'custom'
+	);
 	const canOpenMenu = $derived(
 		!!config &&
-			(!!config.filter ||
+			(!!config.sortable ||
+				!!config.filter ||
 				config.hideable !== false ||
 				config.pinnable !== false ||
 				(model.props.processingMode !== 'manual' && config.groupable) ||
@@ -107,53 +119,141 @@
 			: undefined
 	);
 
+	// A press on the checked direction clears the sort; the menu sorts by this column alone, while
+	// Shift+click on the header still adds it to a multi-sort.
+	const sortItem = (direction: 'asc' | 'desc'): MenuItem => ({
+		type: 'option',
+		title: direction === 'asc' ? t.dataTableSortAscending : t.dataTableSortDescending,
+		prefix: direction === 'asc' ? sortAscendingIcon : sortDescendingIcon,
+		suffix: sorted === direction ? checkIcon : undefined,
+		attrs: { role: 'menuitemradio', 'aria-checked': sorted === direction },
+		onclick: () =>
+			sorted === direction ? column.clearSorting() : column.toggleSorting(direction === 'desc')
+	});
+
+	const optionFilterItems = (): MenuItem[] | undefined => {
+		const filter = config?.filter;
+		if (filter?.type === 'select') {
+			return [
+				{
+					type: 'radio-group',
+					value: typeof filterValue === 'string' ? filterValue : '',
+					onValueChange: (next) => model.setColumnFilter(column.id, next || undefined),
+					items: [
+						{ value: '', title: t.allValues },
+						...filter.options.map((option) => ({
+							value: option.value,
+							title: option.label,
+							disabled: option.disabled
+						}))
+					]
+				}
+			];
+		}
+		if (filter?.type === 'multi-select') {
+			const checked = Array.isArray(filterValue) ? filterValue.map(String) : [];
+			return filter.options.map((option): MenuItem => ({
+				type: 'checkbox',
+				key: option.value,
+				title: option.label,
+				textValue: option.label,
+				disabled: option.disabled,
+				value: checked.includes(option.value),
+				onValueChange: (next) => {
+					const current = model.state.columnFilters.find((entry) => entry.id === column.id)?.value;
+					const values = (Array.isArray(current) ? current.map(String) : []).filter(
+						(entry) => entry !== option.value
+					);
+					if (next) values.push(option.value);
+					model.setColumnFilter(column.id, values.length ? values : undefined);
+				}
+			}));
+		}
+		if (filter?.type === 'boolean') {
+			return [
+				{
+					type: 'radio-group',
+					value: filterValue === true ? 'true' : filterValue === false ? 'false' : '',
+					onValueChange: (next) =>
+						model.setColumnFilter(column.id, next === '' ? undefined : next === 'true'),
+					items: [
+						{ value: '', title: t.allValues },
+						{ value: 'true', title: filter.trueLabel ?? t.trueLabel },
+						{ value: 'false', title: filter.falseLabel ?? t.falseLabel }
+					]
+				}
+			];
+		}
+		return undefined;
+	};
+
 	const menuItems = $derived.by(() => {
 		if (!config) return [];
 		void [
+			model.state.sorting,
+			model.state.columnFilters,
 			model.state.columnVisibility,
 			model.state.columnPinning,
 			model.state.columnSizing,
 			model.state.grouping
 		];
-		const items: MenuItem[] = [];
-		if (config.pinnable !== false) {
-			items.push(
-				{
-					type: 'option',
-					title: t.dataTablePinLeft,
-					prefix: arrowLineLeftIcon,
-					selected: pinning === 'left',
-					suffix: pinning === 'left' ? checkIcon : undefined,
-					onclick: () => column.pin('start')
-				},
-				{
-					type: 'option',
-					title: t.dataTablePinRight,
-					prefix: arrowLineRightIcon,
-					selected: pinning === 'right',
-					suffix: pinning === 'right' ? checkIcon : undefined,
-					onclick: () => column.pin('end')
-				},
-				{
-					type: 'option',
-					title: t.dataTableUnpin,
-					prefix: pushPinSlashIcon,
-					disabled: !pinning,
-					onclick: () => column.pin(false)
-				}
-			);
-		}
-		if (model.props.processingMode !== 'manual' && config.groupable) {
-			items.push({
-				type: 'option',
-				title: model.state.grouping.includes(column.id)
-					? t.dataTableStopGrouping
-					: t.dataTableGroupByColumn,
-				onclick: () => column.toggleGrouping()
+		const sections: MenuItem[][] = [];
+
+		if (config.sortable) sections.push([sortItem('asc'), sortItem('desc')]);
+
+		const view: MenuItem[] = [];
+		const filterRows = optionFilterItems();
+		if (filterRows) {
+			view.push({
+				type: 'submenu',
+				title: t.filter,
+				prefix: funnelSimpleIcon,
+				menu: filterRows,
+				filter: config.filter?.type === 'multi-select' && config.filter.options.length > 8
 			});
 		}
+		if (config.filter && filtered) {
+			view.push({
+				type: 'option',
+				title: t.dataTableClearFilter,
+				prefix: funnelSimpleXIcon,
+				onclick: () => model.setColumnFilter(column.id, undefined)
+			});
+		}
+		if (config.pinnable !== false) {
+			view.push({
+				type: 'submenu',
+				title: t.dataTablePin,
+				prefix: pushPinIcon,
+				menu: [
+					{
+						type: 'radio-group',
+						value: pinning || 'none',
+						onValueChange: (next) =>
+							column.pin(next === 'left' ? 'start' : next === 'right' ? 'end' : false),
+						items: [
+							{ value: 'left', title: t.dataTablePinnedLeft },
+							{ value: 'right', title: t.dataTablePinnedRight },
+							{ value: 'none', title: t.dataTableNotPinned }
+						]
+					}
+				]
+			});
+		}
+		if (model.props.processingMode !== 'manual' && config.groupable) {
+			view.push({
+				type: 'checkbox',
+				title: t.dataTableGroupByColumn,
+				prefix: stackIcon,
+				value: model.state.grouping.includes(column.id),
+				onValueChange: () => column.toggleGrouping()
+			});
+		}
+		if (view.length) sections.push(view);
+
+		const layout: MenuItem[] = [];
 		if (config.resizable !== false) {
-			items.push({
+			layout.push({
 				type: 'option',
 				title: t.dataTableResetWidth,
 				prefix: arrowCounterClockwiseIcon,
@@ -161,7 +261,7 @@
 			});
 		}
 		if (config.hideable !== false) {
-			items.push({
+			layout.push({
 				type: 'option',
 				title: t.dataTableHideColumn,
 				prefix: eyeSlashIcon,
@@ -171,7 +271,11 @@
 				onclick: () => column.toggleVisibility(false)
 			});
 		}
-		return items;
+		if (layout.length) sections.push(layout);
+
+		return sections.flatMap((section, index): MenuItem[] =>
+			index === 0 ? section : [{ type: 'separator', key: `separator-${index}` }, ...section]
+		);
 	});
 
 	const sortLabel = $derived.by(() => {
@@ -234,8 +338,8 @@
 	});
 </script>
 
-{#snippet filterFooter()}
-	<DataTableFilter {column} {model} {classes} separated={menuItems.length > 0} />
+{#snippet filterFields()}
+	<DataTableFilter {column} {model} {classes} />
 {/snippet}
 
 {#snippet renderDefaultHeader()}
@@ -316,13 +420,11 @@
 	<div class={classes.headerActions()}>
 		{#if canOpenMenu}
 			<PopupMenu
-				closeOnItemClick={false}
 				mobileSheet
 				class={classes.headerMenuPanel({ sheet: theme.isMobile })}
 				menu={{
 					items: menuItems,
-					density: 'compact',
-					footer: config?.filter ? filterFooter : undefined
+					header: hasFilterFields ? filterFields : undefined
 				}}
 			>
 				{#snippet trigger(popover)}
