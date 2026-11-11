@@ -72,6 +72,7 @@ during component initialization for automatic cleanup.
 - **subtitle**: string | Snippet<[PageShellApi]> - Default header subtitle.
 - **header**: Snippet<[PageShellApi]> - Custom sticky header content.
 - **headerActions**: Snippet<[PageShellApi]> | PageShellAction[] - Actions on the right side of the default header. Use an array for standard Button props, or a snippet when the action needs shell API access.
+- **subheader**: Snippet<[PageShellApi]> - A band between the header and the content, such as a page's own tab bar. It spans the shell's full width, outside the content's padding, width preset and gap, and stays pinned under the header while the header is sticky (the \`subheader\` theme part, \`data-slot="page-shell-subheader"\`). Left out, nothing is drawn.
 - **footer**: Snippet<[PageShellApi]> - Custom sticky footer content.
 - **footerActions**: Snippet<[PageShellApi]> | PageShellAction[] - Actions on the right side of the sticky footer.
 	- **children**: Snippet<[PageShellApi]> - Page content rendered in normal document flow.
@@ -87,6 +88,7 @@ during component initialization for automatic cleanup.
 - **usePageShell()** returns the current PageShell API and throws when no PageShell exists.
 - **setPageShell(config)** registers a scoped config override and removes it on component destroy.
 - **api.set(config)** pushes a manual override and returns a cleanup function.
+- **api.setSubheader(subheader)** pushes a scoped subheader, so a route can bring its own tab bar.
 - **api.setFooterActions(actions)** pushes scoped page footer actions.
 - **api.reset()** clears all scoped overrides.
 
@@ -112,6 +114,26 @@ during component initialization for automatic cleanup.
 </script>
 
 <PageShell title="Reports" {headerActions}>
+	{#snippet children()}
+		Page content
+	{/snippet}
+</PageShell>
+\`\`\`
+
+## Subheader
+
+A page's own tab bar goes in \`subheader\`: it runs edge to edge under the header, its border
+included, while the content keeps its padding and width preset.
+
+\`\`\`svelte
+<PageShell title="Project" contentPadding="normal" contentWidth="normal">
+	{#snippet subheader()}
+		<nav aria-label="Project views" class="flex gap-lg border-b border-neutral-muted px-lg">
+			<a href="/project/overview" aria-current="page">Overview</a>
+			<a href="/project/activity">Activity</a>
+		</nav>
+	{/snippet}
+
 	{#snippet children()}
 		Page content
 	{/snippet}

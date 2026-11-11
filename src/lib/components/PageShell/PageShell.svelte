@@ -16,6 +16,7 @@
 		back,
 		header,
 		headerActions,
+		subheader,
 		footer,
 		footerActions,
 		contentPadding = 'none',
@@ -69,6 +70,9 @@
 		get headerActions() {
 			return headerActions;
 		},
+		get subheader() {
+			return subheader;
+		},
 		get footer() {
 			return footer;
 		},
@@ -94,6 +98,30 @@
 
 	const classes = $derived(usePageShellTheme(theme));
 
+	// The subheader follows the header: pinned under it while it is sticky, at its measured height.
+	let headerSticky = $state(false);
+	let headerHeight = $state(0);
+
+	const followHeader: Attachment<HTMLElement> = (node) => {
+		void shell.hasHeader;
+		const header = node.parentElement?.querySelector<HTMLElement>(
+			':scope > [data-slot="page-shell-header"]'
+		);
+		if (!header) {
+			headerSticky = false;
+			headerHeight = 0;
+			return;
+		}
+		const measure = () => {
+			headerSticky = getComputedStyle(header).position === 'sticky';
+			headerHeight = header.offsetHeight;
+		};
+		measure();
+		const observer = new ResizeObserver(measure);
+		observer.observe(header);
+		return () => observer.disconnect();
+	};
+
 	function findScrollContainer(node: HTMLElement) {
 		let parent = node.parentElement;
 		while (parent && parent !== document.documentElement) {
@@ -117,6 +145,18 @@
 >
 	{#if shell.hasHeader}
 		<PageShellHeader api={shell.api} {theme} />
+	{/if}
+
+	{#if shell.api.subheader}
+		<div
+			{@attach followHeader}
+			data-slot="page-shell-subheader"
+			data-sticky={headerSticky ? 'true' : undefined}
+			style:--page-shell-header-height={`${headerHeight}px`}
+			class={classes.subheader({ sticky: headerSticky })}
+		>
+			{@render shell.api.subheader(shell.api)}
+		</div>
 	{/if}
 
 	<main

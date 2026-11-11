@@ -49,6 +49,20 @@ const defaultActions = cva({
 	base: 'flex shrink-0 items-center justify-end gap-sm'
 });
 
+// The band between the header and the content: the shell's full width, on the shell surface so the
+// content never shows through it once pinned. Pinned, it sits where it already stands under the
+// sticky header (the header's offset, its height and the gap below it), one layer under it.
+const defaultSubheader = cva({
+	base: 'w-full shrink-0 bg-[var(--page-shell-surface,var(--color-surface))]',
+	variants: {
+		sticky: {
+			true: 'sticky top-[calc(var(--page-shell-edge-inset,0px)_+_var(--page-shell-header-height,0px)_+_2_*_var(--page-shell-chrome-block-gap,0px))] z-10',
+			false: ''
+		}
+	},
+	defaultVariants: { sticky: false }
+});
+
 const defaultContent = cva({
 	base: 'flex-1'
 });
@@ -112,6 +126,7 @@ export const pageShellTheme = {
 	title: defaultTitle,
 	subtitle: defaultSubtitle,
 	actions: defaultActions,
+	subheader: defaultSubheader,
 	content: defaultContent,
 	contentInner: defaultContentInner,
 	footer: defaultFooter,

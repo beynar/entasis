@@ -43,6 +43,9 @@ export class PageShellState {
 			get headerActions() {
 				return current().headerActions;
 			},
+			get subheader() {
+				return current().subheader;
+			},
 			get footer() {
 				return current().footer;
 			},
@@ -90,6 +93,7 @@ export class PageShellState {
 			setSubtitle: this.setSubtitle,
 			setHeader: this.setHeader,
 			setHeaderActions: this.setHeaderActions,
+			setSubheader: this.setSubheader,
 			setFooter: this.setFooter,
 			setFooterActions: this.setFooterActions,
 			reset: this.reset
@@ -109,6 +113,7 @@ export class PageShellState {
 				subtitle: this.options.subtitle,
 				header: this.options.header,
 				headerActions: this.options.headerActions,
+				subheader: this.options.subheader,
 				footer: this.options.footer,
 				footerActions: this.options.footerActions,
 				contentPadding: this.options.contentPadding,
@@ -147,6 +152,7 @@ export class PageShellState {
 	setSubtitle = (subtitle?: PageShellTextRegion) => this.set({ subtitle });
 	setHeader = (header?: PageShellRegion) => this.set({ header });
 	setHeaderActions = (headerActions?: PageShellActions) => this.set({ headerActions });
+	setSubheader = (subheader?: PageShellRegion) => this.set({ subheader });
 	setFooter = (footer?: PageShellRegion) => this.set({ footer });
 	setFooterActions = (footerActions?: PageShellActions) => this.set({ footerActions });
 

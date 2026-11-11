@@ -6,6 +6,13 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `PageShell`: a `subheader` snippet (and `api.setSubheader`) draws a band between the header and
+  the content, such as a page's own tab bar. It spans the shell's full width, outside the
+  content's padding, width preset and gap, and stays pinned under the header while the header is
+  sticky, at the header's measured height. New `subheader` theme part. Without it nothing changes.
+
 ## 0.17.1 — 2026-11-10
 
 ### Added

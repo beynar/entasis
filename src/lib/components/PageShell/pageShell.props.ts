@@ -36,6 +36,12 @@ export type PageShellConfig = {
 	header?: Snippet<[PageShellApi]>;
 	/** Actions rendered on the right side of the default sticky header. */
 	headerActions?: PageShellActions;
+	/**
+	 * A band between the header and the content, such as a page's own tab bar. It spans the
+	 * shell's full width, outside the content's padding, width preset and gap, and stays pinned
+	 * under the header while the header is sticky.
+	 */
+	subheader?: Snippet<[PageShellApi]>;
 	/** Custom sticky footer content. */
 	footer?: Snippet<[PageShellApi]>;
 	/** Actions rendered on the right side of the sticky footer. */
@@ -73,6 +79,8 @@ export type PageShellApi = Readonly<PageShellConfig> & {
 	setHeader: (header?: PageShellRegion) => PageShellRegistrationCleanup;
 	/** Push scoped default-header actions. */
 	setHeaderActions: (headerActions?: PageShellActions) => PageShellRegistrationCleanup;
+	/** Push a scoped subheader. */
+	setSubheader: (subheader?: PageShellRegion) => PageShellRegistrationCleanup;
 	/** Push scoped page footer content. */
 	setFooter: (footer?: PageShellRegion) => PageShellRegistrationCleanup;
 	/** Push scoped page footer actions. */
