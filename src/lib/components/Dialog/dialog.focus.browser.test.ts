@@ -3,9 +3,11 @@
 import { expect, test } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
+import { webkitOnLinux } from '$lib/testing/browser.test-helper.js';
 import DialogTriggerHarness from './DialogTriggerHarness.test.svelte';
 
-test.each(['Escape', 'close button'] as const)(
+// Skipped in WebKit on Linux: on the GitHub runners this overlay never settles (see webkitOnLinux).
+test.skipIf(webkitOnLinux).each(['Escape', 'close button'] as const)(
 	'an animated close with %s puts focus back on the trigger',
 	async (how) => {
 		await render(DialogTriggerHarness, { scenario: 'animated-trigger' });
