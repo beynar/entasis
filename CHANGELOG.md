@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.17.2 — 2026-11-11
+
 ### Added
 
 - `PageShell`: a `subheader` snippet (and `api.setSubheader`) draws a band between the header and
