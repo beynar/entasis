@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.18.0 — 2026-11-11
+
 ### Changed
 
 - `DataTable`: the column menu is plain menu rows. Sort ascending and Sort descending are new radio
