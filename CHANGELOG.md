@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.19.2 — 2026-11-12
+
 ### Added
 
 - `Popover`: `shiftBoundary` keeps the panel within an element along its side, as well as the viewport.
