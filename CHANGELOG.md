@@ -6,6 +6,13 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- `DataTable`: in a table that aggregates nothing, a group row's label was still cut at its column's width: every
+  non-grouped cell of a group row painted the row's surface over it, whether or not its column aggregates. Only a
+  cell whose column declares an `aggregation` or an `aggregatedCell` paints over the label now; the others leave
+  it clear.
+
 ## 0.19.4 — 2026-11-12
 
 ### Added

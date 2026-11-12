@@ -122,7 +122,12 @@
 	): 'label' | 'aggregate' | 'none' => {
 		if (!cell || !row.getIsGrouped()) return 'none';
 		if (cell.getIsGrouped()) return pinned ? 'none' : 'label';
-		return model.isCellAggregated(cell) ? 'aggregate' : 'none';
+		if (!model.isCellAggregated(cell)) return 'none';
+		// Only a column that aggregates has something to show here; an empty cell leaves the label clear.
+		const config = model.getColumnConfig(cell.column.id);
+		return config?.aggregation !== undefined || config?.aggregatedCell !== undefined
+			? 'aggregate'
+			: 'none';
 	};
 
 	const cellPayload = (columnId: string): DataTableCellPayload<TData> | undefined => {

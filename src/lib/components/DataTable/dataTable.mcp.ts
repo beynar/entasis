@@ -102,8 +102,8 @@ configured public header content; sorting, menus, dragging, resizing, focus, and
 by DataTable.
 
 In a group row, the grouped cell's label (expander, value, count) is never cut at its column's
-width: it runs on over the empty cells after it, while an aggregated cell paints over it on the
-row's surface (not when the grouped column is pinned). A cell payload's \`groupSize\` is the
+width: it runs on over the empty cells after it, while a cell whose column declares an
+\`aggregation\` or an \`aggregatedCell\` paints over it on the row's surface (not when the grouped column is pinned). A cell payload's \`groupSize\` is the
 number of rows directly in its group (its items, or its subgroups when grouping is nested), 0
 outside a group row.
 

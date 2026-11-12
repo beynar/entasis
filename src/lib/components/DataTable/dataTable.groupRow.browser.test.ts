@@ -17,6 +17,23 @@ const groupCell = () =>
 	)!;
 const visibleRight = (element: Element) => element.getBoundingClientRect().right;
 
+test('a cell of a column that aggregates nothing leaves the label clear', async () => {
+	await render(Harness, { props: { items } });
+	await expect.poll(() => document.querySelectorAll('tbody tr').length).toBeGreaterThan(0);
+	const row = groupCell().closest('tr')!;
+	for (const id of ['title', 'price']) {
+		const cell = row.querySelector<HTMLElement>(`td[data-column-id="${id}"]`)!;
+		expect(getComputedStyle(cell).zIndex).toBe('auto');
+		expect(getComputedStyle(cell).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+	}
+	// The label's end is drawn, nothing paints over it.
+	const count = [...groupCell().querySelectorAll<HTMLElement>('span')].find(
+		(span) => span.textContent === '(2)'
+	)!;
+	const { right, top, height } = count.getBoundingClientRect();
+	expect(document.elementFromPoint(right - 2, top + height / 2)).toBe(count);
+});
+
 test('the label runs past its column instead of being cut', async () => {
 	await render(Harness, { props: { items } });
 	await expect.poll(() => document.querySelectorAll('tbody tr').length).toBeGreaterThan(0);
