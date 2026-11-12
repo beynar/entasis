@@ -101,6 +101,12 @@ cells, action cells, detail rows, or active editors. A table-level \`header\` re
 configured public header content; sorting, menus, dragging, resizing, focus, and ARIA remain owned
 by DataTable.
 
+In a group row, the grouped cell's label (expander, value, count) is never cut at its column's
+width: it runs on over the empty cells after it, while an aggregated cell paints over it on the
+row's surface (not when the grouped column is pinned). A cell payload's \`groupSize\` is the
+number of rows directly in its group (its items, or its subgroups when grouping is nested), 0
+outside a group row.
+
 \`DataTableCellRenderPayload<TData>\` contains the normal cell payload plus \`column\`,
 \`placeholder\`, and \`renderDefault\`. \`DataTableHeaderRenderPayload<TData>\` contains the normal
 header payload plus \`renderDefault\`.

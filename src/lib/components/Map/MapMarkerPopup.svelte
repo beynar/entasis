@@ -4,6 +4,7 @@
 	import MapHtmlText from './MapHtmlText.svelte';
 	import Popover from '../Popover/Popover.svelte';
 	import type { MapMarkerPopupContentArg, MapMarkerSnippetArg } from './map-types.js';
+	import { useMapClasses } from './map.theme.js';
 
 	type Props<TData = unknown> = {
 		args: MapMarkerSnippetArg<TData>;
@@ -13,6 +14,7 @@
 	};
 
 	let { args, content, open = $bindable(false), children }: Props<TData> = $props();
+	const mapClasses = useMapClasses();
 
 	function close(): void {
 		open = false;
@@ -32,7 +34,7 @@
 	openOnClick
 	closeOnClickOutside
 	closeOnEscape
-	class="bg-surface-floating text-neutral raised-3 z-50 w-72 rounded-md p-3 text-sm outline-none"
+	class={mapClasses().popup()}
 >
 	{#snippet trigger(popover)}
 		{@render children(popover.reference)}

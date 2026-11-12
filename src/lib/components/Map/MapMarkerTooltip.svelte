@@ -4,6 +4,7 @@
 	import MapHtmlText from './MapHtmlText.svelte';
 	import { tooltip as tooltipAttachment } from '../Tooltip/tooltip.attachment.svelte.js';
 	import type { MapMarkerSnippetArg, MapMarkerTooltipContentArg } from './map-types.js';
+	import { useMapClasses } from './map.theme.js';
 
 	type Props<TData = unknown> = {
 		args: MapMarkerSnippetArg<TData>;
@@ -13,6 +14,7 @@
 	};
 
 	let { args, content, disabled, children }: Props<TData> = $props();
+	const mapClasses = useMapClasses();
 
 	const tooltipArg = $derived<MapMarkerTooltipContentArg<TData>>({
 		...args,
@@ -46,6 +48,6 @@
 				content: tooltipContent,
 				position: 'top',
 				offset: 8,
-				class: 'max-w-60 rounded-md px-2.5 py-1.5 text-xs'
+				class: mapClasses().tooltip()
 			})
 )}

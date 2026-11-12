@@ -141,7 +141,15 @@ const cell = cva({
 			true: 'z-20 ring-2 ring-inset ring-selected/70',
 			false: ''
 		},
-		editing: { true: 'overflow-visible p-0 ring-1 ring-inset ring-primary', false: '' }
+		editing: { true: 'overflow-visible p-0 ring-1 ring-inset ring-primary', false: '' },
+		// In a group row the grouped cell's label runs on over the empty cells after it instead of
+		// being cut at its column's width; an aggregated cell paints over it on the row's surface,
+		// so a value is never written over.
+		group: {
+			label: 'z-[1] overflow-visible',
+			aggregate: 'z-[2] bg-inherit',
+			none: ''
+		}
 	},
 	compoundVariants: [
 		{ pinned: false, focused: true, class: 'bg-selected-muted/20' },
@@ -193,8 +201,16 @@ const detailCell = cva({
 });
 const spacer = cva({ base: 'pointer-events-none grid border-0' });
 const expander = cva({ base: 'mr-xs shrink-0' });
-const groupValue = cva({ base: 'min-w-0 truncate' });
-const groupCount = cva({ base: 'ml-xs text-xs font-normal text-neutral/70' });
+const groupValue = cva({
+	base: '',
+	variants: {
+		spill: { true: 'shrink-0 whitespace-nowrap', false: 'min-w-0 truncate' }
+	},
+	defaultVariants: { spill: false }
+});
+const groupCount = cva({
+	base: 'ml-xs shrink-0 whitespace-nowrap text-xs font-normal text-neutral/70'
+});
 const pinnedBoundary = cva({
 	base: 'after:pointer-events-none after:absolute after:inset-y-0 after:w-px after:bg-neutral-muted',
 	variants: {

@@ -7,7 +7,7 @@
 	import { untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { useTheme } from '../Theme/theme.state.svelte.js';
-	import { useMapTheme } from './map.theme.js';
+	import { provideMapClasses, useMapTheme } from './map.theme.js';
 	import MapContent from './MapContent.svelte';
 	import MapShapeLayer from './MapShapeLayer.svelte';
 	import MapSkeleton from './MapSkeleton.svelte';
@@ -74,6 +74,7 @@
 
 	const theme = useTheme();
 	const classes = $derived(useMapTheme(mapTheme));
+	provideMapClasses(() => classes);
 
 	let container: HTMLDivElement | null = null;
 	let map = $state.raw<MapLibreMap | null>(null);

@@ -114,6 +114,17 @@
 		);
 	});
 
+	// A group row's grouped cell lets its label run on (unless pinned: it would cover what scrolls
+	// under it); its aggregated cells paint over that label.
+	const groupRole = (
+		cell: (typeof cells)[number] | undefined,
+		pinned: boolean
+	): 'label' | 'aggregate' | 'none' => {
+		if (!cell || !row.getIsGrouped()) return 'none';
+		if (cell.getIsGrouped()) return pinned ? 'none' : 'label';
+		return model.isCellAggregated(cell) ? 'aggregate' : 'none';
+	};
+
 	const cellPayload = (columnId: string): DataTableCellPayload<TData> | undefined => {
 		const cell = cells.find((entry) => entry.column.id === columnId);
 		if (!cell) return undefined;
@@ -123,6 +134,7 @@
 			value: model.getCellValue(row, columnId),
 			aggregated: model.isCellAggregated(cell),
 			grouped: cell.getIsGrouped(),
+			groupSize: row.getIsGrouped() ? row.subRows.length : 0,
 			startEditing: () => model.startEditing(row, columnId)
 		};
 	};
@@ -279,6 +291,7 @@
 				pinned: !!pinning,
 				focused: isFocused,
 				editing: isEditing,
+				group: groupRole(cell, !!pinning),
 				class: [
 					config?.class,
 					column.id === DATA_TABLE_SELECTION_COLUMN ? classes.selectionCell() : '',
@@ -342,6 +355,7 @@
 					{rowExpanded}
 					{model}
 					{classes}
+					spill={groupRole(cell, !!pinning) === 'label'}
 				/>
 			{/if}
 		</td>

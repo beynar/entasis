@@ -59,7 +59,7 @@ An interactive vector map (pan, zoom, markers, clustering, shapes, geolocation) 
 
 ### Advanced Props
 - **class**: string - Additional classes on the map root.
-- **theme**: MapTheme - Theme overrides for the root container.
+- **theme**: MapThemeProps - Theme overrides: \`root\` (the container), \`popup\` (the surface around a marker's popup: surface, padding, \`w-72\`) and \`tooltip\` (a marker tooltip's size and spacing). A \`popup\` snippet that draws its own card can drop the shell with \`theme={{ popup: { base: 'w-auto p-0 bg-transparent' } }}\` (or \`setMapTheme\`, or a \`<Theme components>\` registry entry).
 
 ## Theming
 

@@ -185,6 +185,11 @@ export type DataTableCellPayload<TData, TValue = unknown> = DataTableRowPayload<
 	value: TValue;
 	aggregated: boolean;
 	grouped: boolean;
+	/**
+	 * In a group row, the rows directly in the group: its items, or its subgroups when grouping
+	 * is nested (the count the built-in label shows). 0 outside a group row.
+	 */
+	groupSize: number;
 	startEditing: () => void;
 };
 

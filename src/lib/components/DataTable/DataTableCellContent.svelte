@@ -17,7 +17,8 @@
 		firstDataColumnId,
 		rowExpanded,
 		model,
-		classes
+		classes,
+		spill = false
 	}: {
 		row: DataTableRowInstance<TData>;
 		cell: DataTableCellInstance<TData>;
@@ -27,6 +28,8 @@
 		rowExpanded: boolean;
 		model: DataTableModel<TData>;
 		classes: DataTableClasses;
+		/** A group row's label runs on over the empty cells after it (see the `group` cell variant). */
+		spill?: boolean;
 	} = $props();
 	const t = $derived(useI18n());
 
@@ -51,7 +54,7 @@
 			disabled={model.props.disabled}
 			onclick={() => row.toggleExpanded()}
 		/>
-		<span class={classes.groupValue()}>{formatValue(cell.getValue())}</span>
+		<span class={classes.groupValue({ spill })}>{formatValue(cell.getValue())}</span>
 		<span class={classes.groupCount()}>({row.subRows.length})</span>
 	{:else if model.isCellAggregated(cell)}
 		{#if config.aggregatedCell}

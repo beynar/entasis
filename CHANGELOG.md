@@ -6,6 +6,21 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Map`: theme parts `popup` (the surface around a marker's popup: surface, padding, its 18rem width) and
+  `tooltip` (a marker tooltip's size and spacing), through the instance `theme`, `setMapTheme` and the
+  `<Theme components>` registry. A `popup` snippet that draws its own card can drop the shell. The tooltip's
+  horizontal padding moves to the `md` spacing step (8px, from 10px) to use the semantic scale.
+- `DataTable`: a cell payload's `groupSize`, the number of rows directly in a group row's group.
+
+### Fixed
+
+- `DataTable`: a group row's label (expander, value, count) was cut at the grouped column's width
+  (« Nouveau 9… » in a 120px column) while the row's other cells were empty. It now runs on over the empty cells
+  after it; an aggregated cell paints over it on the row's surface, so a value is never written over. A pinned
+  grouped column keeps cutting it, so it never covers what scrolls under it.
+
 ## 0.19.3 — 2026-11-12
 
 ### Fixed
