@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.19.1 — 2026-11-12
+
 ### Fixed
 
 - `RichTextInput`: a whole-block selection (a second Cmd/Ctrl+A selects the block, a third every block) showed
