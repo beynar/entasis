@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.19.3 — 2026-11-12
+
 ### Fixed
 
 - `RichTextInput` (and the AI composer, and a Form's `rich-text` entry): 0.19.2 threw
