@@ -28,6 +28,7 @@ Extends all Field component props plus:
 
 ### Display Props
 - **placeholder**: string (default: 'Click or drag files here') - Text shown in the empty dropzone
+- **placeholderIcon**: Snippet<[{ size?: number | string }]> (default: fileIcon) - Icon drawn in the empty dropzone at 40px, such as \`plusIcon\` from \`entasis/icons/plus\` for an add tile
 - **fileList**: Snippet - Custom rendering of the selected files list
 - **file**: Snippet - Custom rendering of each selected file row
 - **fileListClass** / **fileClass** / **placeholderClass**: string - Extra classes for those parts

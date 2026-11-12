@@ -3,16 +3,25 @@ import type { DateInputThemeProps } from './dateInput.theme.js';
 import type { DateInputType } from '../Field/field.js';
 import type { DateSelectorPreset } from '../DateSelector/dateSelector.props.js';
 
-export type DateFormat =
-	'dd/mm/yyyy' | 'mm/dd/yyyy' | 'mm/yy' | 'mm/yyyy' | 'yyyy' | 'yyyy/mm' | 'yyyy/mm/dd';
+export type { DateFormat, DateOnlyFormat, DateTimeFormat } from './dateInput.format.js';
+import type { DateFormat } from './dateInput.format.js';
 
 export type DateInputProps = InputProps<'date' | 'datetime'> & {
 	/** Logical date input type and validation schema used by FieldState. */
 	type?: DateInputType;
 	/** Hint text shown in the empty date input; defaults to the format prop. */
 	placeholder?: string;
-	/** Date mask pattern controlling input masking and value parsing (e.g. dd/mm/yyyy). */
+	/**
+	 * Mask controlling input masking and value parsing (e.g. `dd/mm/yyyy`). A format ending in
+	 * ` HH:MM` also edits the hour and minutes. Defaults to `dd/mm/yyyy`, or `dd/mm/yyyy HH:MM`
+	 * when `type` is `datetime`. Editing only the day of a `datetime` keeps its hour.
+	 */
 	format?: DateFormat;
+	/**
+	 * IANA time zone the day and hour are shown and typed in (e.g. `Europe/Paris`), whatever the
+	 * browser's zone. The value stays the same instant. Defaults to the browser's zone.
+	 */
+	timeZone?: string;
 	/** Locale identifier for date formatting. */
 	locale?: string;
 	/** Separator character between date segments. */

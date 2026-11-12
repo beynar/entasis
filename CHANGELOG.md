@@ -6,6 +6,26 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `DateInput`: `timeZone` (an IANA name such as `Europe/Paris`) shows and reads the day and the hour in that
+  zone whatever the browser's; the value stays the same `Date`. Formats ending in ` HH:MM` (`dd/mm/yyyy HH:MM`,
+  `mm/dd/yyyy HH:MM`, `yyyy/mm/dd HH:MM`) edit the hour too.
+- `FormBoundary` (`entasis/form`): inputs inside it are plain controls, not fields of the Form around it.
+- `FileInput`: `placeholderIcon` replaces the empty dropzone's file icon, such as `plusIcon` for an add tile.
+
+### Changed
+
+- `DateInput` with `type="datetime"`, and so Form's `{ type: 'datetime' }`, now edits the hour: its default
+  format is `dd/mm/yyyy HH:MM` instead of the day alone, which dropped the hour of the value on every edit.
+  Picking a day in the calendar, or editing only the date with a date-only format, keeps the hour.
+
+### Fixed
+
+- `Form`: entasis inputs that a registered input's component composes (a `DateInput` and a `TimeInput` side by
+  side) registered as fields of the form, so the form kept their own baselines and stayed `dirty` after
+  `form.reset(value)`. Form now keeps them out; only the registered entry is a field.
+
 ## 0.18.0 — 2026-11-11
 
 ### Changed

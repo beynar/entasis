@@ -3,7 +3,7 @@
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { focusIntoPopup } from '../Field/focusIntoPopup.js';
 	import { Maskito } from '@maskito/core';
-	import { maskitoDateOptionsGenerator } from '@maskito/kit';
+	import { maskitoDateOptionsGenerator, maskitoDateTime } from '@maskito/kit';
 	import DateSelector from '../DateSelector/DateSelector.svelte';
 	import Field from '../Field/Field.svelte';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
@@ -13,14 +13,22 @@
 	import type { DateInputProps } from './dateInput.props.js';
 	import { useDateInputTheme } from './dateInput.theme.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import {
+		formatDateValue,
+		fromPickedDay,
+		parseDateValue,
+		splitFormat,
+		toLocalWallClock
+	} from './dateInput.format.js';
 
 	let {
 		defaultValue = null,
 		value = $bindable(),
 		errors = $bindable([]),
 		focused = $bindable(false),
-		format = 'dd/mm/yyyy',
-		placeholder = format,
+		format: formatProp,
+		placeholder: placeholderProp,
+		timeZone,
 		locale,
 		separator,
 		presets = [],
@@ -48,6 +56,12 @@
 
 	const id = $props.id();
 	const dateSeparator = $derived(separator || '/');
+	// `datetime` edits the day and the hour unless a format says otherwise.
+	const format = $derived(formatProp ?? (type === 'datetime' ? 'dd/mm/yyyy HH:MM' : 'dd/mm/yyyy'));
+	const placeholder = $derived(placeholderProp ?? format);
+	const mask = $derived(splitFormat(format));
+	// A date-only edit of a datetime keeps the hour it had.
+	const keepsTime = $derived(type === 'datetime');
 	let isCalendarOpen = $state(false);
 
 	const field = createFieldState({
@@ -107,86 +121,16 @@
 
 	const classes = $derived(useDateInputTheme(theme));
 
-	const formatDate = (date: Date | null) => {
-		if (!date) return '';
-		const segments = {
-			dd: String(date.getDate()).padStart(2, '0'),
-			mm: String(date.getMonth() + 1).padStart(2, '0'),
-			yy: String(date.getFullYear()).slice(-2),
-			yyyy: String(date.getFullYear())
-		};
+	const formatDate = (date: Date | null) => formatDateValue(date, format, dateSeparator, timeZone);
 
-		return format
-			.split('/')
-			.map((part) => segments[part as keyof typeof segments])
-			.join(dateSeparator);
-	};
-
-	const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-	const extractDate = (inputValue: string) => {
-		const buildRegex = (mask: string) => {
-			const parts = mask.split('/');
-			const regexParts = parts.map((part) => {
-				switch (part) {
-					case 'dd':
-					case 'mm':
-						return '(\\d{2})';
-					case 'yyyy':
-						return '(\\d{4})';
-					case 'yy':
-						return '(\\d{2})';
-					default:
-						return '\\' + part;
-				}
-			});
-			return new RegExp('^' + regexParts.join(escapeRegex(dateSeparator)) + '$');
-		};
-		const match = inputValue.match(buildRegex(format));
-
-		if (!match) return null;
-
-		const parts = format.split('/');
-		let year: string | undefined;
-		let month: string | undefined;
-		let day: string | undefined;
-		parts.forEach((part, index) => {
-			const segmentValue = match[index + 1];
-			switch (part) {
-				case 'dd':
-					day = segmentValue;
-					break;
-				case 'mm':
-					month = segmentValue;
-					break;
-				case 'yyyy':
-					year = segmentValue;
-					break;
-				case 'yy':
-					year = '20' + segmentValue;
-					break;
-			}
-		});
-
-		year = year || new Date().getFullYear().toString();
-		month = month || '01';
-		day = day || '01';
-
-		const yearNumber = Number(year);
-		const monthNumber = Number(month);
-		const dayNumber = Number(day);
-		const date = new Date(yearNumber, monthNumber - 1, dayNumber);
-
-		if (
-			date.getFullYear() !== yearNumber ||
-			date.getMonth() !== monthNumber - 1 ||
-			date.getDate() !== dayNumber
-		) {
-			return null;
-		}
-
-		return date;
-	};
+	const extractDate = (inputValue: string) =>
+		parseDateValue(
+			inputValue,
+			format,
+			dateSeparator,
+			timeZone,
+			keepsTime ? (field.value as Date | null) : null
+		);
 
 	const syncInputValue = (date: Date | null) => {
 		if (field.node instanceof HTMLInputElement) {
@@ -195,8 +139,15 @@
 	};
 
 	const maskAction = (input: HTMLInputElement) => {
-		const mask = maskitoDateOptionsGenerator({ mode: format, separator: dateSeparator });
-		const maskedElement = new Maskito(input, mask);
+		const options = mask.time
+			? maskitoDateTime({
+					dateMode: mask.date as 'dd/mm/yyyy',
+					timeMode: 'HH:MM',
+					dateSeparator,
+					dateTimeSeparator: ' '
+				})
+			: maskitoDateOptionsGenerator({ mode: mask.date, separator: dateSeparator });
+		const maskedElement = new Maskito(input, options);
 
 		if (value) {
 			input.value = formatDate(value);
@@ -219,7 +170,10 @@
 		}
 	};
 
-	const handleCalendarChange = (date: Date | null) => {
+	const handleCalendarChange = (picked: Date | null) => {
+		const date = picked
+			? fromPickedDay(picked, keepsTime ? (field.value as Date | null) : null, timeZone)
+			: null;
 		field.value = date;
 		onSelect?.(date);
 		field.focused = false;
@@ -239,7 +193,7 @@
 	focusOnClose={() => field.node ?? true}
 	position="bottom-start"
 	mode="date"
-	value={field.value}
+	value={toLocalWallClock(field.value as Date | null, timeZone)}
 	{presets}
 	{disabledDates}
 	{minDate}

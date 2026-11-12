@@ -246,6 +246,7 @@ const domainSizes = new Map([
 	['ChartAxisTicks.size', 'Plot axis tick length in pixels'],
 	['IconProps.size', 'SVG snippet viewport dimension in CSS units'],
 	['AIToolCall.icon.size', 'Icon snippet SVG viewport dimension in CSS units'],
+	['FileInputProps.placeholderIcon.size', 'Icon snippet SVG viewport dimension in CSS units'],
 	['ChartScatterSize.size', 'Scatter mark radius or data channel']
 ]);
 const usedDomainSizes = new Set();

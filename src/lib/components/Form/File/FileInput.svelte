@@ -33,6 +33,7 @@
 		fileClass,
 		placeholder,
 		placeholderClass,
+		placeholderIcon = fileIcon,
 		required = false,
 		theme,
 		disabled,
@@ -166,7 +167,7 @@
 	/>
 	{#if dropzone.files.length === 0}
 		<div transition:slide class={classes.placeholder({ class: placeholderClass, size: rest.size })}>
-			{@render fileIcon({ size: 40 })}
+			{@render placeholderIcon({ size: 40 })}
 			{#if resolvedPlaceholder}
 				<span class="mt-2">{resolvedPlaceholder}</span>
 			{/if}

@@ -1591,6 +1591,7 @@ export const componentInventory = [
 			'Form',
 			'FormAction',
 			'FormActionInput',
+			'FormBoundary',
 			'FormCustomInput',
 			'FormEntryTool',
 			'FormErrors',

@@ -177,7 +177,9 @@ test('API inventory resolves inherited callbacks, nested any, method payloads, s
 		const domainTypes = [
 			...owners.map((name) => `export type ${name} = { size: number };`),
 			// A nested owner: AITool's icon snippet receives an icon size.
-			'export type AIToolCall = { icon: { size: number } };'
+			'export type AIToolCall = { icon: { size: number } };',
+			// FileInput's placeholder icon snippet receives the dropzone's icon size.
+			'export type FileInputProps = {\n\t/** Icon drawn in the empty dropzone. */\n\tplaceholderIcon: { size: number };\n};'
 		].join('\n');
 		await write(
 			'src/lib/components/Widget/index.ts',

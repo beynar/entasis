@@ -33,6 +33,11 @@ export type FileInputProps<Mode extends FileInputMode = 'single'> = Omit<
 	maxSize?: number;
 	/** Text shown in the empty dropzone before any files are selected. */
 	placeholder?: string;
+	/**
+	 * Icon drawn in the empty dropzone, called with `{ size: 40 }`: an icon from
+	 * `entasis/icons/<name>` such as `plusIcon` for an « add » tile. Defaults to `fileIcon`.
+	 */
+	placeholderIcon?: Snippet<[{ size?: number | string }]>;
 	// Slot props
 	/** Custom snippet to render the list of selected files. */
 	fileList?: Snippet;

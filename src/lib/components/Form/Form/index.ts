@@ -1,4 +1,5 @@
 export { default as Form } from './Form.svelte';
+export { default as FormBoundary } from './FormBoundary.svelte';
 export { Ask, ask } from '../Ask/index.js';
 export type { AskButton, AskDialogOptions, AskOptions, AskProps, AskResult } from '../Ask/index.js';
 export type { FormLayout, FormProps, FormToolOptions, FormVariant } from './form.props.js';

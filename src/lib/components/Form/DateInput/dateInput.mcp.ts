@@ -25,6 +25,18 @@ Masked native text entry composed with Field and DateSelector. The bindable valu
 
 Use \`format\` with \`dd\`, \`mm\`, \`yy\`, and \`yyyy\` segments. Supported values include \`dd/mm/yyyy\`, \`mm/dd/yyyy\`, \`mm/yyyy\`, and \`yyyy/mm/dd\`. The \`separator\` prop replaces the slash in the rendered mask.
 
+\`type="datetime"\` edits the day and the hour: its default format is \`dd/mm/yyyy HH:MM\` (also \`mm/dd/yyyy HH:MM\` and \`yyyy/mm/dd HH:MM\`), and picking a day in the calendar or editing only the date keeps the hour. A Form entry \`{ type: 'datetime' }\` renders it. \`timeZone\` (an IANA name such as \`Europe/Paris\`) shows and reads the day and hour in that zone whatever the browser's; the value stays a \`Date\`, the same instant. An hour that occurs twice when clocks go back reads as its first occurrence; an hour skipped when they go forward moves to the hour after.
+
+\`\`\`svelte
+<script lang="ts">
+	import { DateInput } from 'entasis/date-input';
+
+	let startsAt = $state<Date | null>(null);
+</script>
+
+<DateInput label="Starts at" type="datetime" timeZone="Europe/Paris" bind:value={startsAt} />
+\`\`\`
+
 ## Selector options
 
 - \`presets\`: date shortcuts shaped as \`{ label, value }\`.

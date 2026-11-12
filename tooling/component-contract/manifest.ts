@@ -1490,6 +1490,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'Form',
 		'FormAction',
 		'FormActionInput',
+		'FormBoundary',
 		'FormCustomInput',
 		'FormEntryTool',
 		'FormErrors',

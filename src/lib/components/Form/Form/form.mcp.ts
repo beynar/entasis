@@ -262,7 +262,7 @@ registerFormInputs({
 
 Register it: call registerFormInputs at the top level of a module the server and the browser both load before a form renders, such as one the root layout imports. Its keys are checked against the registry; built-in type names are refused, and registering a type again replaces it.
 
-The component renders the control alone. Form wraps it in Field (label, description, errors) and hands it the field it registered, typed from the registry, plus the entry's own props:
+The component renders the control alone. Form wraps it in Field (label, description, errors) and hands it the field it registered, typed from the registry, plus the entry's own props. The component may compose entasis inputs (a DateInput and a TimeInput side by side): Form keeps them out of the form, so only the registered entry is a field, and \`dirty\`, \`reset\` and the submitted value see it alone. Elsewhere, wrap inputs in \`<FormBoundary>\` (from \`entasis/form\`) for the same effect:
 
 \`\`\`svelte
 <!-- doc-fence: skip -->

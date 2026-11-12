@@ -10,6 +10,7 @@
 	} from '../Field/field.state.svelte.js';
 	import type { FormFieldEntry, FormRegisteredInput } from './form.js';
 	import { getFormInputDefinition } from './form.registry.js';
+	import FormBoundary from './FormBoundary.svelte';
 
 	// What the Field wrapper and the field controller consume from an entry; everything else on
 	// a registered entry belongs to its component.
@@ -193,6 +194,9 @@
 	{#if controlSnippet}
 		{@render controlSnippet(field)}
 	{:else if Control}
-		<Control {...controlProps} {field} />
+		<!-- A registered input renders its control alone: entasis inputs it composes are not fields. -->
+		<FormBoundary>
+			<Control {...controlProps} {field} />
+		</FormBoundary>
 	{/if}
 </Field>
