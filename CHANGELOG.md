@@ -6,6 +6,13 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- `RichTextInput` (and the AI composer, and a Form's `rich-text` entry): 0.19.2 threw
+  `ReferenceError: HTMLElement is not defined` on the server whenever the selection toolbar rendered
+  (`toolbar="hover"`, the default, or `"both"`): the toolbar read `HTMLElement` while rendering. It no longer
+  does, and a server-render test covers every toolbar mode, a Form entry and the composer.
+
 ## 0.19.2 — 2026-11-12
 
 ### Added

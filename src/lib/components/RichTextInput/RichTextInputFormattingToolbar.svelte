@@ -286,7 +286,8 @@
 		popover={{
 			class: selectionPopoverClass,
 			// Over the first words of a line the toolbar would hang out of the input: keep it over it.
-			shiftBoundary: selectionTarget instanceof HTMLElement ? selectionTarget : null
+			// Read as given: no browser global may be touched while rendering (server rendering).
+			shiftBoundary: selectionTarget ?? null
 		}}
 		onAfterClose={() => onSelectionClose?.()}
 		children={isEditingLink ? linkEditor : undefined}
