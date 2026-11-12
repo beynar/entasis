@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.19.5 — 2026-11-12
+
 ### Fixed
 
 - `DataTable`: in a table that aggregates nothing, a group row's label was still cut at its column's width: every
