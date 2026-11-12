@@ -136,8 +136,17 @@ const richTextInputLists = [
 	'[&_[data-edytor-type=numbered-list-item]:first-child]:[counter-reset:rich-text-list] [&_:not([data-edytor-type=numbered-list-item])+[data-edytor-type=numbered-list-item]]:[counter-reset:rich-text-list]'
 ].join(' ');
 
+// A whole-block selection (a second Cmd/Ctrl+A, then a third) hides the native selection and marks
+// each selected block: draw it, once per selection (a selected block's selected children add no
+// second layer), and keep a selected block's unselected children on the input's surface.
+const richTextInputBlockSelection = [
+	'[&_[data-edytor-selected]]:rounded-sm [&_[data-edytor-selected]]:bg-primary-muted',
+	'[&_[data-edytor-selected]_[data-edytor-selected]]:bg-transparent',
+	'[&_[data-edytor-selected]_[data-edytor-block]:not([data-edytor-selected])]:bg-surface-raised'
+].join(' ');
+
 const defaultRichTextInputEditor = cva({
-	base: `min-w-0 whitespace-pre-wrap break-words outline-none [--edytor-trailing-space:0] ${richTextInputMarkdownContent} ${richTextInputLists}`,
+	base: `min-w-0 whitespace-pre-wrap break-words outline-none [--edytor-trailing-space:0] ${richTextInputMarkdownContent} ${richTextInputLists} ${richTextInputBlockSelection}`,
 	variants: {
 		size: {
 			small: 'min-h-16 text-xs leading-normal',

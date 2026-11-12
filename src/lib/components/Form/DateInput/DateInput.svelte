@@ -143,6 +143,9 @@
 			? maskitoDateTime({
 					dateMode: mask.date as 'dd/mm/yyyy',
 					timeMode: 'HH:MM',
+					// Explicitly off: left undefined, Maskito's arrow-key stepping still runs, with no
+					// step, and ArrowDown (which opens the calendar) wrote NaN minutes into the text.
+					timeStep: 0,
 					dateSeparator,
 					dateTimeSeparator: ' '
 				})

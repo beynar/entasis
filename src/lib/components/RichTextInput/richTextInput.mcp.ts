@@ -126,6 +126,7 @@ edit, remote ones included. \`clear()\` and the insert methods edit the document
 ## Accessibility
 
 - The editable root uses role="textbox" and aria-multiline.
+- A second Cmd/Ctrl+A selects the current block and a third every block; the default theme draws a selected block on \`primary-muted\` (\`[data-edytor-selected]\` in the \`editor\` part).
 - Fixed and selected-text formatting controls use ToggleMenu toolbar semantics and roving focus.
 - Block styles use radio semantics, list controls toggle on and off, and command buttons do not expose pressed state.
 - The hover toolbar uses SelectionMenu's direct ToggleMenu pass-through for range containment, selection preservation, and Popover positioning.

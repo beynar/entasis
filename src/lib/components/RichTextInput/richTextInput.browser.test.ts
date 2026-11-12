@@ -229,3 +229,27 @@ describe('states', () => {
 		expect(root.textContent).toBe('kept');
 	});
 });
+
+describe('whole-block selection', () => {
+	test('a block selected by repeated select-all is drawn, once per selection', async () => {
+		mount({ value: 'First paragraph\n\nSecond paragraph' });
+		await typeAtEnd();
+		await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}');
+		await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}');
+		await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}');
+		await expect
+			.poll(() => editor().querySelectorAll('[data-edytor-selected]').length)
+			.toBeGreaterThan(0);
+
+		const surface = getComputedStyle(editor()).backgroundColor;
+		for (const block of editor().querySelectorAll<HTMLElement>('[data-edytor-selected]')) {
+			const background = getComputedStyle(block).backgroundColor;
+			const nested = block.parentElement?.closest('[data-edytor-selected]');
+			if (nested) expect(background).toBe('rgba(0, 0, 0, 0)');
+			else {
+				expect(background).not.toBe('rgba(0, 0, 0, 0)');
+				expect(background).not.toBe(surface);
+			}
+		}
+	});
+});

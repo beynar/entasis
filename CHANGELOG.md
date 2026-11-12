@@ -6,6 +6,15 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Fixed
+
+- `RichTextInput`: a whole-block selection (a second Cmd/Ctrl+A selects the block, a third every block) showed
+  nothing, since edytor hides the native selection then. The default theme now draws each selected block on
+  `primary-muted`, once per selection, and keeps a selected block's unselected children on the input's surface.
+- `DateInput` with a time (`type="datetime"`): ArrowDown cut the minutes from the text (« 15/11/2026 09: ») and
+  did not open the calendar. Maskito's arrow-key time stepping ran with no step; it is now off, so ArrowDown
+  opens the calendar and the text stays whole.
+
 ## 0.19.0 — 2026-11-12
 
 ### Added

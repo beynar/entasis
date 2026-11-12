@@ -59,3 +59,24 @@ test("Form's datetime entry edits the hour and takes the entry's time zone", asy
 		.poll(() => (values.at(-1) as { when?: Date } | undefined)?.when?.toISOString())
 		.toBe('2026-03-01T07:00:00.000Z');
 });
+
+test('ArrowDown opens the calendar and leaves the whole text, the minutes included', async () => {
+	await render(Harness, { props: { value: new Date(2026, 10, 15, 9, 45) } });
+	await expect.poll(() => input().value).toBe('15/11/2026 09:45');
+
+	// Calendar closed: ArrowDown opens it.
+	input().focus();
+	await userEvent.keyboard('{ArrowDown}');
+	await expect.poll(() => document.querySelector('dialog[open]')).not.toBeNull();
+	expect(input().value).toBe('15/11/2026 09:45');
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => document.querySelector('dialog[open]')).toBeNull();
+
+	// Calendar opened by a click, caret still in the input: ArrowDown again.
+	await userEvent.click(box());
+	await expect.poll(() => document.querySelector('dialog[open]')).not.toBeNull();
+	input().focus();
+	await userEvent.keyboard('{ArrowDown}');
+	await new Promise((resolve) => setTimeout(resolve, 100));
+	expect(input().value).toBe('15/11/2026 09:45');
+});
