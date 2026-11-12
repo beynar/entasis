@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.19.4 — 2026-11-12
+
 ### Added
 
 - `Map`: theme parts `popup` (the surface around a marker's popup: surface, padding, its 18rem width) and
