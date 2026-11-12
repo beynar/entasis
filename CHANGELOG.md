@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.19.0 — 2026-11-12
+
 ### Added
 
 - `DateInput`: `timeZone` (an IANA name such as `Europe/Paris`) shows and reads the day and the hour in that
