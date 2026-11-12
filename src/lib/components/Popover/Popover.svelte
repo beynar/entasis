@@ -41,6 +41,7 @@
 		fitTrigger = false,
 		positionPanel,
 		collisionBoundary = 'visualViewport',
+		shiftBoundary,
 		fallbackAxisSide = 'none',
 		anchorTo = 'box',
 		inline = false,
@@ -115,6 +116,9 @@
 		},
 		get collisionBoundary() {
 			return collisionBoundary;
+		},
+		get shiftBoundary() {
+			return shiftBoundary;
 		},
 		get fallbackAxisSide() {
 			return fallbackAxisSide;

@@ -50,7 +50,7 @@ With no target prop, SelectionMenu watches its parent. Pass a selector or an HTM
   events. Callback-naming decision: the document owns the text selection, so SelectionMenu has no
   controlled \`selection\` prop to change and cannot use the \`onSelectionChange\` state family.
 - **onAfterOpen / onAfterClose**: post-transition lifecycle callbacks receiving SelectionMenuPayload.
-- **popover**: Props forwarded to the floating Popover panel as one object - \`{ class, theme }\`.
+- **popover**: Props forwarded to the floating Popover panel as one object - \`{ class, theme, shiftBoundary }\`; \`shiftBoundary\` keeps the menu within an element such as the editor.
 - **contentClass**: string - Additional classes for the advanced custom-content wrapper.
 - **selectionTheme**: SelectionMenuThemeProps - Popover panel and custom-content theme overrides.
 

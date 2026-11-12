@@ -124,6 +124,7 @@
 	lockScroll={false}
 	class={classes.popover({ className: popover?.class })}
 	theme={popover?.theme}
+	shiftBoundary={popover?.shiftBoundary}
 	onAfterOpen={() => onAfterOpen?.(payload)}
 	onAfterClose={() => onAfterClose?.(payload)}
 >

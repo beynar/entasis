@@ -283,7 +283,11 @@
 		position="top"
 		offset={8}
 		directedTransition={false}
-		popover={{ class: selectionPopoverClass }}
+		popover={{
+			class: selectionPopoverClass,
+			// Over the first words of a line the toolbar would hang out of the input: keep it over it.
+			shiftBoundary: selectionTarget instanceof HTMLElement ? selectionTarget : null
+		}}
 		onAfterClose={() => onSelectionClose?.()}
 		children={isEditingLink ? linkEditor : undefined}
 		{@attach restoreSelectionFocusOnEscape}

@@ -83,6 +83,7 @@ interface PopoverOptions<Payload = unknown> extends MakeRequired<
 		| 'haspopup'
 		| 'positionPanel'
 		| 'collisionBoundary'
+		| 'shiftBoundary'
 		| 'fallbackAxisSide'
 		| 'anchorTo'
 		| 'modal'
@@ -934,6 +935,7 @@ export class PopoverState<Payload = unknown>
 		positionPanel: () => this.positionPanel,
 		direction: this.#direction,
 		collisionBoundary: () => this.collisionBoundary,
+		shiftBoundary: () => this.shiftBoundary,
 		fallbackAxisSide: () => this.fallbackAxisSide,
 		anchorTo: () => this.anchorTo,
 		anchorPoint: this.#anchorPoint,

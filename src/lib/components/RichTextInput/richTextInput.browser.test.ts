@@ -253,3 +253,56 @@ describe('whole-block selection', () => {
 		}
 	});
 });
+
+describe('the toolbar over a selection', () => {
+	const hoverFormats = [
+		'heading2',
+		'heading3',
+		'bold',
+		'italic',
+		'strikethrough',
+		'link',
+		'bulletList',
+		'orderedList',
+		'quote'
+	] as const;
+
+	test('its buttons act on the selected text, as the fixed toolbar does', async () => {
+		mount({ toolbar: 'hover', formats: [...hoverFormats], value: 'Bonjour le monde' });
+		await selectInFirstLine(11, 5);
+		const strike = page.getByRole('button', { name: /^Strikethrough/ });
+		await expect.element(strike).toBeVisible();
+		await userEvent.click(strike);
+		await expect.poll(value).toBe('Bonjour le ~~monde~~');
+		await expect.element(strike).toHaveAttribute('aria-pressed', 'true');
+	});
+
+	test('a press on a block or list control turns the selected line', async () => {
+		mount({ toolbar: 'hover', formats: [...hoverFormats], value: 'Bonjour le monde' });
+		await selectInFirstLine(11, 5);
+		await userEvent.click(page.getByRole('button', { name: /^Unordered list/ }));
+		await expect.poll(value).toBe('- Bonjour le monde');
+	});
+
+	test('over the first word of a line it stays within the input', async () => {
+		mount({
+			toolbar: 'hover',
+			formats: [...hoverFormats],
+			value: 'Bonjour le monde, une ligne assez longue pour la barre',
+			wrapperStyle: 'margin-left: 240px; width: 520px'
+		});
+		await selectInFirstLine(0, 7);
+		const toolbar = page.getByRole('toolbar', { name: /formatting/i });
+		await expect.element(toolbar).toBeVisible();
+		await nextFrame();
+		const input = document
+			.querySelector('[data-slot="rich-text-input-root"]')!
+			.getBoundingClientRect();
+		await expect
+			.poll(() => (toolbar.element() as HTMLElement).getBoundingClientRect().left)
+			.toBeGreaterThanOrEqual(Math.floor(input.left));
+		expect((toolbar.element() as HTMLElement).getBoundingClientRect().right).toBeLessThanOrEqual(
+			Math.ceil(input.right)
+		);
+	});
+});

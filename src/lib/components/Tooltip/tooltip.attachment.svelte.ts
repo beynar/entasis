@@ -1,5 +1,20 @@
 import { untrack } from 'svelte';
 import { on } from 'svelte/events';
+
+// The trigger's press listeners (pointerdown, click) are plain ones. `on()` from svelte/events runs
+// Svelte's delegated propagation from the trigger and marks the event handled there: for a trigger
+// outside the app's root (a toolbar in a popover's top-layer dialog) the document fallback then
+// skipped the trigger's own `onclick`, so a press on its icon did nothing while a press on its
+// padding worked. Focus listeners keep `on()`: a blur that removing the DOM fires synchronously
+// must run outside the current reaction, which `on()` ensures.
+const listen = <K extends keyof HTMLElementEventMap>(
+	node: HTMLElement,
+	type: K,
+	handler: (event: HTMLElementEventMap[K]) => void
+) => {
+	node.addEventListener(type, handler);
+	return () => node.removeEventListener(type, handler);
+};
 import { useTheme } from '../Theme/theme.state.svelte.js';
 import { getDeepActiveElement } from '$lib/utils/focus.js';
 import type { OpenChangeInit } from '$lib/utils/openChange.js';
@@ -186,7 +201,7 @@ export const tooltip = (props: TooltipOptions) => {
 			on(ref, 'pointerenter', (event) => {
 				if (event.pointerType !== 'touch') pressed = false;
 			}),
-			on(ref, 'pointerdown', (event) => {
+			listen(ref, 'pointerdown', (event) => {
 				// A touch never opens a tooltip, so there is nothing to close, and the press that
 				// follows is not a pointer leaving.
 				if (event.pointerType === 'touch' || event.button !== 0) return;
@@ -194,7 +209,7 @@ export const tooltip = (props: TooltipOptions) => {
 			}),
 			// Enter or Space on a focused trigger: a click with no pointer behind it.
 			// A click from code, or from Enter in a form field, reaches a trigger nobody focused.
-			on(ref, 'click', (event) => {
+			listen(ref, 'click', (event) => {
 				if (event.detail === 0 && getDeepActiveElement(ref.ownerDocument) === ref) press(event);
 			}),
 			// Keyboard users get the tooltip on focus when the focus ring shows; a click, a tap, focus

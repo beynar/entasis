@@ -149,6 +149,8 @@ export interface PanelMiddlewareOptions {
 	offset?: number;
 	/** The viewport `shift` keeps the panel inside. */
 	collisionBoundary?: PopoverCollisionBoundary;
+	/** An element `shift` also keeps the panel inside. */
+	shiftBoundary?: Element | null;
 	/** The perpendicular sides `flip` falls back to when neither side of the axis fits. */
 	fallbackAxisSide?: PopoverFallbackAxisSide;
 	/**
@@ -250,6 +252,7 @@ export const fallbackPlacementsFor = (
 export const panelMiddleware = ({
 	offset: gap,
 	collisionBoundary = 'visualViewport',
+	shiftBoundary,
 	fallbackAxisSide = 'none',
 	placement,
 	line,
@@ -280,6 +283,8 @@ export const panelMiddleware = ({
 		mainAxis: true,
 		crossAxis: true,
 		padding: VIEWPORT_PADDING,
+		// An element boundary intersects with the viewport below: the panel stays within both.
+		...(shiftBoundary ? { boundary: shiftBoundary } : {}),
 		// floating-ui's `viewport` is the visual viewport; the layout viewport ignores
 		// pinch-zoom, so panning a zoomed page doesn't drag the panel along.
 		rootBoundary: collisionBoundary === 'layoutViewport' ? 'layoutViewport' : 'viewport'
@@ -470,6 +475,8 @@ export interface PanelPositionerOptions {
 	positionPanel: () => PopoverProps['positionPanel'];
 	/** The viewport `shift` keeps the panel inside. Default `'visualViewport'`. */
 	collisionBoundary?: () => PopoverCollisionBoundary | undefined;
+	/** An element `shift` also keeps the panel inside. */
+	shiftBoundary?: () => Element | null | undefined;
 	/** The perpendicular sides `flip` falls back to. Default `'none'`. */
 	fallbackAxisSide?: () => PopoverFallbackAxisSide | undefined;
 	/** Whether the panel anchors to the reference's box or to one of its lines. Default `'box'`. */
@@ -565,6 +572,7 @@ export const createPanelPositioner = (options: PanelPositionerOptions): PanelPos
 				direction,
 				offset: options.offset(),
 				collisionBoundary: options.collisionBoundary?.(),
+				shiftBoundary: options.shiftBoundary?.(),
 				fallbackAxisSide: options.fallbackAxisSide?.(),
 				...(lineAnchor ? { line: options.anchorPoint?.() ?? null } : {}),
 				arrow

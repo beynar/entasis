@@ -96,6 +96,13 @@ export type PopoverProps<Payload = unknown> = WithAttachments<{
 	 */
 	collisionBoundary?: PopoverCollisionBoundary;
 	/**
+	 * An element the panel stays within along its side, as well as the viewport: a toolbar over a
+	 * selection stays over the editor instead of hanging out of it. It only shifts the panel;
+	 * flipping and the `--available-*` sizes still use the viewport. A panel wider than the
+	 * element still overflows it.
+	 */
+	shiftBoundary?: HTMLElement | null;
+	/**
 	 * When the panel fits neither on its side nor on the opposite one, also try the perpendicular
 	 * axis: `'end'` tries bottom (or the inline end) first, `'start'` top (or the inline start),
 	 * `'none'` stays on the axis. A panel placed beside its reference (left or right) tries only

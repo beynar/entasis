@@ -6,6 +6,22 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Popover`: `shiftBoundary` keeps the panel within an element along its side, as well as the viewport.
+  `SelectionMenu` forwards it through `popover`.
+
+### Fixed
+
+- `RichTextInput`: the buttons of the toolbar over a selection (`toolbar="hover"` or `"both"`) did nothing when
+  pressed on their icon, which is where a press lands. The tooltip on each button listened to the button with
+  `on()` from `svelte/events`, which runs Svelte's delegated propagation from the button and marks the event
+  handled; for a toolbar in a popover, outside the app's root, the document listener then skipped the button's
+  own `onclick`. The tooltip now listens with plain listeners. The same tooltip sits on buttons in other popovers
+  and menus, which this fixes too.
+- `RichTextInput`: the toolbar over a selection stays within the input instead of hanging out of it over the first
+  words of a line.
+
 ## 0.19.1 — 2026-11-12
 
 ### Fixed

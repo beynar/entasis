@@ -53,8 +53,11 @@ type SelectionMenuBaseProps = {
 	closeOnEscape?: PopoverProps['closeOnEscape'];
 	/** When true, clicking outside dismisses the menu until the selection changes. */
 	closeOnClickOutside?: PopoverProps['closeOnClickOutside'];
-	/** Props forwarded to the floating Popover panel. */
-	popover?: Pick<PopoverProps, 'class' | 'theme'>;
+	/**
+	 * Props forwarded to the floating Popover panel. `shiftBoundary` keeps the menu within an
+	 * element (such as the editor the selection is in) as well as the viewport.
+	 */
+	popover?: Pick<PopoverProps, 'class' | 'theme' | 'shiftBoundary'>;
 	/** Additional classes merged onto the custom-content wrapper. */
 	contentClass?: string;
 	/**
