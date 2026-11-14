@@ -582,6 +582,7 @@ This section is generated from `tooling/component-contract/manifest.ts`.
 - `entasis/types` — typescript, utility
 - `entasis/cva` — styling, utility
 - `entasis/scheduling` — scheduling, utility
+- `entasis/glimm` — animation, transition, webgl, utility
 - `entasis/icons/*` — icons, snippet, wildcard-export
 - `entasis/spinner-overlay` — attachment, feedback
 - `entasis/webmcp` — svelte, webmcp, ai-agents, utility

@@ -142,6 +142,7 @@ import { colorPaletteDescription } from '$lib/tailwind/palette.mcp.js';
 import { typesDescription } from '$lib/types/types.mcp.js';
 import { cvaDescription } from '$lib/utils/cva/cva.mcp.js';
 import { schedulingDescription } from '$lib/utils/scheduling/scheduling.mcp.js';
+import { glimmDescription } from '$lib/utils/glimm/glimm.mcp.js';
 import { iconsDescription } from '$lib/components/Icons/icons.mcp.js';
 import { spinnerOverlayDescription } from '$lib/attachments/spinnerOverlay.mcp.js';
 import { webmcpDescription } from '$lib/utils/webmcp/webmcp.mcp.js';
@@ -292,6 +293,7 @@ export const componentMcpRegistry = {
 	types: typesDescription,
 	cva: cvaDescription,
 	scheduling: schedulingDescription,
+	glimm: glimmDescription,
 	icons: iconsDescription,
 	'spinner-overlay': spinnerOverlayDescription,
 	webmcp: webmcpDescription

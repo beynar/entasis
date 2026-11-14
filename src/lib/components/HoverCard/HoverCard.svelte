@@ -21,6 +21,7 @@
 		open = $bindable(),
 		trigger: triggerContent = 'Hover',
 		children,
+		cover,
 		title,
 		description,
 		footer,
@@ -319,6 +320,10 @@
 		onfocusin={handleFocusIn}
 		onfocusout={scheduleClose}
 	>
+		{#snippet cardCover()}
+			<Slot render={cover} {payload} />
+		{/snippet}
+
 		{#snippet cardTitle()}
 			<Slot render={title} {payload} />
 		{/snippet}
@@ -343,6 +348,7 @@
 			{showBorders}
 			class={classes.card({ size, className })}
 			theme={card?.theme}
+			cover={cover ? cardCover : undefined}
 			title={title ? cardTitle : undefined}
 			description={description ? cardDescription : undefined}
 			content={children ? cardContentSlot : undefined}

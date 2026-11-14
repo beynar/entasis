@@ -134,6 +134,7 @@
 		"colorizr": "^5.1.1",
 		"esm-env": "^1.2.2",
 		"file-selector": "^5.0.1",
+		"glimm": "^0.4.1",
 		"lightgallery": "^3.0.0",
 		"melt": "^0.44.0",
 		"runed": "^0.37.1",
@@ -856,6 +857,10 @@
 			"types": "./dist/utils/scheduling/index.d.ts",
 			"default": "./dist/utils/scheduling/index.js"
 		},
+		"./glimm": {
+			"types": "./dist/utils/glimm/index.d.ts",
+			"default": "./dist/utils/glimm/index.js"
+		},
 		"./icons/*": {
 			"types": "./dist/components/Icons/*.d.ts",
 			"default": "./dist/components/Icons/*.js"
@@ -1304,6 +1309,9 @@
 			],
 			"scheduling": [
 				"dist/utils/scheduling/index.d.ts"
+			],
+			"glimm": [
+				"dist/utils/glimm/index.d.ts"
 			],
 			"icons/*": [
 				"dist/components/Icons/*.d.ts"

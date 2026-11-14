@@ -104,6 +104,42 @@
 		</ComponentCard>
 
 		<ComponentCard
+			title="Cover"
+			description="An image across the top of the card, flush with its edges and corners. The header, content and footer follow with their usual spacing, and it combines with media."
+			code={`<Card title="Coastline" description="A study of the coast and its rhythms">
+	{#snippet cover()}
+		<img src={photo} alt="" class="aspect-video object-cover" />
+	{/snippet}
+	{#snippet media()}
+		<Avatar name="Léa Martin" size="small" />
+	{/snippet}
+	{#snippet footer()}
+		<Button size="small" variant="outline">View project</Button>
+	{/snippet}
+</Card>`}
+		>
+			<Card
+				class="w-full max-w-sm"
+				title="Coastline"
+				description="A study of the coast and its rhythms"
+			>
+				{#snippet cover()}
+					<img
+						src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
+						alt=""
+						class="aspect-video object-cover"
+					/>
+				{/snippet}
+				{#snippet media()}
+					<Avatar name="Léa Martin" size="small" />
+				{/snippet}
+				{#snippet footer()}
+					<Button size="small" variant="outline">View project</Button>
+				{/snippet}
+			</Card>
+		</ComponentCard>
+
+		<ComponentCard
 			title="Media"
 			description="A face, an icon or a thumbnail before the title: the title and description line up beside it, and the action keeps the far end."
 			code={`<Card title="Import" description="Relance des factures en retard">

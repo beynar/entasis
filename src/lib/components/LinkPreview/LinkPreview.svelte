@@ -96,6 +96,9 @@
 			? previewState.metadata.image
 			: undefined
 	);
+	const isLoaded = $derived(previewState.status === 'loaded' && !!previewState.metadata);
+	// The cover holds the image once loaded, its placeholder before, and nothing on an error.
+	const hasCover = $derived(isLoaded ? !!previewImage : previewState.status !== 'error');
 	const previewFavicon = $derived(
 		previewState.metadata?.favicon && previewState.metadata.favicon !== failedFaviconUrl
 			? previewState.metadata.favicon
@@ -162,6 +165,23 @@
 	});
 </script>
 
+<!-- The image, or its placeholder while loading, is the card's cover: flush with its top and sides. -->
+{#snippet previewCover()}
+	{#if isLoaded && previewImage}
+		<div class={classes.media({ size })}>
+			<img
+				src={previewImage}
+				alt={imageAlt ?? `${previewTitle} preview`}
+				class={classes.image()}
+				loading="lazy"
+				onerror={() => (failedImageUrl = previewImage)}
+			/>
+		</div>
+	{:else}
+		<Skeleton class={classes.media({ size })} />
+	{/if}
+{/snippet}
+
 <HoverCard
 	{id}
 	open={openState.value}
@@ -183,6 +203,7 @@
 	{popover}
 	card={{ color: card?.color ?? 'neutral', variant: card?.variant ?? 'solid', theme: card?.theme }}
 	{showBorders}
+	cover={hasCover ? previewCover : undefined}
 	class={classes.card({ size, className: card?.class })}
 	theme={hoverCardTheme}
 	onOpenChange={handleOpenChange}
@@ -209,19 +230,7 @@
 	{/snippet}
 
 	<div class={classes.content({ size })} data-status={previewState.status}>
-		{#if previewState.status === 'loaded' && previewState.metadata}
-			{#if previewImage}
-				<div class={classes.media({ size })}>
-					<img
-						src={previewImage}
-						alt={imageAlt ?? `${previewTitle} preview`}
-						class={classes.image()}
-						loading="lazy"
-						onerror={() => (failedImageUrl = previewImage)}
-					/>
-				</div>
-			{/if}
-
+		{#if isLoaded}
 			<div class={classes.body({ size })}>
 				<div class={classes.header()}>
 					{#if previewFavicon}
@@ -260,7 +269,6 @@
 				role="status"
 				aria-label={loadingLabel ?? t.linkPreviewLoading}
 			>
-				<Skeleton class={classes.media({ size })} />
 				<div class={classes.body({ size })}>
 					<Skeleton class="h-3 w-24 rounded-full" />
 					<Skeleton class="h-4 w-11/12 rounded-full" />

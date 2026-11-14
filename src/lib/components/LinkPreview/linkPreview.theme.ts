@@ -22,7 +22,7 @@ const defaultLinkPreviewTrigger = cva({
 });
 
 const defaultLinkPreviewCard = cva({
-	base: 'max-w-[calc(100vw-2rem)] overflow-hidden gap-0! py-0!',
+	base: 'max-w-[calc(100vw-2rem)] overflow-hidden',
 	variants: {
 		size: {
 			small: 'w-64',
@@ -35,13 +35,14 @@ const defaultLinkPreviewCard = cva({
 	}
 });
 
+// The Card spaces the content: its cover slot holds the image, flush with the top and sides.
 const defaultLinkPreviewContent = cva({
 	base: 'grid min-w-0 gap-0',
 	variants: {
 		size: {
-			small: '-mx-md',
-			normal: '-mx-xl',
-			large: '-mx-layout-md'
+			small: null,
+			normal: null,
+			large: null
 		}
 	},
 	defaultVariants: {
@@ -50,7 +51,7 @@ const defaultLinkPreviewContent = cva({
 });
 
 const defaultLinkPreviewMedia = cva({
-	base: 'bg-neutral-muted overflow-hidden rounded-t-lg rounded-b-none',
+	base: 'bg-neutral-muted rounded-none',
 	variants: {
 		size: {
 			small: 'aspect-[1.9/1]',
@@ -71,9 +72,9 @@ const defaultLinkPreviewBody = cva({
 	base: 'grid min-w-0 gap-md',
 	variants: {
 		size: {
-			small: 'px-md pt-lg pb-lg',
-			normal: 'px-xl pt-xl pb-xl',
-			large: 'px-layout-md pt-layout-sm pb-layout-sm'
+			small: null,
+			normal: null,
+			large: null
 		}
 	},
 	defaultVariants: {
@@ -130,7 +131,7 @@ const defaultLinkPreviewLoading = cva({
 });
 
 const defaultLinkPreviewError = cva({
-	base: 'border-danger/20 bg-danger-muted/20 text-danger-muted-readable rounded-lg border p-lg'
+	base: 'grid min-w-0 gap-md'
 });
 
 export const linkPreviewTheme = {

@@ -6,6 +6,35 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `glimm(element, options)` from `entasis/glimm` plays a [glimm](https://glimm.dev) sweep over one
+  element: an iridescent WebGL band crosses it. A `change` passed with it lands behind the band
+  while the content ahead keeps the old one, through a view transition scoped to the element in
+  Chromium and a curtain in the element's background elsewhere. The band is drawn in the top layer,
+  clipped to the element's rounded corners and to the scroll containers around it. Its colours
+  come from a semantic role of the theme (`color`, default `primary`), or from a `palette`: a glimm
+  palette name or several roles to blend. Six presets set its shape and timing: `reveal` (one wide band),
+  `glint` (a streak from a corner), `ripple` (a ring from the centre or from a click, `origin`),
+  `double` (two bands from both sides, meeting in the middle), `split` (two bands
+  opening from the middle) and `wave` (a bent, rippling band); the change is cut along the same shape.
+  The band dims itself over a dark surface. Reduced motion and a missing WebGL context
+  apply the change at once. Adds the `glimm` package (MIT) as a dependency, loaded on the first
+  sweep. Docs at `/utilities/glimm`.
+- `Card` has a `cover` slot: an image or a block across the top of the card, flush with its edges
+  and its top corners. The card drops its top padding for it, and the header, content and footer
+  follow with their usual spacing; it combines with `media`. A theme part of the same name styles
+  it.
+- `HoverCard` has a `cover` slot, passed to its card's `cover`.
+
+### Fixed
+
+- `LinkPreview` places its image, and its placeholder while loading, in the card's `cover`. In
+  the `small` size the image no longer stops short of the card's sides, and in `large` it no longer
+  runs past them and gets cut off. The `content` and `body` theme parts no longer carry the negative
+  margins and paddings that offset the card's. The error state is plain text in the card's spacing
+  instead of a tinted box over the whole card.
+
 ## 0.21.0 — 2026-11-14
 
 ### Changed

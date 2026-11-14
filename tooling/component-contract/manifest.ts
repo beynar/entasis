@@ -594,6 +594,17 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		visibility: 'public'
 	},
 	{
+		id: 'glimm',
+		subpath: './glimm',
+		sourceIndex: 'src/lib/utils/glimm/index.ts',
+		exports: packageConditions('src/lib/utils/glimm/index.ts', false),
+		docs: [],
+		mcp: { source: 'utils/glimm/glimm.mcp.js', exportName: 'glimmDescription' },
+		capabilities: ['animation', 'transition', 'webgl', 'utility'],
+		relatedComponents: [],
+		visibility: 'public'
+	},
+	{
 		id: 'icons',
 		subpath: './icons/*',
 		sourceIndex: 'src/lib/components/Icons/*.ts',
@@ -3203,6 +3214,18 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'SchedulingOverlapPlacement',
 		'packSchedulingLanes',
 		'packSchedulingOverlaps'
+	],
+	glimm: [
+		'GlimmDirection',
+		'GlimmHandle',
+		'GlimmOptions',
+		'GlimmOrigin',
+		'GlimmPalette',
+		'GlimmPaletteName',
+		'GlimmPreset',
+		'GlimmShape',
+		'glimm',
+		'glimmPresets'
 	],
 	icons: {
 		pattern: [

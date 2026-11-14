@@ -1,7 +1,7 @@
 export const cardDescription = `
 # Card Component
 
-The Card component is a flexible container component used to display content in a structured, visually distinct card format. It supports multiple sections (header, media, title, description, action, content, footer) through slots and can be made interactive with links or click handlers.
+The Card component is a flexible container component used to display content in a structured, visually distinct card format. It supports multiple sections (cover, header, media, title, description, action, content, footer) through slots and can be made interactive with links or click handlers.
 
 ## Basic Usage
 
@@ -64,6 +64,7 @@ Interactive descendants stay independent: clicks (and Enter/Space) on buttons, l
 
 ### Content Props (Slots)
 - **header**: Snippet - Custom header content (overrides default header structure)
+- **cover**: Snippet - An image or a block across the top of the card, flush with its edges and top corners (the card drops its top padding); the header, content and footer follow with their usual spacing
 - **media**: Snippet - A face, icon or thumbnail before the title, centred on the title and description beside it (an agent's avatar, then its name and a subtitle)
 - **title**: Snippet - Card title text
 - **description**: Snippet - Card description text
@@ -343,6 +344,7 @@ The Card component uses a theme object that can be customized using the \`theme\
 The theme object contains the following parts:
 - **root**: Main card container styles
 - **header**: Card header section styles
+- **cover**: The block across the top of the card (flush, top corners rounded like the card)
 - **media**: The face, icon or thumbnail before the title (\`twoLines\` when a description follows the title)
 - **title**: Card title text styles
 - **description**: Card description text styles

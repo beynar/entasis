@@ -145,6 +145,7 @@ export const componentAliases = {
 	'entasis/cva': './src/lib/utils/cva/index.ts',
 	'entasis/motion': './src/lib/utils/motion/index.ts',
 	'entasis/scheduling': './src/lib/utils/scheduling/index.ts',
+	'entasis/glimm': './src/lib/utils/glimm/index.ts',
 	'entasis/spinner-overlay': './src/lib/attachments/spinnerOverlay.svelte.ts',
 	'entasis/webmcp': './src/lib/utils/webmcp/index.ts'
 };

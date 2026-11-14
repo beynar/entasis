@@ -32,6 +32,8 @@ export type HoverCardProps = WithAttachments<{
 	trigger?: HoverCardTrigger;
 	/** Main card content. Receives the hover card payload when rendered as a snippet. */
 	children?: Slot<HoverCardPayload>;
+	/** Media flush with the top and sides of the card, rendered through the Card cover slot. */
+	cover?: Slot<HoverCardPayload>;
 	/** Card title rendered through the Card title slot. */
 	title?: Slot<HoverCardPayload>;
 	/** Card description rendered through the Card description slot. */

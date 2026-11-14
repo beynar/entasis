@@ -46,6 +46,7 @@ const gettingStartedLinks: AppNavigationLink[] = [
 
 const additionalUtilityLinks: AppNavigationLink[] = [
 	{ href: '/utilities/dnd', text: 'Dnd list' },
+	{ href: '/utilities/glimm', text: 'Glimm' },
 	{ href: '/utilities/raised', text: 'Raised' },
 	{ href: '/utilities/scroll-fade', text: 'Scroll fade' },
 	{ href: '/utilities/shimmer', text: 'Shimmer' }

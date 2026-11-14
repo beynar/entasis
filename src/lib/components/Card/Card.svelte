@@ -23,6 +23,7 @@
 		onpointerleave = null,
 		showBorders = false,
 		theme,
+		cover,
 		header,
 		media,
 		title,
@@ -119,7 +120,17 @@
 	{rel}
 	{role}
 	tabindex={link ? (disabled ? -1 : undefined) : onclick && !disabled ? 0 : undefined}
-	class={classes.root({ color, variant, size, density, clickable, disabled, elevation, className })}
+	class={classes.root({
+		color,
+		variant,
+		size,
+		density,
+		clickable,
+		disabled,
+		elevation,
+		hasCover: !!cover,
+		className
+	})}
 	onclick={handleClick}
 	onkeydown={handleKeydown}
 	onpointerenter={handleEnter}
@@ -127,6 +138,8 @@
 	aria-disabled={disabled || undefined}
 	{...attachments}
 >
+	<Slot render={cover} class={classes.cover()} />
+
 	<Slot
 		renderIf={hasHeader}
 		render={header}

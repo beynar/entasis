@@ -4816,6 +4816,27 @@ export const componentInventory = [
 		visibility: 'public'
 	},
 	{
+		id: 'glimm',
+		subpath: 'entasis/glimm',
+		sourceIndex: 'src/lib/utils/glimm/index.ts',
+		exportedSymbols: [
+			'GlimmDirection',
+			'GlimmHandle',
+			'GlimmOptions',
+			'GlimmOrigin',
+			'GlimmPalette',
+			'GlimmPaletteName',
+			'GlimmPreset',
+			'GlimmShape',
+			'glimm',
+			'glimmPresets'
+		],
+		docs: [],
+		capabilities: ['animation', 'transition', 'webgl', 'utility'],
+		relatedComponents: [],
+		visibility: 'public'
+	},
+	{
 		id: 'icons',
 		subpath: 'entasis/icons/*',
 		sourceIndex: 'src/lib/components/Icons/*.ts',
@@ -5027,6 +5048,7 @@ export const relatedComponents = {
 	cva: ['theme'],
 	motion: ['theme'],
 	scheduling: ['event-calendar', 'gantt-chart'],
+	glimm: [],
 	icons: [],
 	'spinner-overlay': ['spinner'],
 	webmcp: ['theme', 'form', 'ask']

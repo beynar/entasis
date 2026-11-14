@@ -27,6 +27,7 @@ HoverCard previews supplemental content when a trigger is hovered or focused. It
 - **defaultOpen**: boolean (default: false) - Initial state when open is not provided.
 - **trigger**: string | Snippet<[HoverCardPayload]> | ButtonProps - Trigger content. ButtonProps render a Entasis Button.
 - **children**: string | Snippet<[HoverCardPayload]> - Main card content.
+- **cover**: string | Snippet<[HoverCardPayload]> - Card cover slot: media flush with the top and sides of the card.
 - **title**: string | Snippet<[HoverCardPayload]> - Card title slot.
 - **description**: string | Snippet<[HoverCardPayload]> - Card description slot.
 - **footer**: string | Snippet<[HoverCardPayload]> - Card footer slot.

@@ -58,6 +58,11 @@ const defaultCard = cva({
 			true: 'opacity-50 cursor-not-allowed *:pointer-events-none',
 			false: null
 		},
+		// A cover sits flush against the top edge, so the card drops its top padding.
+		hasCover: {
+			true: 'pt-0',
+			false: ''
+		},
 		// Elevation step of a solid card; only solid casts a shadow (compound variants below).
 		elevation: {
 			1: '',
@@ -68,6 +73,7 @@ const defaultCard = cva({
 		}
 	},
 	defaultVariants: {
+		hasCover: false,
 		size: 'normal',
 		density: 'normal',
 		color: 'neutral',
@@ -207,6 +213,11 @@ const defaultCardAction = cva({
 	}
 });
 
+// An image or a block across the top of the card, flush with its edges and its top corners.
+const defaultCardCover = cva({
+	base: 'overflow-hidden rounded-t-[inherit] *:block *:w-full'
+});
+
 // A face, an icon or a thumbnail before the title, centred on the title and description beside it.
 const defaultCardMedia = cva({
 	base: 'col-start-1 row-start-1 flex shrink-0 items-center self-center',
@@ -271,6 +282,7 @@ const defaultCardFooter = cva({
 export const cardTheme = {
 	root: defaultCard,
 	header: defaultCardHeader,
+	cover: defaultCardCover,
 	media: defaultCardMedia,
 	title: defaultCardTitle,
 	description: defaultCardDescription,
