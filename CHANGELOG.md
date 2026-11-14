@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.22.0 — 2026-11-14
+
 ### Added
 
 - `glimm(element, options)` from `entasis/glimm` plays a [glimm](https://glimm.dev) sweep over one
