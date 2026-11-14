@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { CheckboxOption, CheckboxesInputProps } from './checkboxesInput.props.js';
 	import { useCheckboxesInputTheme } from './checkboxesInput.theme.js';
@@ -30,11 +31,13 @@
 		size = 'normal',
 		selectAll = false,
 		selectAllLabel,
+		id: idProp,
 		...rest
 	}: CheckboxesInputProps<Option, Value> = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue)) as Value[];
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 
 	const field = createFieldState({
 		id,

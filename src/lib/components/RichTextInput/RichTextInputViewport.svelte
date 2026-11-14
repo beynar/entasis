@@ -2,7 +2,7 @@
 	import { on } from 'svelte/events';
 	import { untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
-	import { Edytor, type JSONDoc, type Plugin } from 'edytor';
+	import { Edytor, type EdytorProps, type JSONDoc, type Plugin } from 'edytor';
 	import type { RichTextInputCollaboration } from './richTextInput.props.js';
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
 	import type { Sizes } from '$lib/types/theme.js';
@@ -31,6 +31,19 @@
 		onBlur?: (event: FocusEvent) => void;
 		/** A press below the last line: the caret goes to the end of the text. */
 		onPressBelowContent?: () => void;
+	};
+
+	type EdytorCollaboration = Pick<EdytorProps, keyof RichTextInputCollaboration>;
+
+	// The public collaboration type is structural, so that entasis's declarations never name the
+	// optional edytor peer. The assignment below keeps it honest: svelte-check fails here when a
+	// field stops fitting edytor's own. Only the document and the sync provider, opaque in the
+	// public type, are left out of that check and cast.
+	const toEdytorCollaboration = (
+		settings: RichTextInputCollaboration | undefined
+	): EdytorCollaboration | undefined => {
+		const checked: Omit<EdytorCollaboration, 'document' | 'sync'> | undefined = settings;
+		return checked as EdytorCollaboration | undefined;
 	};
 
 	let {
@@ -235,7 +248,7 @@
 			class={classes.editorShell({ size })}
 		>
 			<Edytor
-				{...collaboration}
+				{...toEdytorCollaboration(collaboration)}
 				{id}
 				{value}
 				{plugins}

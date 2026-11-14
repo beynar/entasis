@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { TextAreaProps } from './textArea.props.js';
 	import { useTextAreaTheme } from './textArea.theme.js';
@@ -26,11 +27,13 @@
 		maxLength,
 		onPressEnter,
 		textareaAttrs,
+		id: idProp,
 		...rest
 	}: TextAreaProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, textareaAttrs, generatedId));
 
 	const field = createFieldState({
 		id,
@@ -124,5 +127,6 @@
 		name={field.name}
 		id={field.id}
 		required={field.required}
-		class={classes.input({ disabled: field.disabled, size: rest.size })}></textarea>
+		class={classes.input({ disabled: field.disabled, size: rest.size })}
+		{...field.ariaAttrs({ role: 'textbox', native: 'text', attrs: textareaAttrs })}></textarea>
 </Field>

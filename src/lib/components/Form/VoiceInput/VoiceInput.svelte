@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { microphoneIcon } from '$lib/components/Icons/microphone.js';
 	import { pauseIcon } from '$lib/components/Icons/pause.js';
 	import { playIcon } from '$lib/components/Icons/play.js';
@@ -6,6 +7,7 @@
 	import { xIcon } from '$lib/components/Icons/x.js';
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import VoiceInputContent from './VoiceInputContent.svelte';
@@ -48,6 +50,7 @@
 		clearLabel,
 		fieldAttrs,
 		theme,
+		id: idProp,
 		...rest
 	}: VoiceInputProps = $props();
 	const valueState = createBindableValue<Blob | null>(
@@ -58,7 +61,8 @@
 		() => defaultValue
 	);
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const t = $derived(useI18n());
 	const resolvedColor = $derived(useDefaultColor(color));
 	const resolvedStopLabel = $derived(stopLabel ?? t.voiceInputStop);

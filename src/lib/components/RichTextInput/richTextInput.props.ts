@@ -1,4 +1,3 @@
-import type { EdytorProps } from 'edytor';
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { InputProps } from '$lib/components/Form/Field/field.js';
 import type { WithAttachments } from '$lib/types/props.js';
@@ -97,27 +96,11 @@ export type RichTextInputHandle = {
 	insertToken: (token: RichTextInputToken) => void;
 };
 
-/**
- * edytor's collaboration settings, passed to the editor as they are (read once, when it mounts):
- * \`room\` alone keeps a local copy in the browser and syncs its open tabs; with \`server\`, people
- * edit the room together. \`actor\` names the local author (presence and attribution); \`document\`
- * shares one \`createDocument()\` between views; \`sync\` is a custom provider.
- */
-export type RichTextInputCollaboration = Pick<
-	EdytorProps,
-	| 'room'
-	| 'server'
-	| 'params'
-	| 'actor'
-	| 'document'
-	| 'sync'
-	| 'presence'
-	| 'requireHydration'
-	| 'onSyncExpired'
-	| 'onSyncRefused'
->;
+import type { RichTextInputCollaboration } from './richTextInput.collaboration.js';
 
-type RichTextInputFieldProps = Omit<InputProps<'rich-text'>, 'theme' | 'onValueChange'>;
+export type { RichTextInputCollaboration };
+
+type RichTextInputFieldProps = Omit<InputProps<'rich-text'>, 'id' | 'theme' | 'onValueChange'>;
 
 export type RichTextInputProps = WithAttachments<
 	RichTextInputFieldProps & {

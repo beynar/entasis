@@ -2,7 +2,9 @@
 	import Spinner from '../Spinner/Spinner.svelte';
 	import Slot from '../Slot/Slot.svelte';
 	import Button from '../Button/Button.svelte';
-	import type { Toast } from './toast.state.svelte.js';
+	// The toast state type is imported under another name: the emitted declaration of this component declares
+	// `Toast` itself, and an import of the same name conflicts with it.
+	import type { Toast as ToastInstance } from './toast.state.svelte.js';
 	import { warningIconFill } from '$lib/components/Icons/warning.js';
 	import { xCircleIconFill } from '$lib/components/Icons/xCircle.js';
 	import { infoIconFill } from '$lib/components/Icons/info.js';
@@ -27,7 +29,7 @@
 		/** Recalculates the interactive toast-stack area after movement or expansion. */
 		updateArea: () => void;
 		/** Toast state owned by the parent Toaster. */
-		toast: Toast;
+		toast: ToastInstance;
 		/** The Toaster's component theme overrides. */
 		theme?: ToastThemeProps;
 	}> = $props();

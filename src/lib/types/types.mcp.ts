@@ -12,7 +12,7 @@ Every overlay's \`onOpenChange(open, details)\` receives \`OpenChangeDetails\` a
 - \`reason\` (\`OpenChangeReason\`): \`'trigger-press'\`, \`'trigger-hover'\`, \`'trigger-focus'\`, \`'outside-press'\`, \`'escape-key'\`, \`'close-watcher'\` (the Android Back gesture), \`'close-press'\`, \`'item-press'\`, \`'list-navigation'\`, \`'input-change'\` (typing in a combobox input), \`'focus-out'\`, \`'swipe'\`, \`'trigger-unmount'\`, \`'find-in-page'\` (the browser's find-in-page opened a disclosure that hides its content until found) or \`'imperative-action'\`.
 - \`event\`: the DOM event behind the change, when there is one.
 - \`trigger\`: the trigger element involved, when a trigger caused it.
-- \`interaction\` (\`OpenChangeInteraction\`): \`'mouse'\`, \`'touch'\`, \`'pen'\`, \`'keyboard'\` or \`'programmatic'\`.
+- \`interaction\` (\`OpenChangeInteraction\`): \`'mouse'\`, \`'touch'\`, \`'pen'\`, \`'keyboard'\`, \`'programmatic'\` (no user input behind it) or \`'agent'\` (a WebMCP tool under \`<Theme webmcp>\` caused it; it can be cancelled like any other change).
 - \`cancel()\` keeps the overlay as it was and leaves the event untouched (a cancelled Escape is not \`defaultPrevented\`); \`isCanceled\` reports it.
 
 \`OpenChangeHandler\` is the \`(open, details) => void\` signature itself. Inside the callback, \`open\` still holds the previous state.

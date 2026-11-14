@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Popover from '../../Popover/Popover.svelte';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import {
 		loadIntlTelInputFromCdn,
@@ -40,11 +41,13 @@
 		onValidate,
 		onValueChange,
 		visible,
+		id: idProp,
 		...rest
 	}: PhoneInputProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const t = $derived(useI18n());
 	const resolvedPlaceholder = $derived(placeholder ?? t.phoneNumber);
 	const resolvedSearchPlaceholder = $derived(searchPlaceholder ?? t.search);
@@ -290,6 +293,7 @@
 				}}
 				type="tel"
 				{id}
+				{...field.ariaAttrs({ role: 'textbox', native: 'text' })}
 				name={field.name}
 				bind:this={field.node}
 				placeholder={resolvedPlaceholder}

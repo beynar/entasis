@@ -4889,6 +4889,7 @@ export const componentInventory = [
 			'WebMCPToolHandle',
 			'WebMCPToolOptions',
 			'WebMCPToolProp',
+			'isAgentAction',
 			'registerWebMCPTool',
 			'useWebMCPTool',
 			'webmcpSupported'

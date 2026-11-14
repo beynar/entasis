@@ -1,590 +1,120 @@
 ---
 name: building-with-entasis
-description: Builds UIs with the entasis component library for SvelteKit. Covers component usage, theming, Tailwind plugin configuration, form inputs, overlays, layout primitives, and theme customization. Use when the user asks to build UI with entasis components, customize themes, or work with entasis form inputs.
+description: Builds SvelteKit interfaces with the entasis component library, makes them usable by browser agents with <Theme webmcp>, and tests them. Covers choosing and composing its components, forms and validation, layout, theming with its Tailwind plugin and <Theme>, WebMCP tool props, and Vitest tests. Use whenever a project has entasis installed or the user mentions entasis.
 ---
 
-# entasis Component Library
-
-A configuration-over-markup component library for SvelteKit. Components are styled via a global theme system backed by a Tailwind CSS plugin.
-
-## Contents
-
-- [Import Convention](#import-convention)
-- [Common Props](#common-props)
-- [Accessibility](#accessibility)
-- [Snippet Pattern](#snippet-pattern)
-- [Theme System](#theme-system)
-- [Color Tokens](#color-tokens)
-- [Design Tokens](#design-tokens)
-- [Component Theme Customization](#component-theme-customization)
-- [Component References](#component-references)
-
-## Import Convention
-
-All components use kebab-case package paths with PascalCase component names. There is no root `entasis` export; always import from the subpath.
-
-```svelte
-<script>
-	import { Button } from 'entasis/button';
-	import { TextInput } from 'entasis/text-input';
-	import { Dialog } from 'entasis/dialog';
-	import { Popover } from 'entasis/popover';
-</script>
-```
-
-## Common Props
-
-Most components share these prop patterns:
-
-### Colors
-
-`color`: `'primary'` | `'secondary'` | `'success'` | `'warning'` | `'danger'` | `'info'` | `'neutral'`
-
-When `color` is omitted, controls inherit the theme's `defaultColor` (`'neutral'` unless changed via `<Theme designTokens>`).
-
-### Sizes
-
-`size`: `'small'` | `'normal'` | `'large'`
-
-### Variants (interactive components)
-
-`variant`: `'solid'` | `'outline'` | `'soft'` | `'ghost'` | `'link'`
-
-### Common
-
-- `class`: string - Additional CSS classes
-- `theme`: ComponentTheme - Per-instance theme overrides
-- `ref`: HTMLElement - Bind to underlying DOM element
-- `disabled`: boolean
-- `data-*`: every component accepts arbitrary `data-*` attributes and forwards them to its root
-  element, so test hooks and analytics markers like `<Button data-testid="save">` always work.
-
-### Naming rules
-
-The same word means the same thing on every component; `tooling/check-public-api-contract.mjs`
-fails the build when it does not.
-
-- **State comes in threes.** A bindable `value` always ships with `defaultValue` and
-  `onValueChange`; a bindable `open` always ships with `defaultOpen` and `onOpenChange`. Bind one,
-  or drive it with the pair. Rating, Meter, ProgressCircle, and QRCode display a value they never
-  edit and are marked `@readonly-value` in their props file.
-- **Give bound state a starting value.** `let name = $state('')`, `let open = $state(false)`,
-  not `$state()`. A component writes its default into a bound value the parent left `undefined`,
-  and on the server that write makes Svelte render the parent's markup twice. A `null` or `false`
-  default is only written in the browser, so `bind:value={x}` or `bind:open={x}` with `x` unset
-  stays a single render for most fields and every closed overlay; a meaningful default (Tabs' first
-  tab, `defaultValue`, `defaultOpen`) is still written.
-- **Callbacks name the change, not the gesture**, take one payload object, and are present tense:
-  `onValueChange`, `onOpenChange`, `onWidthChange`, `onSearchChange`. Never `onChange`, `onClick`,
-  `onToggle`, `onPageChange`, or `onWidthChanged`.
-- **Open changes carry details.** `onOpenChange(open, details)` is the only callback with two
-  arguments. It runs before the state changes, so inside it the component still reports the old
-  state: read the first argument. `details` (`OpenChangeDetails` from `entasis/types`) has
-  `reason` (`'trigger-press'`, `'outside-press'`, `'escape-key'`, `'item-press'`,
-  `'trigger-unmount'`…), `event`, `trigger`, `interaction` and `cancel()`, which keeps the
-  component as it was. Every other change callback takes one payload object, including Tabbar's
-  `{ value, reason }` and NavigationMenu's `{ value, details }`.
-- **`onAfterOpen` / `onAfterClose` fire once per open and close**, also when no animation plays.
-- **`readOnly`, never `readonly`.** Every value control takes `readOnly`: it stays focusable and
-  announced, refuses edits, and still validates and submits. A read-only `Form`, `FormGroup` or
-  `Field as="fieldset"` makes the fields inside it read-only.
-- **Disabled fields are not submitted.** A disabled field, directly or through a disabled
-  `FormGroup` or `Form`, skips validation and is left out of `onSubmit`, `ask()` and
-  `MultiStepForm` values, like a native form. Use `readOnly` for a value that must still submit.
-- **`api` is the instance handle.** `bind:api` on Tabs, Stepper, DataTable, Tree, AIChat, and
-  AIConversation gives the state object; the exported types are `TabsApi`, `StepperApi`,
-  `DataTableApi`, `AIConversationApi`. Tabs, Stepper and DataTable publish it in the browser
-  only: during server rendering it is `undefined`, so read it in handlers and effects. Popover and Dialog snippets and lifecycle callbacks receive
-  the narrow `PopoverApi` (`entasis/popover`) and `DialogApi` (`entasis/dialog`): open state,
-  `open()`, `close()`, `toggle()` and the `trigger` / `reference` attachments. `PopoverState` is a
-  deprecated alias of `PopoverApi`.
-- **Styling hooks are data attributes.** Overlays and lists write `data-open`, `data-closed`,
-  `data-entering`, `data-exiting`, `data-side`, `data-align`, `data-popup-open`,
-  `data-highlighted`, `data-disabled` and `data-selected`; style them with Tailwind's `data-*`
-  variants instead of reading component state. Each owner exports the typed list
-  (`popoverDataAttributes`, `popoverCssVariables`, …).
-- **`label` is the one prop that names a component.** It is painted where the component has a
-  visible label (every Field input, Select, Checkbox, Switch, Slider, Rating, Meter, Stat) and
-  spoken where it has none (Button, ToggleButton, SegmentedControl, Pagination, Chart, ScrollArea,
-  AudioPlayer, VideoPlayer, QRCode, field actions). There is no `ariaLabel` prop anywhere. A
-  hidden visible label still names its control: Checkbox `mode="control"` speaks its string
-  `label` instead of painting it. Omit `label` and the component falls back to a sensible default
-  from the i18n catalog where it has one.
-- **`size` is `'small' | 'normal' | 'large'`** (the exported `Sizes`) everywhere. `xs`/`sm`/`md`/
-  `lg`/`xl` are Tailwind breakpoint and spacing words, never a component size.
-- **Literal unions are kebab-case**: `position="top-right"`, `variant="outline"`,
-  `icon="plus-minus"`. Disclosure controls (Accordion, Collapsible, AITool, Sidebar) share one
-  `DisclosureIndicator` union: `'chevron' | 'plus-minus' | 'none'`.
-- **Hover-opened surfaces delay with `delay`** (Popover, Menu submenus, PopupMenu), not
-  `hoverDelay`.
-
-## Accessibility
-
-Accessibility is the library's job. Never pass an `aria-*` attribute to a entasis component: describe
-the meaning and the component writes the attribute.
-
-| You pass                                             | The component renders                                                                                |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `<Button pressed={bold} />`                          | `aria-pressed`                                                                                       |
-| `<Button selected={isActive} role="tab" />`          | `aria-selected`                                                                                      |
-| `<Button expanded={open} haspopup="menu" />`         | `aria-expanded`, `aria-haspopup`                                                                     |
-| `<Chip selected={filter === group} />`               | `aria-pressed` on a button chip, `aria-current` on a link chip (and `aria-disabled` from `disabled`) |
-| `<Tabbar label="Sections" orientation="vertical" />` | `role="tablist"`, `aria-label`, `aria-orientation`                                                   |
-| `<PageShell label="Invoice detail" />`               | `aria-label` on the `<main>` landmark                                                                |
-
-An accessible name is always `label` — never `aria-label`, never `ariaLabel`.
-
-`aria-controls` has no public prop. A trigger inside a Popover, PopupMenu, Select or Combobox is
-wired by the surface itself: the built-in Button trigger gets `{...popover.triggerProps}`, and a
-custom snippet trigger gets the same state through `{@attach popover.reference}`. Never set
-`aria-haspopup` / `aria-expanded` / `aria-controls` on such a trigger by hand.
-
-Escape hatches that still take raw attributes, because they are attribute bags spread onto a DOM
-node rather than props: `MenuOption`'s `attrs`, `Field`'s `fieldAttrs`, `Select`'s `triggerAttrs`,
-and the `attributes` object a `Carousel` dot hands its snippet. Map marker `label`, `popup` and
-`tooltip` strings are likewise rendered as HTML — pass a snippet when the content is user-supplied.
-
-## Snippet Pattern
-
-Most components accept `prefix` and `suffix` snippets for composable content:
-
-```svelte
-<script>
-	import { Button } from 'entasis/button';
-	import { plusIcon } from 'entasis/icons/plus';
-</script>
-
-<Button>
-	{#snippet prefix()}{@render plusIcon()}{/snippet}
-	Add Item
-</Button>
-```
-
-`Slot` utility (`import { Slot } from 'entasis/slot'`) renders strings, numbers, Snippets, or components uniformly: `<Slot render={dynamicContent} />`
-
-## Theme System
-
-Three layers: the Tailwind theme plugin (palette + engine utilities), the `<Theme>` component (wraps the app, runtime design tokens, light/dark switching), and the `ThemeState` it hands to its `children` snippet. The `@source` line lets Tailwind see the classes used inside the packaged components.
-
-```css
-/* app.css - one @plugin block per theme; the default one also bootstraps the engine */
-@import 'tailwindcss';
-@source '../node_modules/entasis/dist';
-
-@plugin 'entasis/tailwind-plugin/theme' {
-	name: light;
-	default: true;
-	colorscheme: light;
-	surface: #fafafa;
-	neutral: #18181b;
-	primary: #5f62ef;
-	secondary: #e4e4e7;
-	danger: #dc2626;
-	success: #15803d;
-	warning: #f59e0b;
-	info: #2563eb;
-}
-@plugin 'entasis/tailwind-plugin/theme' {
-	name: dark;
-	colorscheme: dark;
-	surface: #09090b;
-	surface-floating: #27272a;
-	neutral: #fafafa;
-	primary: #5f62ef;
-	secondary: #27272a;
-	danger: #dc2626;
-	success: #15803d;
-	warning: #f59e0b;
-	info: #2563eb;
-	state-hover-opacity: 0.16;
-	state-pressed-opacity: 0.32;
-	state-selected-opacity: 0.1;
-}
-```
-
-```svelte
-<!-- +layout.svelte - wrap app once -->
-<script>
-	import { Theme } from 'entasis/theme';
-
-	let { children } = $props();
-</script>
-
-<Theme>{@render children()}</Theme>
-```
-
-Themes are applied as `html[data-theme="<name>"]`; `<Theme>` persists the choice in `localStorage` and follows the system preference by default. See [theming.md](theming.md) for full details.
-
-## Color Tokens
-
-Each semantic color (`primary`, `secondary`, `danger`, `success`, `warning`, `info`, `neutral`) generates variants: `{color}-light` (+15%), `{color}-lighter` (+25%), `{color}-dark` (-15%), `{color}-muted` (mixed with the base surface), `{color}-contrast` (auto contrast). All are overridable in the plugin block. Two read-only text variants are also generated: `{color}-readable` (colored text on the surface) and `{color}-muted-readable` (colored text on the muted tint).
-
-Usage: `bg-primary`, `text-primary-contrast`, `border-danger-dark`, `bg-neutral-muted`, `text-primary-readable`.
-
-Opaque surfaces use `surface-recessed` for inset wells and grouped-control tracks, followed by the elevation ladder `surface-canvas`, `surface`, `surface-raised`, and `surface-floating` (`bg-surface`, `bg-surface-raised`, ...). Transient hover, virtual focus, and press use the global `state-layer` utility, which composites `currentColor` without changing the resting surface. Use focus rings for focus and `*-muted` or solid colors for persistent selected, checked, open, or semantic states.
-
-```svelte
-<button class="state-layer bg-primary text-primary-contrast">Save</button>
-```
-
-`state-hover-opacity`, `state-pressed-opacity` and `state-selected-opacity` can be overridden per theme block. Their light-theme defaults are 0.05, 0.10 and 0.07; their dark-theme defaults are 0.16, 0.32 and 0.10. `state-selected-opacity` is the alpha `bg-selected-muted` composites the selected role at, which is why a selected row reads the same on `surface`, `surface-raised` and `surface-floating`.
-
-## Design Tokens
-
-Geometry tokens are runtime values passed to `<Theme designTokens={...}>`, keyed by theme name.
-`radius`, `spacing`, `typeScale`, `elevation` and `motion` are _also_ build-time plugin options on
-the `default: true` block; the runtime value wins for the theme that declares it, because it lands
-on the more specific `html[data-theme="<name>"]`. The rest are runtime-only:
-
-| Token              | Values                                                                                       | Default     |
-| ------------------ | -------------------------------------------------------------------------------------------- | ----------- |
-| `radius`           | `none` \| `subtile` \| `small` \| `normal` \| `large` \| `round` \| number                   | `normal`    |
-| `spacing`          | `small` \| `normal` \| `large` \| number                                                     | `normal`    |
-| `spacingScale`     | `{ xs?, sm?, md?, lg?, xl? }` multipliers of `--spacing`                                     | 1/1.5/2/3/4 |
-| `typeScale`        | `compact` \| `default` \| `comfortable` \| `large` \| `{ baseMinPx, baseMaxPx, scale, ... }` | unset       |
-| `elevation`        | `flat` \| `normal` \| `high`                                                                 | `normal`    |
-| `motion`           | `{ duration?, easing? }` -- the five duration steps and four easing roles                    | unset       |
-| `raisedWithBorder` | boolean                                                                                      | unset       |
-| `defaultColor`     | `primary` \| `secondary` \| `danger` \| `success` \| `warning` \| `info` \| `neutral`        | `neutral`   |
-| `focusColor`       | any color role -- pins every focus ring                                                      | unset       |
-| `selectedColor`    | any color role -- pins every persistent selection fill                                       | unset       |
-| `hoverColor`       | any color role -- pins the transient hover layer                                             | unset       |
-| `pressedColor`     | any color role -- pins the transient pressed layer (falls back to `hoverColor`)              | unset       |
-
-`focusColor`, `selectedColor`, `hoverColor` and `pressedColor` are the four **state roles**. Left
-unset, each state falls back to the current role (`ring-focus` resolves to
-`var(--color-focus, var(--color))`), so nothing changes visually; pin one and that state stops
-following the control's own color everywhere at once. Theme-level only -- no per-component
-override. See `theming.md` "State colours".
-
-```svelte
-<script lang="ts">
-	import { Theme, type ThemeDesignTokenMap } from 'entasis/theme';
-
-	let { children } = $props();
-	const designTokens: ThemeDesignTokenMap = {
-		light: { radius: 'large', spacing: 'normal', defaultColor: 'primary' },
-		dark: { radius: 'large', spacing: 'normal', defaultColor: 'primary' }
-	};
-</script>
-
-<Theme {designTokens}>{@render children()}</Theme>
-```
-
-## Component Theme Customization
-
-Each component's parts — the element a part lands on, the variants it takes and their default,
-the exact classes each value adds — are listed in `theme-parts/<registry-key>.md` next to this file
-(generated, one file per component: `theme-parts/sidebar.md`, `theme-parts/button.md`).
-Two subsections of `theming.md` answer the questions that come up first: _Scoping an override to
-one colour or variant_ (the `data-color` / `data-variant` hooks) and _Switching a house utility off_
-(`state-layer-none`, `raised-none`, and what each engine utility really is).
-
-Every component has a theme object with slots (e.g., `root`, `prefix`, `suffix`). Each slot has `base` classes plus one map per variant (`color`, `variant`, `size`, ...) keyed directly by variant value.
-
-### Per-instance override
-
-```svelte
-<script>
-	import { Button } from 'entasis/button';
-</script>
-
-<Button theme={{ root: { base: 'rounded-full shadow-lg' } }}>Custom</Button>
-```
-
-### Global override
-
-```svelte
-<script>
-	import { setButtonTheme } from 'entasis/button';
-
-	setButtonTheme({
-		root: {
-			base: 'tracking-wide',
-			variant: { solid: 'shadow-md hover:shadow-lg transition-shadow' },
-			color: { primary: 'ring-1 ring-primary/30' }
-		}
-	});
-</script>
-```
-
-Pattern: `import { set{Component}Theme } from 'entasis/{kebab-name}'`. Overrides are appended to the defaults; pass `override: true` to drop the defaults entirely.
-
-## Component References
-
-**Theming & Config**: See [theming.md](theming.md) for full Tailwind plugin config and Theme component details.
-
-**Display**: See [display.md](display.md) for Button, ButtonGroup, Avatar, Chip, Heading, Code, Meter, MetadataList, Rating, ToggleButton, ToggleButtonGroup, QRCode, DocumentViewer, Icons.
-
-**Form Inputs**: See [form-inputs.md](form-inputs.md) for TextInput, TextArea, NumberInput, RatingInput, PasswordInput, PhoneInput, DateInput, TimeInput, ColorInput, ColorPicker, Select, Combobox, Autocomplete, TagsInput, KeyValueInput, JsonEditor, Switch, RadioInput, CheckboxesInput, FileInput, Calendar, MiniCalendar, Form, MultiStepForm.
-
-**Layout & Navigation**: See [layout.md](layout.md) for Tabs, Tabbar, Stepper, Breadcrumbs, NavigationMenu, Accordion, Collapsible, Separator, Menu, PopupMenu, MenuOption, Carousel, ScrollArea, AspectRatio, Marquee, Sidebar, AppShell, Grid/GridSpan — including `AppShell variant="framed"`, `Sidebar activeVariant`, and the `mount` axis on Tabs and Stepper.
-
-**Overlays & Feedback**: See [overlays.md](overlays.md) for Dialog, Popover, Tooltip, Toast, Confirmation, Alert, NetworkIndicator.
-
-**Data & Utility**: See [data-utility.md](data-utility.md) for Table, DataTable, SortableList, Card, Skeleton, Slot.
-
-## Quick Patterns
-
-### Form with validation
-
-```svelte
-<script>
-	import { Form } from 'entasis/form';
-	import { Button } from 'entasis/button';
-
-	const handleSubmit = async (value) => {
-		console.log(value);
-	};
-</script>
-
-<Form
-	inputs={{
-		email: { type: 'email', label: 'Email', required: true, class: 'col-span-1' },
-		password: { type: 'password', label: 'Password', required: true, class: 'col-span-1' }
-	}}
-	onSubmit={handleSubmit}
->
-	{#snippet footer(form)}
-		<Button type="submit" loading={form.loading}>Submit</Button>
-	{/snippet}
-</Form>
-```
-
-### Confirmation dialog
-
-```typescript
-import { confirmation } from 'entasis/confirmation';
-
-declare function deleteItem(): Promise<void>;
-
-const { confirmed, result } = await confirmation({
-	title: 'Delete item?',
-	description: 'This cannot be undone.',
-	confirm: 'Delete',
-	cancel: 'Cancel',
-	onConfirm: async () => {
-		await deleteItem();
-	}
-});
-```
-
-### Toast notifications
-
-```typescript
-import { toast } from 'entasis/toast';
-
-declare function upload(): Promise<void>;
-
-toast.success({ title: 'Saved!' });
-toast.danger({ title: 'Error', description: 'Something went wrong.' });
-
-// Loading toast
-const t = toast.info({ title: 'Uploading...', loading: true, duration: false });
-await upload();
-t.remove();
-toast.success({ title: 'Done!' });
-```
-
-<!-- component-contract:inventory:start -->
-
-## Generated Package Inventory
-
-This section is generated from `tooling/component-contract/manifest.ts`.
-
-### AI
-
-- `entasis/ai-conversation` — Conversation (/components/ai-conversation)
-- `entasis/ai-ask-user-question` — Ask user question (/components/ai-ask-user-question)
-- `entasis/ai-chat` — Chat (/components/ai-chat)
-- `entasis/ai-context` — Context (/components/ai-context)
-- `entasis/ai-thread` — Thread (/components/ai-thread)
-- `entasis/ai-thread-toc` — Thread TOC (/components/ai-thread-toc)
-- `entasis/ai-message` — Message (/components/ai-message)
-- `entasis/ai-message-actions` — Message actions (/components/ai-message-actions)
-- `entasis/ai-marker` — Marker (/components/ai-marker)
-- `entasis/ai-model-selector` — Model selector (/components/ai-model-selector)
-- `entasis/ai-composer` — Composer (/components/ai-composer)
-- `entasis/ai-reasoning` — Reasoning (/components/ai-reasoning)
-- `entasis/ai-suggestion` — Suggestion (/components/ai-suggestion)
-- `entasis/ai-tool` — Tool (/components/ai-tool)
-
-### Layout
-
-- `entasis/aspect-ratio` — Aspect ratio (/components/aspect-ratio)
-- `entasis/card` — Card (/components/card)
-- `entasis/grid` — Grid (/components/grid)
-- `entasis/grid` — Grid span (/components/grid-span)
-- `entasis/heading` — Heading (/components/heading)
-- `entasis/resizable` — Resizable (/components/resizable)
-- `entasis/scroll-area` — Scroll area (/components/scroll-area)
-- `entasis/separator` — Separator (/components/separator)
-- `entasis/stack` — Stack (/components/stack)
-
-### Shells
-
-- `entasis/app-shell` — App shell (/components/app-shell)
-- `entasis/page-shell` — Page shell (/components/page-shell)
-- `entasis/sidebar` — Sidebar (/components/sidebar)
-
-### Actions
-
-- `entasis/button` — Button (/components/button)
-- `entasis/button-group` — Button group (/components/button-group)
-- `entasis/segmented-control` — Segmented control (/components/segmented-control)
-- `entasis/toggle-button` — Toggle button (/components/toggle-button)
-- `entasis/toggle-button-group` — Toggle group (/components/toggle-button-group)
-- `entasis/toggle-menu` — Toggle menu (/components/toggle-menu)
-- `entasis/selection-menu` — Selection menu (/components/selection-menu)
-
-### Forms
-
-- `entasis/address-input` — Address input (/components/address-input)
-- `entasis/autocomplete` — Autocomplete (/components/autocomplete)
-- `entasis/calendar` — Calendar (/components/calendar)
-- `entasis/checkbox` — Checkbox (/components/checkbox)
-- `entasis/checkboxes-input` — Checkboxes (/components/checkboxes)
-- `entasis/color-input` — Color input (/components/color-input)
-- `entasis/color-picker` — Color picker (/components/color-picker)
-- `entasis/combobox` — Combobox (/components/combobox)
-- `entasis/date-input` — Date input (/components/date-input)
-- `entasis/date-selector` — Date selector (/components/date-selector)
-- `entasis/file-input` — File (/components/file)
-- `entasis/form` — Form (/components/form)
-- `entasis/json-editor` — JSON editor (/components/json-editor)
-- `entasis/key-value-input` — Key value input (/components/key-value-input)
-- `entasis/multi-step-form` — Multi-step form (/components/multi-step-form)
-- `entasis/number-input` — Number input (/components/number-input)
-- `entasis/password-input` — Password (/components/password)
-- `entasis/phone-input` — Phone (/components/phone)
-- `entasis/pin-input` — Pin input (/components/pin-input)
-- `entasis/radio-input` — Radios (/components/radios)
-- `entasis/rating-input` — Rating input (/components/rating-input)
-- `entasis/rich-text-input` — Rich text input (/components/rich-text-input)
-- `entasis/select` — Select (/components/select)
-- `entasis/signature-input` — Signature input (/components/signature-input)
-- `entasis/slider` — Slider (/components/slider)
-- `entasis/switch` — Switch (/components/switch)
-- `entasis/tag-group` — Tag group (/components/tag-group)
-- `entasis/tags-input` — Tags input (/components/tags-input)
-- `entasis/text-input` — Text input (/components/textinput)
-- `entasis/text-area` — Textarea (/components/textarea)
-- `entasis/time-input` — Time input (/components/time-input)
-- `entasis/voice-input` — Voice input (/components/voice-input)
-
-### Data display
-
-- `entasis/address` — Address (/components/address)
-- `entasis/avatar` — Avatar (/components/avatar)
-- `entasis/avatar` — Avatar group (/components/avatar-group)
-- `entasis/chart` — Chart (/components/chart)
-- `entasis/chip` — Chip (/components/chip)
-- `entasis/countdown` — Countdown (/components/countdown)
-- `entasis/event-calendar` — Event calendar (/components/event-calendar)
-- `entasis/gantt-chart` — Gantt chart (/components/gantt-chart)
-- `entasis/kanban` — Kanban (/components/kanban)
-- `entasis/kbd` — Kbd (/components/kbd)
-- `entasis/metadata-list` — Metadata list (/components/metadata-list)
-- `entasis/mini-calendar` — Mini calendar (/components/mini-calendar)
-- `entasis/rating` — Rating (/components/rating)
-- `entasis/sortable-list` — Sortable list (/components/sortable-list)
-- `entasis/stat` — Stat (/components/stat)
-- `entasis/table` — Table (/components/table)
-- `entasis/data-table` — Data table (/components/data-table)
-- `entasis/timeline` — Timeline (/components/timeline)
-- `entasis/tree` — Tree (/components/tree)
-
-### Feedback
-
-- `entasis/alert` — Alert (/components/alert)
-- `entasis/confirmation` — Confirmation (/components/confirmation)
-- `entasis/empty` — Empty (/components/empty)
-- `entasis/meter` — Meter (/components/meter)
-- `entasis/network-indicator` — Network indicator (/components/network-indicator)
-- `entasis/progress` — Progress (/components/progress)
-- `entasis/progress-circle` — Progress circle (/components/progress-circle)
-- `entasis/skeleton` — Skeleton (/components/skeleton)
-- `entasis/spinner` — Spinner (/components/spinner)
-- `entasis/spinner-text` — Spinner text (/components/spinner-text)
-- `entasis/toast` — Toast (/components/toast)
-
-### Disclosure
-
-- `entasis/accordion` — Accordion (/components/accordion)
-- `entasis/collapsible` — Collapsible (/components/collapsible)
-
-### Navigation
-
-- `entasis/breadcrumbs` — Breadcrumbs (/components/breadcrumbs)
-- `entasis/command` — Command (/components/command)
-- `entasis/navigation-menu` — Navigation menu (/components/navigation-menu)
-- `entasis/pagination` — Pagination (/components/pagination)
-- `entasis/stepper` — Stepper (/components/stepper)
-- `entasis/tabbar` — Tabbar (/components/tabbar)
-- `entasis/table-of-contents` — Table of contents (/components/table-of-contents)
-- `entasis/tabs` — Tabs (/components/tabs)
-
-### Menus
-
-- `entasis/context-menu` — Context menu (/components/context-menu)
-- `entasis/menu` — Menu (/components/menu)
-- `entasis/menu-bar` — Menu bar (/components/menu-bar)
-- `entasis/menu-option` — Menu option (/components/menu-option)
-- `entasis/popup-menu` — Popup menu (/components/popup-menu)
-
-### Overlays
-
-- `entasis/dialog` — Dialog (/components/dialog)
-- `entasis/floating-window` — Floating window (/components/floating-window)
-- `entasis/hover-card` — Hover card (/components/hover-card)
-- `entasis/link-preview` — Link preview (/components/link-preview)
-- `entasis/overlay` — Overlay (/components/overlay)
-- `entasis/popover` — Popover (/components/popover)
-- `entasis/tooltip` — Tooltip (/components/tooltip)
-
-### Media
-
-- `entasis/audio-player` — Audio player (/components/audio-player)
-- `entasis/carousel` — Carousel (/components/carousel)
-- `entasis/image-gallery` — Image gallery (/components/image-gallery)
-- `entasis/image-zoom` — Image zoom (/components/image-zoom)
-- `entasis/media-volume` — Media volume (/components/media-volume)
-- `entasis/document-viewer` — Document viewer (/components/document-viewer)
-- `entasis/video-player` — Video player (/components/video-player)
-
-### Content & graphics
-
-- `entasis/code` — Code (/components/code)
-- `entasis/diff` — Diff (/components/diff)
-- `entasis/globe` — Globe (/components/globe)
-- `entasis/map` — Map (/components/map)
-- `entasis/markdown` — Markdown (/components/markdown)
-- `entasis/marquee` — Marquee (/components/marquee)
-- `entasis/mermaid` — Mermaid (/components/mermaid)
-- `entasis/qr-code` — QR code (/components/qr-code)
-
-### Utilities
-
-- `entasis/hitbox` — Hitbox (/utilities/hitbox)
-
-### Utilities and entrypoints
-
-- `entasis/package.json` — package-metadata
-- `entasis/ai-file-preview` — svelte, component, ai
-- `entasis/ask` — svelte, component, forms
-- `entasis/field` — svelte, component, forms
-- `entasis/slot` — svelte, component, utilities
-- `entasis/theme` — svelte, component, configuration
-- `entasis/i18n` — svelte, localization
-- `entasis/tailwind-plugin` — tailwind, theme-configuration
-- `entasis/tailwind-plugin/theme` — tailwind, theme-configuration, color-palettes
-- `entasis/color-palette` — theme-configuration, color-palettes
-- `entasis/types` — typescript, utility
-- `entasis/cva` — styling, utility
-- `entasis/scheduling` — scheduling, utility
-- `entasis/glimm` — animation, transition, webgl, utility
-- `entasis/icons/*` — icons, snippet, wildcard-export
-- `entasis/spinner-overlay` — attachment, feedback
-- `entasis/webmcp` — svelte, webmcp, ai-agents, utility
-
-<!-- component-contract:inventory:end -->
+# Build with entasis
+
+entasis is a Svelte 5 component library for SvelteKit, built on configuration over markup: a
+component takes data and semantic props (`color`, `size`, `density`, `variant`) and draws its own
+structure, accessibility and states. One Tailwind CSS plugin generates the palette, and one
+`<Theme>` at the root sets color roles, radius, spacing and motion for every component.
+
+## Read first
+
+The docs for the installed version ship in the package, as Markdown:
+
+- `node_modules/entasis/docs/llms.txt` is the index: one line per component and entrypoint. Read
+  it first, then only the pages your task needs, such as `docs/components/data-table.md`. Each
+  page is the component's full reference (props, data model, theme parts, accessibility).
+- This skill ships there too, in `node_modules/entasis/skills/entasis/`. When it differs from a
+  copy elsewhere, the installed one matches the code you run.
+- Don't read the compiled `dist/**/*.js`. The docs and the `.d.ts` types are the API; when they
+  don't answer, write a small test that tries it.
+
+Online, the same pages are at https://entasis.beynar.workers.dev/llms.txt and
+`https://entasis.beynar.workers.dev/components/<name>.md` (latest release), and the MCP server at
+https://entasis.beynar.workers.dev/mcp returns them from its `components` tool.
+
+If entasis is not installed yet, install `entasis` and `tailwindcss` (v4) with the project's
+package manager, then follow _Set up_ in [references/build-interface.md](references/build-interface.md#1-set-up).
+
+## Pick your path
+
+1. **Build an interface**, such as a settings page, a dashboard or a checkout form:
+   [references/build-interface.md](references/build-interface.md).
+2. **Make it agent-ready**, so an AI agent in the browser can use it through WebMCP:
+   [references/agent-ready.md](references/agent-ready.md). Every interface goes through this
+   step, even when WebMCP stays off: what makes it work for an agent (names, refusals, danger
+   colors) is what makes it right for a person.
+3. **Test it**: [references/testing.md](references/testing.md).
+
+Every path ends with [When you're done](#when-youre-done).
+
+## Rules for every task
+
+- **Public imports only.** Import each component from its kebab-case subpath with its PascalCase
+  name: `import { DataTable } from 'entasis/data-table'`. There is no root `entasis` import, and
+  never import from `entasis/dist/...` or a source path. Icons are snippets from
+  `entasis/icons/<name>`: `import { plusIcon } from 'entasis/icons/plus'`, rendered with
+  `{@render plusIcon()}` or passed as a `prefix` / `suffix` snippet.
+- **Use what ships before writing markup.** Look the need up in
+  [references/components.md](references/components.md) first. A `<button>`, `<input>` or a `div`
+  with `role="dialog"`, `"menu"`, `"listbox"`, `"tablist"` or `"switch"` next to an installed
+  entasis is almost always a bug: it loses keyboard support, i18n, validation and agent tools.
+- **Semantic props, not classes.**
+  - `color` is a role, `'primary'`, `'secondary'`, `'success'`, `'warning'`, `'danger'`, `'info'`
+    or `'neutral'`; left out, it follows the theme's `defaultColor`.
+  - `size` is `'small'`, `'normal'` or `'large'`: geometry and type.
+  - `density` is `'compact'`, `'normal'` or `'comfortable'`: inner spacing. The two vocabularies
+    differ on purpose: never pass a `size` value to `density`, or `sm` / `md` / `lg` to either.
+  - Buttons and similar controls take `variant`: `'solid'`, `'outline'`, `'soft'`, `'ghost'` or
+    `'link'`.
+- **State comes in threes.** Editable state is `value` / `defaultValue` / `onValueChange`;
+  disclosure is `open` / `defaultOpen` / `onOpenChange(open, details)`, where
+  `details.cancel()` keeps the component as it was. Bind one (`bind:value`, `bind:open`) or drive
+  it with the pair, and give bound state a starting value: `$state('')`, `$state(false)`, never a
+  bare `$state()`. Callbacks take one payload object and name the change, never `onChange` or
+  `onClick`. Native DOM handlers are lowercase Svelte 5 names (`onclick`).
+- **`label` names a component; never pass `aria-*`.** The component paints `label` where it has a
+  visible label and speaks it where it has none (an icon-only Button). It writes `aria-pressed`,
+  `aria-expanded`, `aria-controls` and the rest from semantic props (`pressed`, `selected`,
+  `expanded`). Value controls take `readOnly` (never `readonly`).
+- **Forms go through Form and Field.** Describe fields as data in `<Form inputs={...}>`; Form owns
+  values, validation, submission and the error messages (from the i18n catalog, in every locale).
+  A custom control inside a Form is an entry with `type: 'field'`, a `fieldType` and a `snippet`
+  receiving the `FieldState`; outside a Form, wrap it in `Field` from `entasis/field`. A reusable
+  input type is registered once with `registerFormInputs` and typed by augmenting
+  `FormInputRegistry` from `entasis/form`. Never build a second validation path. Disabled fields
+  are not submitted; use `readOnly` for a value that must still submit.
+- **Lay out with Stack and Grid.** Space groups with their semantic `gap` (`none`, `xs`, `sm`,
+  `md`, `lg`, `xl`), not margin classes. Card `density` spaces its header, content and footer
+  only: stack several groups inside the content with a Stack.
+- **Theme once, restyle through themes.** Wrap the app in one `<Theme>` (`entasis/theme`). Change
+  a part with the component's `theme` prop, its `set<Name>Theme()` setter or
+  `<Theme components>`, using the parts listed in `theme-parts/<name>.md`; use the generated
+  tokens (`bg-surface-raised`, `text-primary-readable`, `rounded-md`, `h-control-md`), never
+  arbitrary colors or a bigger radius than the theme's.
+- **Key lists by identity**, never by index, in `{#each}` and in the items you pass.
+- **Comments are rare.** Write one only when a reader would get the code wrong without it.
+
+## When you're done
+
+1. **Typecheck.** Run `npx svelte-kit sync` once, then
+   `npx svelte-check --tsconfig ./tsconfig.json --threshold error`. Zero errors; a type error in a
+   prop is an API misuse, not something to cast away.
+2. **Test.** Write and run tests as [references/testing.md](references/testing.md) says
+   (`npx vitest run <your files>`). Every interface gets at least the component tests for what you
+   built and the agent test from [references/agent-ready.md](references/agent-ready.md#prove-it-with-a-test).
+   If a test finds a bug in code you were only asked to test, mark it `test.fails` with a one-line
+   reason, report it, and leave the suite green.
+3. **Lint and format** with the project's own commands (`npx eslint <files>`,
+   `npx prettier --check <files>`) when it has them.
+4. **Read your diff once more**: no `aria-*` props, no deep imports, no hand-rolled controls, no
+   index keys, no arbitrary color classes, no comment that restates the code.
+5. **Report** each command you ran with its exit code, anything you could not check (such as a
+   real browser for WebMCP or color contrast), and anything the docs or types got wrong or left
+   out.
+
+## Reference
+
+- [references/components.md](references/components.md): every component and entrypoint, by
+  category, with its import and its Markdown page (generated).
+- [references/theming.md](references/theming.md): the Tailwind plugin, color tokens, design
+  tokens, motion, responsive props, dark mode and theme overrides.
+- [references/form-inputs.md](references/form-inputs.md), [references/display.md](references/display.md),
+  [references/layout.md](references/layout.md), [references/overlays.md](references/overlays.md),
+  [references/data-utility.md](references/data-utility.md): worked notes per component family.
+- `theme-parts/<name>.md`: every themeable part of a component, the element it lands on, its
+  variants and their exact classes (generated, one file per component, such as
+  [theme-parts/button.md](theme-parts/button.md)).

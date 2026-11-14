@@ -116,7 +116,10 @@ describe('Tabs', () => {
 	test('a disabled tab cannot be picked, and tool={false} removes the tool', async () => {
 		const first = mount(Tabs, { items });
 		expect(await (await tool('select_tab')).execute({ value: 'c' }, {})).toEqual({
-			status: 'unavailable'
+			status: 'unavailable',
+			value: 'c',
+			message: 'The tab "Off" is disabled: pick one of the current tabs.',
+			current: ['a', 'b']
 		});
 		first.unmount();
 		mount(Tabs, { items, tool: false });
@@ -140,7 +143,10 @@ describe('Pagination', () => {
 		const go = await tool('go_to_page');
 		expect(await go.execute({ page: 3 }, {})).toEqual({ status: 'done', page: 3 });
 		expect(onValueChange).toHaveBeenCalled();
-		expect(await go.execute({ page: 9 }, {})).toEqual({ status: 'invalid' });
+		expect(await go.execute({ page: 9 }, {})).toEqual({
+			status: 'invalid',
+			message: 'Pages go from 1 to 5; page 3 is showing.'
+		});
 	});
 });
 
@@ -282,7 +288,9 @@ describe('commands', () => {
 			trigger
 		});
 		await tick();
-		expect((await run.execute({ id: 'save' }, {})).status).toBe('unavailable');
+		const result = await run.execute({ id: 'save' }, {});
+		expect(result).toMatchObject({ status: 'unavailable', current: ['other'] });
+		expect(result.message).toMatch(/the list changed/);
 		expect(onclick).not.toHaveBeenCalled();
 	});
 
@@ -318,6 +326,7 @@ describe('commands', () => {
 		});
 		const result = await (await tool('run_command')).execute({ id: 'boom' }, {});
 		expect(result.status).toBe('failed');
+		expect(result.message).toMatch(/The app's own handler for "Boom" failed/);
 		expect(JSON.stringify(result)).not.toContain('4242');
 	});
 

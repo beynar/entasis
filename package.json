@@ -7,7 +7,7 @@
 		"build": "vite build && npm run prepack",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync",
-		"prepack": "svelte-kit sync && npm run check:component-contract && npm run check:feature-chips && npm run check:semantic-theme-tokens && npm run check:template-purity && npm run check:public-api-contract && svelte-package && npm run check:declaration-size && npm run check:packed-library && npm run check:package-consumer && npm run check:doc-fences && node tooling/check-document-viewer-package.mjs && publint",
+		"prepack": "svelte-kit sync && npm run check:component-contract && npm run check:feature-chips && npm run check:semantic-theme-tokens && npm run check:template-purity && npm run check:public-api-contract && svelte-package && npm run generate:package-docs && npm run check:declaration-size && npm run check:packed-library && npm run check:package-consumer && npm run check:doc-fences && node tooling/check-document-viewer-package.mjs && publint",
 		"check:document-viewer-package": "node tooling/check-document-viewer-package.mjs",
 		"check:semantic-theme-tokens": "node tooling/check-semantic-theme-tokens.mjs",
 		"check:template-purity": "node tooling/check-template-purity.mjs",
@@ -18,17 +18,20 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"test:unit": "vitest",
+		"test:unit": "sh scripts/test-slot.sh vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
-		"test:e2e": "playwright test",
+		"test:e2e": "sh scripts/test-slot.sh playwright test",
 		"test:browser": "vitest run --project browser",
 		"bench": "vitest bench --reporter=verbose",
 		"bench:baseline": "vitest bench --mode baseline --reporter=verbose",
 		"generate:component-contract": "node tooling/component-contract/generate.mjs",
+		"generate:package-docs": "node tooling/component-contract/agent-docs.mjs",
 		"check:component-contract": "node tooling/component-contract/generate.mjs --check",
 		"check:declaration-size": "node tooling/check-declaration-size.mjs",
 		"check:packed-library": "node tooling/check-packed-library.mjs",
-		"test:contracts": "node --test tooling/component-contract/verify-checks.mjs",
+		"test:contracts": "node --test tooling/component-contract/verify-checks.mjs tooling/test-coverage/coverage.test.mjs tooling/bundle-absent/graph.test.mjs",
+		"check:test-coverage": "node tooling/test-coverage/check.mjs",
+		"check:bundle-absent": "node tooling/bundle-absent/check.mjs",
 		"check:doc-fences": "node tooling/check-doc-fences.mjs",
 		"check:feature-chips": "node tooling/check-feature-chips.mjs",
 		"release": "node tooling/release.mjs"
@@ -37,10 +40,14 @@
 		"dist",
 		"!dist/**/*.test.*",
 		"!dist/**/*.spec.*",
-		"!dist/**/*.test-helper.*"
+		"!dist/**/*.test-helper.*",
+		"docs/llms.txt",
+		"docs/components",
+		"skills"
 	],
 	"sideEffects": [
-		"**/*.css"
+		"**/*.css",
+		"**/*.styles.js"
 	],
 	"type": "module",
 	"peerDependencies": {

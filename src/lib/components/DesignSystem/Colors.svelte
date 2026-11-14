@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Heading from '$lib/components/Heading/Heading.svelte';
-	import type { Colors } from '$lib/types/theme.js';
+	// The color type is imported under another name: the emitted declaration of this component
+	// declares `Colors` itself, and an import of the same name conflicts with it.
+	import type { Colors as ColorRole } from '$lib/types/theme.js';
 
 	const colorList = {
 		primary: [
@@ -59,7 +61,7 @@
 			'bg-neutral-muted',
 			'bg-neutral-contrast'
 		]
-	} satisfies Record<Colors, string[]>;
+	} satisfies Record<ColorRole, string[]>;
 
 	const surfaceList = [
 		{ name: 'surface-recessed', background: 'bg-surface-recessed' },

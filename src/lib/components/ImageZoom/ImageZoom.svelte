@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
-	import 'lightgallery/css/lightgallery.css';
-	import 'lightgallery/css/lg-medium-zoom.css';
+	// The stylesheets load through a JavaScript module, which keeps them out of the emitted declaration.
+	import './imageZoom.styles.js';
 	import Slot from '../Slot/Slot.svelte';
 	import { magnifyingGlassPlusIcon } from '../Icons/magnifyingGlassPlus.js';
 	import { ImageZoomState } from './imageZoom.state.svelte.js';

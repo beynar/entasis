@@ -1,23 +1,10 @@
 import { tick, untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 
-interface CustomEventMap {
-	'autosize:update': CustomEvent<void>;
-}
-
-declare global {
-	interface Document {
-		addEventListener<K extends keyof CustomEventMap>(
-			type: K,
-			listener: (this: Document, ev: CustomEventMap[K]) => void
-		): void;
-		dispatchEvent<K extends keyof CustomEventMap>(ev: CustomEventMap[K]): void;
-		removeEventListener<K extends keyof CustomEventMap>(
-			type: K,
-			listener: (this: Document, ev: CustomEventMap[K]) => void
-		): void;
-	}
-}
+// The update event is typed locally rather than by augmenting the global Document: a
+// declaration merged into Document ships with the package, and its void dispatchEvent overload
+// breaks lib.dom for every consumer that typechecks library declarations.
+const AUTOSIZE_UPDATE = 'autosize:update';
 
 type Opts = {
 	value?: unknown;
@@ -28,7 +15,7 @@ type Opts = {
 export const triggerAutoSizeUpdate = () =>
 	tick().then(() => {
 		if (typeof document === 'undefined') return;
-		document.dispatchEvent(new CustomEvent<void>('autosize:update'));
+		document.dispatchEvent(new CustomEvent<void>(AUTOSIZE_UPDATE));
 	});
 
 export const autosize = (getOptions: () => Opts = () => ({})): Attachment<HTMLTextAreaElement> => {
@@ -99,7 +86,7 @@ export const autosize = (getOptions: () => Opts = () => ({})): Attachment<HTMLTe
 
 			const handleInput = () => update();
 			textarea.addEventListener('input', handleInput);
-			document.addEventListener('autosize:update', update);
+			document.addEventListener(AUTOSIZE_UPDATE, update);
 			update();
 
 			$effect(() => {
@@ -110,7 +97,7 @@ export const autosize = (getOptions: () => Opts = () => ({})): Attachment<HTMLTe
 			return () => {
 				resizeObserver?.disconnect();
 				textarea.removeEventListener('input', handleInput);
-				document.removeEventListener('autosize:update', update);
+				document.removeEventListener(AUTOSIZE_UPDATE, update);
 			};
 		});
 };

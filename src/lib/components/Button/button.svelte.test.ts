@@ -181,15 +181,55 @@ describe('Button loading', () => {
 		const onclick = vi.fn();
 		renderInTheme(Button, { children: 'Continue', href: '#next', loading: true, onclick });
 
+		// No `href`, as for a disabled anchor: a middle click (`auxclick`) or a click before
+		// hydration cannot navigate either. The tabindex keeps it in the tab order.
 		const anchor = screen.getByRole('link', { name: 'Continue' });
-		expect(anchor).toHaveAttribute('href', '#next');
-		expect(anchor).not.toHaveAttribute('tabindex');
+		expect(anchor).not.toHaveAttribute('href');
+		expect(anchor).toHaveAttribute('tabindex', '0');
 		expect(anchor).toHaveAttribute('aria-disabled', 'true');
 		expect(anchor).toHaveAttribute('aria-busy', 'true');
 
 		const click = new MouseEvent('click', { bubbles: true, cancelable: true });
 		expect(anchor.dispatchEvent(click)).toBe(false);
 		expect(onclick).not.toHaveBeenCalled();
+	});
+
+	test('a loading anchor gets its href back, and an explicit tabindex wins', async () => {
+		const { rerender } = renderInTheme(Button, {
+			children: 'Continue',
+			href: '#next',
+			loading: true,
+			tabindex: -1
+		});
+		const anchor = screen.getByRole('link', { name: 'Continue' });
+		expect(anchor).toHaveAttribute('tabindex', '-1');
+
+		await rerender({ children: 'Continue', href: '#next', loading: false, tabindex: undefined });
+		expect(anchor).toHaveAttribute('href', '#next');
+		expect(anchor).not.toHaveAttribute('tabindex');
+		expect(anchor).not.toHaveAttribute('aria-disabled');
+	});
+
+	test('a loading link popover trigger stays closed on Enter or Space', async () => {
+		// Without its `href` the link is no native control, so the trigger handles its keys
+		// itself, and must refuse them while the Button does.
+		const settle = () => new Promise((resolve) => setTimeout(resolve, 10));
+		const { rerender } = render(ButtonPopoverTrigger, {
+			props: { loading: true, href: '#export' }
+		});
+
+		const link = screen.getByRole('link', { name: 'Export' });
+		link.focus();
+		await fireEvent.keyDown(link, { key: 'Enter' });
+		await fireEvent.keyDown(link, { key: ' ' });
+		await settle();
+		expect(link).toHaveAttribute('aria-expanded', 'false');
+		expect(screen.queryByText('Export options')).not.toBeInTheDocument();
+
+		await rerender({ loading: false, href: '#export' });
+		link.click();
+		await settle();
+		expect(link).toHaveAttribute('aria-expanded', 'true');
 	});
 
 	test('a loading popover trigger stays closed on Enter or Space', async () => {

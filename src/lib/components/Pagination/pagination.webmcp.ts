@@ -7,6 +7,8 @@ import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type PaginationToolSource = {
 	readonly tool: WebMCPToolProp | undefined;
+	/** The element it renders into: the tools go while it sits in a `data-webmcp-off` zone. */
+	readonly root?: HTMLElement | null;
 	readonly label: unknown;
 	readonly disabled: boolean;
 	readonly page: number;
@@ -36,8 +38,17 @@ export const expose: WebMCPExpose<PaginationToolSource> = (source, config) =>
 				},
 				annotations: { consequentialHint: options.consequential ?? false },
 				execute: ({ page: next }: { page: unknown }) => {
-					if (typeof next !== 'number' || !Number.isInteger(next)) return { status: 'invalid' };
-					if (next < 1 || next > source.pageCount) return { status: 'invalid' };
+					if (
+						typeof next !== 'number' ||
+						!Number.isInteger(next) ||
+						next < 1 ||
+						next > source.pageCount
+					) {
+						return {
+							status: 'invalid',
+							message: `Pages go from 1 to ${source.pageCount}; page ${source.page} is showing.`
+						};
+					}
 					// As a press does: the page changes, and a link is followed on top of that.
 					source.setPage(next);
 					const to = siteAddress(source.href(next));

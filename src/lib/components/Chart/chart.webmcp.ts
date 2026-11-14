@@ -7,6 +7,8 @@ import type { WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
 
 export type ChartToolSource = {
 	readonly tool: WebMCPToolProp | undefined;
+	/** The element it renders into: the tools go while it sits in a `data-webmcp-off` zone. */
+	readonly root?: HTMLElement | null;
 	readonly label: string;
 	readonly description: string | undefined;
 	readonly data: readonly object[];
@@ -82,6 +84,9 @@ export const expose: WebMCPExpose<ChartToolSource> = (source, config) =>
 				execute: () => ({
 					fields,
 					total: source.data.length,
+					...(source.data.length > MAX_ROWS
+						? { message: `The first ${MAX_ROWS} rows of ${source.data.length} are here.` }
+						: {}),
 					rows: source.data
 						.slice(0, MAX_ROWS)
 						.map((row) =>

@@ -103,6 +103,10 @@ refused too, only the topmost modal's tools stay, and a tool reads only what the
 An internal Button gets `tool={false}` when it only changes how a person looks at something (copy,
 zoom, scroll, minimize, formatting), so `click_button` lists what acts. Props a consumer passes
 to a Button stay offered by default.
+Agents never see what a person cannot: `aria-hidden` subtrees and `data-webmcp-off` zones are left
+out, and labels follow the accessible name. An open change made by a tool reports
+`interaction: 'agent'`; value callbacks call `isAgentAction()`. Refusals say what is there and what
+to do (current ids, accepted values, how many items a list leaves out).
 
 ## Theme ownership
 
@@ -198,6 +202,17 @@ is horizontal/vertical. Numeric color ramps remain horizontal. Native layout res
 - `npm run check:package-consumer`
 - `npm run check:packed-library`
 - `npm run test:contracts`
+- `npm run check:test-coverage`
+- `npm run check:bundle-absent` (after `svelte-package`; `--source` reads `src/lib`)
+
+`check:test-coverage` requires each manifest component to have a browser test, an SSR test and,
+for overlay and list owners, its `<owner>.attributes.ts`, unless `tooling/test-coverage/exemptions.json`
+names the gap with a reason; a stale exemption fails, and a pull request cannot add a `todo`.
+`check:bundle-absent` refuses a static path from a public entry to a `*.webmcp.*` module (Ask and
+MultiStepForm excepted) and any import of MapLibre or intl-tel-input. Keyboard patterns are checked
+with the internal `src/lib/testing/apg.test-helper.ts` (`checkPattern`) in LTR and RTL. Local test
+runs go through `scripts/test-slot.sh`, which allows two at a time on one machine; CI retries
+browser and e2e tests twice and lists the ones that passed only on a retry in the job summary.
 
 The packed-library check installs an actual tarball in a temporary consumer with no source
 aliases. It checks export targets, all manifest symbols, native event/attribute typing, Field

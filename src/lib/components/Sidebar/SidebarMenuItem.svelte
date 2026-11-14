@@ -352,8 +352,7 @@
 					endReserve,
 					className: ['aria-expanded:bg-neutral-muted', item.class]
 				})}
-				aria-expanded={popover.isOpen}
-				aria-haspopup="menu"
+				{...popover.triggerAttributes}
 				aria-controls={popover.isOpen ? popover.id : undefined}
 				aria-describedby={describedBy}
 				{@attach tooltipContent

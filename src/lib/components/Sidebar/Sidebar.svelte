@@ -279,6 +279,10 @@
 		get tool() {
 			return tool;
 		},
+		// Out of agents' reach while it sits in a `data-webmcp-off` zone.
+		get root() {
+			return ref;
+		},
 		get activityBar() {
 			return activityBar;
 		},

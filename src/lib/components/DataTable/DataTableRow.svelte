@@ -160,7 +160,10 @@
 			}
 			return;
 		}
+		// Alt with a navigation key is a browser or system shortcut (Alt+Left is Back), as in every
+		// other keyboard list, and DataTable binds no action to it.
 		if (
+			!event.altKey &&
 			[
 				'Tab',
 				'ArrowLeft',

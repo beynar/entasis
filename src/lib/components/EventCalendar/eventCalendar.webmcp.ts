@@ -15,6 +15,8 @@ import type {
 
 export type EventCalendarToolSource = {
 	readonly tool: WebMCPToolProp | undefined;
+	/** The element it renders into: the tools go while it sits in a `data-webmcp-off` zone. */
+	readonly root?: HTMLElement | null;
 	readonly api: EventCalendarApi<object>;
 	readonly disabled: boolean;
 	readonly canDrag: boolean;
@@ -85,7 +87,14 @@ function placement(
 function moveEvent(source: EventCalendarToolSource, input: Record<string, unknown>) {
 	const occurrence = typeof input.key === 'string' ? source.api.getOccurrence(input.key) : null;
 	const next = occurrence && placement(source, occurrence, input);
-	if (!occurrence || !next) return { status: 'invalid', message: 'Unknown event or date.' };
+	if (!occurrence || !next) {
+		return {
+			status: 'invalid',
+			message: occurrence
+				? 'This date cannot be read: send a date or date-time as read_calendar gives them.'
+				: 'No such event on the calendar: call read_calendar for the current keys.'
+		};
+	}
 	if (!source.canMove(occurrence)) {
 		return { status: 'refused', message: 'This event cannot be moved.' };
 	}
@@ -150,9 +159,14 @@ export const expose: WebMCPExpose<EventCalendarToolSource> = (source, config) =>
 				execute: ({ date, view }: { date?: unknown; view?: unknown }) => {
 					// A day in the calendar's own time zone, which `goTo` reads a date-only string in.
 					const target = typeof date === 'string' && DATE_ONLY.test(date) ? date : null;
-					if (date !== undefined && !target) return { status: 'invalid' };
+					if (date !== undefined && !target) {
+						return { status: 'invalid', message: 'Send the date as YYYY-MM-DD.' };
+					}
 					if (view !== undefined && !source.views.includes(view as EventCalendarView)) {
-						return { status: 'invalid' };
+						return {
+							status: 'invalid',
+							message: `The views are ${source.views.join(', ')}.`
+						};
 					}
 					if (view) source.api.setView(view as EventCalendarView);
 					if (target) source.api.goTo(target as EventCalendarDateOnly);

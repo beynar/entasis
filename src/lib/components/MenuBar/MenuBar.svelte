@@ -26,6 +26,9 @@
 		() => dir
 	);
 	const menuBar = useMenuBarState(() => menus, getDirection, id);
+	// A menu that closes because the arrows moved to the next one leaves focus to that menu: given
+	// back to its own trigger, the focus would make the bar reopen the menu it just left.
+	const focusOnClose = () => menuBar.activeIndex === null;
 </script>
 
 <div
@@ -53,6 +56,7 @@
 			offset={4}
 			lockScroll={false}
 			{closeOnItemClick}
+			{focusOnClose}
 			menu={{
 				...menuBar.getMenuProps(menu, index),
 				// Last, and read off `menu` explicitly: `getMenuProps` builds from `{ ...menu }`,
@@ -75,6 +79,7 @@
 					suffix={menu.suffix}
 					children={menu.label}
 					disabled={menu.disabled}
+					tabindex={menuBar.navigation.tabIndexAt(index)}
 					expanded={menuBar.activeIndex === index}
 					controls={`${id}-menu-${index}`}
 					data-active={menuBar.activeIndex === index ? 'true' : undefined}

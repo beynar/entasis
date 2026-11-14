@@ -4,6 +4,7 @@ import { page, userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-svelte';
 import { tab, webkitOnLinux } from '$lib/testing/browser.test-helper.js';
 import FocusScopeHarness from './FocusScopeHarness.test.svelte';
+import FocusSurvivorHarness from './FocusSurvivorHarness.test.svelte';
 
 type Scenario = Parameters<typeof FocusScopeHarness>[1]['scenario'];
 const mount = (scenario: Scenario) => render(FocusScopeHarness, { props: { scenario } });
@@ -119,6 +120,90 @@ describe('shadow DOM (CX-12a)', () => {
 			} finally {
 				host.remove();
 			}
+		}
+	);
+
+	test.skipIf(webkitOnLinux)(
+		'a modal dialog portaled into a shadow root makes the rest of that root and the light DOM around its host inert',
+		async () => {
+			const neighbour = document.createElement('button');
+			neighbour.textContent = 'Light neighbour';
+			const host = document.createElement('div');
+			document.body.append(neighbour, host);
+			const root = host.attachShadow({ mode: 'open' });
+			const target = document.createElement('div');
+			root.append(target);
+			try {
+				render(FocusScopeHarness, { target, props: { scenario: 'focus-on-close' } });
+				const trigger = [...root.querySelectorAll('button')].find(
+					(candidate) => candidate.textContent?.trim() === 'Open dialog'
+				) as HTMLButtonElement;
+				trigger.focus();
+				const dialog = () => root.querySelector('[role="dialog"]');
+				await userEvent.keyboard('{Enter}');
+				await expect.poll(dialog).not.toBeNull();
+				// The page inside the shadow root, beside the portaled dialog.
+				await expect.poll(() => target.hasAttribute('inert')).toBe(true);
+				expect(trigger.closest('[inert]')).toBe(target);
+				// The light DOM beside the shadow host.
+				expect(neighbour.hasAttribute('inert')).toBe(true);
+				expect(host.hasAttribute('inert')).toBe(false);
+				expect(dialog()?.closest('[inert]')).toBeNull();
+
+				await userEvent.keyboard('{Escape}');
+				await expect.poll(dialog).toBeNull();
+				expect(target.hasAttribute('inert')).toBe(false);
+				expect(neighbour.hasAttribute('inert')).toBe(false);
+				await expect.poll(() => root.activeElement).toBe(trigger);
+			} finally {
+				host.remove();
+				neighbour.remove();
+			}
+		}
+	);
+});
+
+describe('nearest survivor', () => {
+	const mountRows = (kind: 'popover' | 'dialog') =>
+		render(FocusSurvivorHarness, { props: { kind } });
+
+	test.skipIf(webkitOnLinux)(
+		"a row's menu that deletes the row hands focus to the next row's control",
+		async () => {
+			mountRows('popover');
+			element('Actions 2').focus();
+			await userEvent.keyboard('{Enter}');
+			await expect.poll(() => document.activeElement).toBe(element('Delete 2'));
+			await userEvent.keyboard('{Enter}');
+			await expect
+				.poll(() => document.querySelector('li:nth-child(2)')?.textContent)
+				.toContain('Row 3');
+			await expect.poll(() => document.activeElement).toBe(element('Actions 3'));
+		}
+	);
+
+	test.skipIf(webkitOnLinux)('deleting the last row hands focus to the row before it', async () => {
+		mountRows('popover');
+		element('Actions 3').focus();
+		await userEvent.keyboard('{Enter}');
+		await expect.poll(() => document.activeElement).toBe(element('Delete 3'));
+		await userEvent.keyboard('{Enter}');
+		await expect.poll(() => document.querySelectorAll('li').length).toBe(2);
+		await expect.poll(() => document.activeElement).toBe(element('Actions 2'));
+	});
+
+	test.skipIf(webkitOnLinux)(
+		"a row's dialog that deletes the row hands focus to the next row's control",
+		async () => {
+			mountRows('dialog');
+			element('Remove 1').focus();
+			await userEvent.keyboard('{Enter}');
+			await expect.element(page.getByRole('dialog')).toBeVisible();
+			element('Confirm 1').focus();
+			await userEvent.keyboard('{Enter}');
+			await expect.poll(() => document.querySelector('[role="dialog"]')).toBeNull();
+			await expect.poll(() => document.activeElement).toBe(element('Remove 2'));
+			expect(element('Remove 2').matches(':focus-visible')).toBe(true);
 		}
 	);
 });

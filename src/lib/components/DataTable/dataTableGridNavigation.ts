@@ -64,3 +64,15 @@ export const dataTableGridNavigation =
 			}
 		};
 	};
+
+// Apple platforms jump to the start or end of a document with Command+Home/End (Command+Fn+Left
+// and Right on a compact keyboard); elsewhere Control does it, and Meta is the system key.
+const isApplePlatform = () => {
+	if (typeof navigator === 'undefined') return false;
+	const { userAgentData } = navigator as Navigator & { userAgentData?: { platform?: string } };
+	return /mac|iphone|ipad|ipod/i.test(userAgentData?.platform || navigator.platform || '');
+};
+
+/** Home or End with the platform's document modifier: the first or last row, not only column. */
+export const isDocumentJump = (event: KeyboardEvent) =>
+	event.ctrlKey || (event.metaKey && isApplePlatform());

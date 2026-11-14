@@ -3,6 +3,7 @@
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import type { CalendarInputProps } from './calendarInput.props.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { FieldValue } from '../Field/field.js';
 	import CalendarPrimitive from './CalendarPrimitive.svelte';
@@ -38,11 +39,13 @@
 		header,
 		todayBadge,
 		onViewChange,
+		id: idProp,
 		...rest
 	}: CalendarInputProps<T> = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	type CalendarFieldValue = FieldValue<T>;
 
 	const field = createFieldState<T>({

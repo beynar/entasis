@@ -126,7 +126,7 @@ export type SelectValue<Multiple extends boolean = false> = Multiple extends tru
  */
 export type SelectProps<Multiple extends boolean = false> = Omit<
 	InputProps<'select'>,
-	'value' | 'defaultValue' | 'onValueChange' | 'onValidate' | 'theme'
+	'id' | 'value' | 'defaultValue' | 'onValueChange' | 'onValidate' | 'theme'
 > &
 	SelectSharedProps & {
 		/**

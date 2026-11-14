@@ -16,6 +16,8 @@ import type {
 
 export type SidebarToolSource = {
 	readonly tool: WebMCPToolProp | undefined;
+	/** The element it renders into: the tools go while it sits in a `data-webmcp-off` zone. */
+	readonly root?: HTMLElement | null;
 	readonly activityBar: SidebarActivityBar | undefined;
 	readonly items: readonly SidebarGroup[] | undefined;
 	readonly views: Readonly<Record<string, { items?: SidebarGroup[] }>> | undefined;

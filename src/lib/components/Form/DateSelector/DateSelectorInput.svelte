@@ -61,6 +61,7 @@
 		() => defaultOpen
 	);
 
+	// The author's `id` names the selector popover, as on DateSelector; the field keeps its own.
 	const id = $props.id();
 
 	const field = createFieldState<FieldType>({

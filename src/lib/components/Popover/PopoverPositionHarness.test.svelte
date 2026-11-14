@@ -2,7 +2,8 @@
 	// Harness for `popover.position.svelte.test.ts`: a floating popover whose placement inputs and
 	// open state the test changes while it stays mounted. `update` changes only the inputs it is
 	// given, so nothing else the panel reads changes with them. The other props are fixed at
-	// render. `dir` installs the i18n direction context the popover resolves logical sides with;
+	// render. `dir` installs the i18n direction context and lays the trigger out in it (the
+	// popover resolves logical sides from the trigger's direction first, then the context);
 	// `inset` keeps the trigger that many px away from the page edges.
 	import { untrack } from 'svelte';
 	import { setI18nDirection } from '$lib/i18n/context.svelte.js';
@@ -57,7 +58,7 @@
 </script>
 
 <Theme>
-	<div style:padding="{inset}px">
+	<div style:padding="{inset}px" {dir}>
 		<Popover
 			open={openedByHover ? undefined : 'open' in changed ? changed.open : open}
 			openOnHover={openedByHover}

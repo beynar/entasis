@@ -6,7 +6,9 @@
 	import MenuOption from '../MenuOption/MenuOption.svelte';
 	import { useMenuOptionTheme } from '../MenuOption/menuOption.theme.js';
 	import Slot from '../Slot/Slot.svelte';
-	import type { MenuCheckboxItem } from './menu.props.js';
+	// Aliased: the declaration emitted for this component declares `MenuCheckboxItem`, and an
+	// import of the same name would conflict with it in a consumer that type-checks the package.
+	import type { MenuCheckboxItem as MenuCheckboxItemData } from './menu.props.js';
 	import type { MenuThemeProps } from './menu.theme.js';
 
 	let {
@@ -17,7 +19,7 @@
 		theme,
 		rowAttach
 	}: {
-		item: MenuCheckboxItem;
+		item: MenuCheckboxItemData;
 		density: Density;
 		size: Sizes;
 		color?: Colors;

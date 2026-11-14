@@ -3,6 +3,12 @@ import { access, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promise
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import {
+	canonicalSkillDir,
+	packageDocsDir,
+	packageSkillDir,
+	writePackageDocs
+} from './component-contract/agent-docs.mjs';
 import { listSources, loadManifest, repositoryRoot } from './component-contract/source.mjs';
 
 const exec = promisify(execFile);
@@ -18,7 +24,144 @@ async function run(command, args, cwd = fixtureRoot) {
 	}
 }
 
+// The consumer typechecks with `skipLibCheck: false`, so a broken shipped `.d.ts` fails. The
+// declarations of entasis's own dependencies are left to them: an error located in a package
+// other than these is reported and ignored. Errors in typescript's and svelte's own types stay,
+// as an entasis global augmentation is what makes them fail.
+const checkedPackages = new Set(['entasis', 'typescript', 'svelte']);
+// Errors in entasis's shipped declarations that predate the strict check. Each is a bug to fix;
+// remove its entry with the fix. Paths are relative to the consumer's node_modules.
+// Each entry has `file` (a path or a pattern), `message` (a substring of the error) and `bug` (what
+// is wrong). The list is empty: src/lib/declarations.source.test.ts guards the source patterns that
+// produced its former entries.
+/** @type {{ file: string | RegExp, message: string, bug: string }[]} */
+const knownDeclarationErrors = [];
+
+async function typecheckConsumer() {
+	let stdout;
+	try {
+		({ stdout } = await exec(
+			path.join(fixtureRoot, 'node_modules/.bin/svelte-check'),
+			[
+				'--workspace',
+				fixtureRoot,
+				'--tsconfig',
+				path.join(fixtureRoot, 'tsconfig.json'),
+				'--output',
+				'machine'
+			],
+			{ cwd: fixtureRoot, maxBuffer: 20 * 1024 * 1024 }
+		));
+	} catch (error) {
+		if (typeof error.stdout !== 'string') throw error;
+		stdout = error.stdout;
+	}
+	const failures = [];
+	const foreign = new Map();
+	const known = new Set();
+	for (const line of stdout.split('\n')) {
+		const match = line.match(/^\d+ ERROR "([^"]+)" (\d+):(\d+) "(.*)"$/);
+		if (!match) continue;
+		const [, file, row, column, message] = match;
+		const at = file.lastIndexOf('node_modules/');
+		const modulePath = at === -1 ? null : file.slice(at + 'node_modules/'.length);
+		if (modulePath) {
+			const segments = modulePath.split('/');
+			const name = segments[0].startsWith('@') ? segments.slice(0, 2).join('/') : segments[0];
+			if (!checkedPackages.has(name)) {
+				foreign.set(name, (foreign.get(name) ?? 0) + 1);
+				continue;
+			}
+			const entry = knownDeclarationErrors.find(
+				(candidate) =>
+					(typeof candidate.file === 'string'
+						? candidate.file === modulePath
+						: candidate.file.test(modulePath)) && message.includes(candidate.message)
+			);
+			if (entry) {
+				known.add(entry);
+				continue;
+			}
+		}
+		failures.push(`${modulePath ?? path.relative(fixtureRoot, file)}:${row}:${column} ${message}`);
+	}
+	if (!stdout.includes('COMPLETED')) throw new Error(`svelte-check did not complete:\n${stdout}`);
+	if (failures.length)
+		throw new Error(`The packed library does not typecheck:\n- ${failures.join('\n- ')}`);
+	if (foreign.size)
+		console.log(
+			`Ignored errors in dependency declarations: ${[...foreign].map(([name, count]) => `${name} (${count})`).join(', ')}.`
+		);
+	for (const entry of known) console.warn(`Known declaration bug, still present: ${entry.bug}.`);
+	for (const entry of knownDeclarationErrors.filter((candidate) => !known.has(candidate)))
+		console.warn(`Known declaration bug no longer reported, remove its entry: ${entry.bug}.`);
+}
+
+// Relative Markdown links of a packed page that do not resolve inside the package.
+async function brokenLinks(file, packageRoot) {
+	const broken = [];
+	const source = await readFile(file, 'utf8');
+	for (const [, target] of source.matchAll(/\]\(([^)\s]+)\)/g)) {
+		if (/^[a-z]+:/i.test(target) || target.startsWith('#')) continue;
+		const resolved = path.resolve(path.dirname(file), target.split('#')[0]);
+		if (!resolved.startsWith(packageRoot)) broken.push(`${target} (outside the package)`);
+		else if (
+			!(await access(resolved).then(
+				() => true,
+				() => false
+			))
+		)
+			broken.push(target);
+	}
+	return broken;
+}
+
+// The agent docs and the skill ship in the package and must describe this version.
+async function checkAgentDocs(packageRoot, version, expectedPages) {
+	const problems = [];
+	const llms = path.join(packageRoot, packageDocsDir, 'llms.txt');
+	const llmsText = await readFile(llms, 'utf8').catch(() => null);
+	if (llmsText === null) throw new Error(`The package must ship ${packageDocsDir}/llms.txt.`);
+	if (!llmsText.includes(`Version ${version}.`))
+		problems.push(`${packageDocsDir}/llms.txt does not name version ${version}`);
+	const pages = await listSources(path.join(packageRoot, packageDocsDir, 'components'), (file) =>
+		file.endsWith('.md')
+	);
+	if (pages.length !== expectedPages)
+		problems.push(`${pages.length} packed component pages, expected ${expectedPages}`);
+	const links = [...llmsText.matchAll(/^- \[[^\]]+\]\(([^)]+)\)/gm)].length;
+	if (links !== expectedPages)
+		problems.push(`${packageDocsDir}/llms.txt links ${links} pages, expected ${expectedPages}`);
+	for (const page of pages) {
+		if (!(await readFile(page, 'utf8')).includes(`- Package version: entasis ${version}`)) {
+			problems.push(`${path.relative(packageRoot, page)} does not name version ${version}`);
+			break;
+		}
+	}
+	const skillFiles = await listSources(path.join(packageRoot, packageSkillDir), (file) =>
+		file.endsWith('.md')
+	);
+	const sourceSkillFiles = await listSources(path.join(repositoryRoot, canonicalSkillDir), (file) =>
+		file.endsWith('.md')
+	);
+	if (!skillFiles.some((file) => file.endsWith(`${path.sep}SKILL.md`)))
+		problems.push(`${packageSkillDir}/SKILL.md is not packed`);
+	if (skillFiles.length !== sourceSkillFiles.length)
+		problems.push(
+			`${skillFiles.length} packed skill files, expected the ${sourceSkillFiles.length} of ${canonicalSkillDir}`
+		);
+	for (const file of [llms, ...skillFiles, ...pages]) {
+		for (const target of await brokenLinks(file, packageRoot))
+			problems.push(`${path.relative(packageRoot, file)} links to missing ${target}`);
+	}
+	if (problems.length)
+		throw new Error(`Packed agent docs are incomplete:\n- ${problems.join('\n- ')}`);
+	return { pages: pages.length, skillFiles: skillFiles.length };
+}
+
 try {
+	// Written at pack time (git-ignored), so a standalone run packs the current docs too.
+	const agentDocs = await writePackageDocs(repositoryRoot);
 	const { stdout } = await run(
 		'npm',
 		['pack', '--ignore-scripts', '--json', '--pack-destination', fixtureRoot],
@@ -73,6 +216,7 @@ try {
 	if (license !== (await readFile(path.join(repositoryRoot, 'LICENSE'), 'utf8'))) {
 		throw new Error('The packed license differs from LICENSE.');
 	}
+	const packedDocs = await checkAgentDocs(packageRoot, metadata.version, agentDocs.pages);
 
 	const imports = [];
 	let symbolIndex = 0;
@@ -146,7 +290,7 @@ try {
 				isolatedModules: true,
 				module: 'ESNext',
 				moduleResolution: 'Bundler',
-				skipLibCheck: true,
+				skipLibCheck: false,
 				strict: true,
 				target: 'ES2022'
 			},
@@ -159,19 +303,14 @@ try {
 	);
 	// The consumer's own svelte-check: the repository's resolves its own Svelte for the component
 	// shims, so a consumer on another Svelte would see two unrelated `Snippet` types.
-	await run(path.join(fixtureRoot, 'node_modules/.bin/svelte-check'), [
-		'--workspace',
-		fixtureRoot,
-		'--tsconfig',
-		path.join(fixtureRoot, 'tsconfig.json')
-	]);
+	await typecheckConsumer();
 	await run(process.execPath, [
 		'--input-type=module',
 		'-e',
 		"import plugin from 'entasis/tailwind-plugin'; if (typeof plugin !== 'function') throw new Error('The Tailwind entrypoint must export its plugin.');"
 	]);
 	console.log(
-		`Packed library passed: ${entrypointCount} entrypoints and ${symbolIndex} symbols, installed from ${packed.filename}.`
+		`Packed library passed: ${entrypointCount} entrypoints and ${symbolIndex} symbols, ${packedDocs.pages} Markdown pages and ${packedDocs.skillFiles} skill files, installed from ${packed.filename}.`
 	);
 } finally {
 	await rm(fixtureRoot, { recursive: true, force: true });

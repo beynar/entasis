@@ -21,7 +21,13 @@ export function useMenuBarState(
 		orientation: 'horizontal',
 		loop: true,
 		id,
-		enableHoverFocus: false
+		enableHoverFocus: false,
+		// The triggers as the bar renders them, so `tabIndexAt` puts the bar's one Tab stop in
+		// the server markup: the first menu that is not disabled.
+		renderedItems: () => {
+			const menus = getMenus();
+			return { count: menus.length, isUnfocusable: (index) => !!menus[index]?.disabled };
+		}
 	});
 
 	const openStates = $state(untrack(() => getMenus().map(() => false)));

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { KeyValueInputProps } from './keyValueInput.props.js';
 	import type { KeyValuePair } from '../Field/field.js';
@@ -38,11 +39,13 @@
 		prefix,
 		suffix,
 		description,
+		id: idProp,
 		...rest
 	}: KeyValueInputProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 
 	// Stable per-row uid from an instance counter. The each block is keyed by row.id
 	// because keys can be empty or duplicated while typing, and duplicate/empty keys in a

@@ -19,6 +19,22 @@ export type PopupTriggerProps = {
 	controls: string | undefined;
 };
 
+/**
+ * The popup ARIA a trigger renders with, as attributes to spread on the element (`aria-haspopup`
+ * and `aria-expanded`), so the server markup carries them before any attachment runs.
+ * `aria-controls` is left to the attachment: the popup it names is not part of the server render.
+ */
+export type PopupTriggerAttributes = {
+	'aria-haspopup': 'dialog' | 'menu' | 'listbox' | 'tree' | 'grid' | 'true';
+	'aria-expanded': 'true' | 'false';
+};
+
+/** `PopupTriggerProps` as the attributes a trigger spreads; see `PopupTriggerAttributes`. */
+export const popupTriggerAttributes = (props: PopupTriggerProps): PopupTriggerAttributes => ({
+	'aria-haspopup': props.haspopup === true ? 'true' : props.haspopup,
+	'aria-expanded': props.expanded ? 'true' : 'false'
+});
+
 const TRIGGER_ARIA = {
 	haspopup: 'aria-haspopup',
 	expanded: 'aria-expanded',
@@ -57,11 +73,10 @@ export interface TriggerActivationOptions {
  * control. A non-control element also gets `role="button"` and `tabindex="0"`. Returns cleanup.
  */
 export function triggerActivation(node: HTMLElement, options: TriggerActivationOptions) {
-	const nativeControl = node.matches(NATIVE_CONTROL);
 	if (!node.matches(POPUP_CONTROL) && !node.hasAttribute('role')) {
 		node.setAttribute('role', 'button');
 	}
-	if (!nativeControl && !node.hasAttribute('tabindex')) node.tabIndex = 0;
+	if (!node.matches(NATIVE_CONTROL) && !node.hasAttribute('tabindex')) node.tabIndex = 0;
 	// The element's own handler wins. Svelte delegates `onclick` to the root, so it runs after
 	// this listener: the default action waits until the event has finished dispatching, then
 	// runs only if nothing cancelled the event or asked for an open state meanwhile.
@@ -75,9 +90,13 @@ export function triggerActivation(node: HTMLElement, options: TriggerActivationO
 			options.activate(event);
 		});
 	};
+	// Read on each key, not once: a loading or disabled link Button drops its `href` and is a
+	// native control again once it gets it back. While it has none, the browser does not
+	// activate it and neither does this, since `aria-disabled` announces that it refuses.
 	const onKeydown = (event: KeyboardEvent) => {
-		if (nativeControl || event.target !== node) return;
+		if (node.matches(NATIVE_CONTROL) || event.target !== node) return;
 		if (event.key !== 'Enter' && event.key !== ' ') return;
+		if (node.getAttribute('aria-disabled') === 'true') return;
 		event.preventDefault();
 		const requests = options.requests();
 		clearTimeout(pending);

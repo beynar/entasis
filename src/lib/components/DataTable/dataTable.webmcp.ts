@@ -2,6 +2,7 @@
 // its controls do and answers with the rows, by column; `move_row` while rows can be reordered.
 
 import { tick } from 'svelte';
+import { readableText } from '$lib/utils/webmcp/webmcp.dom.js';
 import { watchWebMCPTool, type WebMCPExpose } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 import { exposureOf, toolOptions, toolText, toolValue } from '$lib/utils/webmcp/webmcp.registry.js';
 import type { WebMCPJsonSchema, WebMCPToolProp } from '$lib/utils/webmcp/webmcp.types.js';
@@ -64,8 +65,9 @@ function shownValue(
 	const cell = source.root?.querySelector(
 		`tr[data-row-id="${CSS.escape(row.id)}"] [data-column-id="${CSS.escape(column.id)}"]`
 	);
-	// A virtualized row off screen has no cell to read: nothing is shown of it right now.
-	return cell?.textContent?.trim() ?? null;
+	// A virtualized row off screen has no cell to read: nothing is shown of it right now. What
+	// assistive technology skips, a decorative glyph say, is not part of what the cell shows.
+	return cell ? readableText(cell) : null;
 }
 
 function valueOf(column: DataTableColumn<never>, row: never, index: number): unknown {
@@ -103,13 +105,20 @@ function apply(source: DataTableToolSource, input: QueryInput): string | null {
 			const fits = schema.enum
 				? (schema.enum as unknown[]).includes(value)
 				: typeof value === schema.type;
-			if (!fits) return `The filter of "${id}" does not take this value.`;
+			if (!fits) {
+				return schema.enum
+					? `The filter of "${id}" takes one of ${(schema.enum as unknown[]).map((option) => JSON.stringify(option)).join(', ')}.`
+					: `The filter of "${id}" takes a ${String(schema.type)}.`;
+			}
 			api.setColumnFilter(id, value);
 		}
 	}
 	if (typeof input.sort === 'string') {
 		const column = columns.find((candidate) => candidate.id === input.sort);
-		if (!column?.sortable) return `The column "${input.sort}" does not sort.`;
+		if (!column?.sortable) {
+			const sortable = columns.filter((candidate) => candidate.sortable).map(({ id }) => id);
+			return `The column "${input.sort}" does not sort. ${sortable.length ? `These do: ${sortable.join(', ')}.` : 'No column does.'}`;
+		}
 		source.setSorting([{ id: column.id, desc: input.descending === true }]);
 	}
 	if (Number.isInteger(input.page) && (input.page as number) >= 1) {
@@ -124,6 +133,7 @@ async function query(source: DataTableToolSource, input: QueryInput) {
 	await settled(source);
 	const { api } = source;
 	const columns = source.columns.filter((column) => isVisible(source, column));
+	const omitted = source.pageRows.length - MAX_ROWS;
 	return {
 		status: 'done',
 		total: api.totalItems,
@@ -133,7 +143,13 @@ async function query(source: DataTableToolSource, input: QueryInput) {
 		rows: source.pageRows.slice(0, MAX_ROWS).map((row) => ({
 			id: row.id,
 			...Object.fromEntries(columns.map((column) => [column.id, shownValue(source, column, row)]))
-		}))
+		})),
+		...(omitted > 0
+			? {
+					omitted,
+					message: `This page shows ${source.pageRows.length} rows; the first ${MAX_ROWS} are here. Search or filter to narrow them down.`
+				}
+			: {})
 	};
 }
 
@@ -198,9 +214,25 @@ export const expose: WebMCPExpose<DataTableToolSource> = (source, config) => {
 				},
 				annotations: { consequentialHint: options.consequential ?? true },
 				execute: ({ rowId, index }: { rowId: unknown; index: unknown }) => {
-					if (typeof rowId !== 'string' || typeof index !== 'number') return { status: 'invalid' };
+					if (typeof rowId !== 'string' || typeof index !== 'number') {
+						return { status: 'invalid', message: 'Give a rowId from query_table and an index.' };
+					}
+					if (!source.pageRows.some((row) => row.id === rowId)) {
+						return {
+							status: 'invalid',
+							rowId,
+							message: `No row "${rowId}" on the page showing: call query_table for the current ids.`
+						};
+					}
 					const moved = source.moveRow(rowId, index);
-					return { status: moved ? 'done' : 'refused', rowId, index };
+					return moved
+						? { status: 'done', rowId, index }
+						: {
+								status: 'refused',
+								rowId,
+								index,
+								message: 'The table refused this move, as it would refuse it to the user.'
+							};
 				}
 			};
 		}, exposure)

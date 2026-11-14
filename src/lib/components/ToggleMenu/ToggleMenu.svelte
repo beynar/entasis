@@ -38,6 +38,18 @@
 	const t = $derived(useI18n());
 
 	const classes = $derived(useToggleMenuTheme(theme));
+	// Where each item's buttons start in the toolbar's arrow-key order, and how many there are: a
+	// group or radio group adds one per button, any other item one (a custom item attaches
+	// `reference` to its control).
+	const navigationLayout = $derived.by(() => {
+		let count = 0;
+		const starts = items.map((item) => {
+			const start = count;
+			count += item.type === 'group' || item.type === 'radio-group' ? item.items.length : 1;
+			return start;
+		});
+		return { starts, count };
+	});
 	// A disabled item stays in the arrow-key order and can hold the tab stop (the APG toolbar
 	// pattern), so a fully disabled toolbar keeps one tab stop and a screen reader can reach what
 	// is unavailable. Items refuse activation themselves.
@@ -45,14 +57,21 @@
 		orientation: 'horizontal',
 		loop: true,
 		enableHoverFocus: false,
-		skipDisabled: false
+		skipDisabled: false,
+		// The tools as the rail renders them, so `tabIndexAt` puts the toolbar's one Tab stop on
+		// the first of them in the server markup. Disabled tools can hold it; the overflow button
+		// joins the order only once tools overflow, which the server cannot know.
+		renderedItems: () => ({ count: navigationLayout.count })
 	});
+	const tabIndexFrom = (index: number) => (offset: number) =>
+		navigation.tabIndexAt(navigationLayout.starts[index] + offset);
 	const overflow = useToggleMenuOverflow();
 
-	function getToggleProps(item: ToggleMenuToggleItem): Omit<ToggleMenuToggleItem, 'type'> {
+	function getToggleProps(item: ToggleMenuToggleItem, index: number) {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Remove the menu discriminant before forwarding native button props.
 		const { type: _type, ...props } = item;
-		return props;
+		// The roving tabindex rides along with the native props ToggleButton forwards to its button.
+		return { ...props, tabindex: tabIndexFrom(index)(0) };
 	}
 
 	function replaceItem(index: number, item: ToggleMenuItem): void {
@@ -259,6 +278,7 @@
 					unitClass={classes.unit()}
 					unitReference={overflow.unitReference(index)}
 					buttonReference={navigation.itemReference}
+					tabIndexAt={tabIndexFrom(index)}
 					onToggle={({ value, checked }) => updateGroup(index, item, value, checked)}
 				/>
 			{:else if item.type === 'radio-group'}
@@ -272,6 +292,7 @@
 					unitClass={classes.unit()}
 					unitReference={overflow.unitReference(index)}
 					buttonReference={navigation.itemReference}
+					tabIndexAt={tabIndexFrom(index)}
 					onValueChange={(value) => updateRadioGroup(index, value)}
 				/>
 			{:else if item.type === 'menu'}
@@ -286,6 +307,7 @@
 					unitClass={classes.unit()}
 					unitReference={overflow.unitReference(index)}
 					buttonReference={navigation.itemReference}
+					tabIndexAt={tabIndexFrom(index)}
 				/>
 			{:else if item.type === 'custom'}
 				<span
@@ -313,7 +335,7 @@
 					{@attach overflow.unitReference(index)}
 				>
 					<ToggleButton
-						{...getToggleProps(item)}
+						{...getToggleProps(item, index)}
 						size={item.size ?? size}
 						color={item.color ?? color}
 						variant={item.variant ?? variant}
@@ -355,6 +377,7 @@
 					squared
 					label={t.moreTools}
 					prefix={dotsThreeIcon}
+					{...popover.triggerProps}
 					{@attach overflow.hasOverflow ? navigation.itemReference : undefined}
 					{@attach popover.reference}
 					onclick={() => popover.toggle()}

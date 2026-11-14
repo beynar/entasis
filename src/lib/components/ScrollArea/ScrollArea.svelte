@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { useParentLayer } from '$lib/utils/layers.svelte.js';
-	import { ScrollArea } from './scrollArea.svelte.js';
+	// The state lives in scrollArea.state.svelte.ts rather than scrollArea.svelte.ts: the latter
+	// emits scrollArea.svelte.d.ts, which collides with this component's ScrollArea.svelte.d.ts on
+	// case-insensitive file systems. It is imported under another name because the emitted
+	// declaration of this component declares `ScrollArea` itself.
+	import { ScrollArea as ScrollAreaState } from './scrollArea.state.svelte.js';
 	import type { ScrollAreaProps } from './scrollArea.props.js';
 	import { useScrollAreaTheme } from './scrollArea.theme.js';
 	import { caretUpIcon } from '../Icons/caretUp.js';
@@ -56,7 +60,7 @@
 		}
 	);
 
-	const scrollArea = new ScrollArea({
+	const scrollArea = new ScrollAreaState({
 		get type() {
 			return type;
 		},

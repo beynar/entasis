@@ -17,6 +17,7 @@
 	import type { MenuItem } from '../../Menu/menu.props.js';
 	import SegmentedControl from '../../SegmentedControl/SegmentedControl.svelte';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import {
 		createFieldState,
@@ -65,6 +66,7 @@
 		i18n,
 		theme,
 		tool,
+		id: idProp,
 		...rest
 	}: JsonEditorProps = $props();
 
@@ -72,7 +74,8 @@
 		value = untrack(() => boundDefault(defaultValue ?? initialJsonValue(schema) ?? null));
 	}
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const t = $derived(useI18n(i18n));
 	const classes = $derived(useJsonEditorTheme(theme));
 
@@ -210,6 +213,10 @@
 		{
 			get tool() {
 				return tool;
+			},
+			// Out of agents' reach while it sits in a `data-webmcp-off` zone.
+			get root() {
+				return rootElement;
 			},
 			get label() {
 				return rest.label;

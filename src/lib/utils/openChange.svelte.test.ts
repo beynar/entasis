@@ -8,6 +8,7 @@ import {
 	requestOpenChange,
 	resolveOpenChangeDetails
 } from './openChange.js';
+import { actAsAgent } from './webmcp/webmcp.agent.js';
 
 describe('getInteractionType', () => {
 	test('no event is programmatic', () => {
@@ -89,5 +90,35 @@ describe('open-change details', () => {
 		expect(requestOpenChange(onOpenChange, false, details)).toBe(false);
 		expect(onOpenChange).toHaveBeenCalledWith(false, details);
 		expect(requestOpenChange(undefined, true, createOpenChangeDetails())).toBe(true);
+	});
+});
+
+describe('a change a WebMCP tool makes', () => {
+	test('reports the agent, whatever event or modality the owner read', () => {
+		actAsAgent(() => {
+			expect(getInteractionType(new MouseEvent('click', { detail: 0 }))).toBe('agent');
+			expect(getInteractionType()).toBe('agent');
+			expect(createOpenChangeDetails({ interaction: 'mouse' }).interaction).toBe('agent');
+		});
+		expect(getInteractionType()).toBe('programmatic');
+		expect(createOpenChangeDetails({ interaction: 'mouse' }).interaction).toBe('mouse');
+	});
+
+	test('can be cancelled like any other', () => {
+		const onOpenChange = vi.fn((_open: boolean, details: { cancel(): void }) => details.cancel());
+		const allowed = actAsAgent(() =>
+			requestOpenChange(onOpenChange, true, createOpenChangeDetails({ reason: 'trigger-press' }))
+		);
+		expect(allowed).toBe(false);
+		expect(onOpenChange.mock.calls[0][1]).toMatchObject({ interaction: 'agent', isCanceled: true });
+	});
+
+	test('a tool that throws leaves later changes to people', () => {
+		expect(() =>
+			actAsAgent(() => {
+				throw new Error('boom');
+			})
+		).toThrow('boom');
+		expect(getInteractionType()).toBe('programmatic');
 	});
 });

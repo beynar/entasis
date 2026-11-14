@@ -70,13 +70,21 @@
 					(!(disabled || item.disabled) || item.focusableWhenDisabled)
 			);
 			return index === -1 ? null : index;
-		}
+		},
+		renderedItems: () => ({
+			count: items.length,
+			isUnfocusable: (index) =>
+				!items[index] ||
+				((disabled || !!items[index].disabled) && !items[index].focusableWhenDisabled)
+		})
 	});
 
-	function getButtonProps(item: ToggleButtonGroupItem) {
+	// The roving tabindex rides along with the native props ToggleButton forwards to its button,
+	// so the server markup already holds the group's single tab stop.
+	function getButtonProps(item: ToggleButtonGroupItem, index: number) {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Strip the group keys before forwarding native toggle props.
 		const { value: _value, onValueChange: _onValueChange, ...props } = item;
-		return props;
+		return { ...props, tabindex: navigation.tabIndexAt(index) };
 	}
 
 	const toggle = (itemValue: string, checked: boolean) => {
@@ -104,12 +112,12 @@
 	{@attach navigation.containerReference}
 	{...attachments}
 >
-	{#each items as item (item.value)}
+	{#each items as item, index (item.value)}
 		<ToggleButton
 			{size}
 			{color}
 			{variant}
-			{...getButtonProps(item)}
+			{...getButtonProps(item, index)}
 			role={type === 'single' ? 'radio' : undefined}
 			disabled={disabled || item.disabled}
 			bind:value={

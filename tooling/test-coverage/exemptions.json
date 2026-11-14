@@ -1,0 +1,330 @@
+{
+	"$comment": "Gaps in tooling/test-coverage/check.mjs (npm run check:test-coverage). Keyed by manifest id, then requirement (browser, ssr, attributes). \"todo\" marks a known gap that may only be closed, never added; any other text is the reason the requirement cannot apply. A met requirement makes its exemption stale and fails the check until it is removed.",
+	"exemptions": {
+		"ai-conversation": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"ai-ask-user-question": {
+			"ssr": "todo"
+		},
+		"ai-chat": {
+			"ssr": "todo"
+		},
+		"ai-context": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"ai-thread": {
+			"ssr": "todo"
+		},
+		"ai-thread-toc": {
+			"ssr": "todo"
+		},
+		"ai-message": {
+			"ssr": "todo"
+		},
+		"ai-message-actions": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"ai-marker": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"ai-model-selector": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"ai-composer": {
+			"ssr": "todo"
+		},
+		"ai-reasoning": {
+			"ssr": "todo"
+		},
+		"ai-suggestion": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"ai-tool": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"ai-file-preview": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"aspect-ratio": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"grid": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"heading": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"resizable": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"scroll-area": {
+			"ssr": "todo"
+		},
+		"separator": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"stack": {
+			"browser": "todo"
+		},
+		"app-shell": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"page-shell": {
+			"ssr": "todo"
+		},
+		"button-group": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"toggle-button": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"selection-menu": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"ask": {
+			"ssr": "todo"
+		},
+		"autocomplete": {
+			"attributes": "todo"
+		},
+		"checkboxes-input": {
+			"ssr": "todo"
+		},
+		"date-selector": {
+			"browser": "todo"
+		},
+		"form": {
+			"ssr": "todo"
+		},
+		"multi-step-form": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"slider": {
+			"ssr": "todo"
+		},
+		"tag-group": {
+			"ssr": "todo"
+		},
+		"voice-input": {
+			"ssr": "todo"
+		},
+		"address": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"avatar": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"chart": {
+			"browser": "todo"
+		},
+		"chip": {
+			"browser": "todo"
+		},
+		"countdown": {
+			"browser": "todo"
+		},
+		"event-calendar": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"gantt-chart": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"kanban": {
+			"ssr": "todo"
+		},
+		"kbd": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"metadata-list": {
+			"browser": "todo"
+		},
+		"mini-calendar": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"rating": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"sortable-list": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"stat": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"table": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"timeline": {
+			"ssr": "todo"
+		},
+		"alert": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"confirmation": {
+			"ssr": "todo"
+		},
+		"empty": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"meter": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"network-indicator": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"progress": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"progress-circle": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"skeleton": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"spinner": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"spinner-text": {
+			"ssr": "todo"
+		},
+		"toast": {
+			"ssr": "todo"
+		},
+		"accordion": {
+			"ssr": "todo"
+		},
+		"breadcrumbs": {
+			"browser": "todo"
+		},
+		"command": {
+			"browser": "todo",
+			"attributes": "todo"
+		},
+		"pagination": {
+			"browser": "todo"
+		},
+		"stepper": {
+			"browser": "todo"
+		},
+		"table-of-contents": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"context-menu": {
+			"browser": "todo",
+			"attributes": "todo"
+		},
+		"menu-bar": {
+			"attributes": "todo"
+		},
+		"popup-menu": {
+			"browser": "todo",
+			"attributes": "todo"
+		},
+		"floating-window": {
+			"browser": "todo",
+			"ssr": "todo",
+			"attributes": "todo"
+		},
+		"link-preview": {
+			"attributes": "todo"
+		},
+		"overlay": {
+			"ssr": "todo"
+		},
+		"audio-player": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"carousel": {
+			"browser": "todo"
+		},
+		"image-gallery": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"image-zoom": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"media-volume": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"document-viewer": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"video-player": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"code": {
+			"ssr": "todo"
+		},
+		"diff": {
+			"ssr": "todo"
+		},
+		"globe": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"map": {
+			"ssr": "todo"
+		},
+		"marquee": {
+			"browser": "todo"
+		},
+		"mermaid": {
+			"ssr": "todo"
+		},
+		"qr-code": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"hitbox": {
+			"browser": "todo",
+			"ssr": "todo"
+		},
+		"slot": {
+			"browser": "todo",
+			"ssr": "todo"
+		}
+	}
+}

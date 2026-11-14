@@ -144,6 +144,11 @@ export type FieldValue<T extends FieldType> = T extends RegisteredInputType
 
 export type InputProps<T extends FieldType> = WithSlot<
 	{
+		/**
+		 * Id of the control's focusable element, which an external `<label for>` can target. The
+		 * field's label, description and error ids derive from it. Defaults to a generated id.
+		 */
+		id?: string;
 		/** Form field name, used as the key when the input is part of a Form. */
 		name?: string;
 		/** Marks the field as required for validation and shows the required indicator. */
@@ -232,6 +237,7 @@ export type InputProps<T extends FieldType> = WithSlot<
 
 export type FieldProps<T extends FieldType> = Omit<
 	InputProps<T>,
+	| 'id'
 	| 'type'
 	| 'name'
 	| 'required'

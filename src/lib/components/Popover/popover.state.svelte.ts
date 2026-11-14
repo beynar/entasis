@@ -25,12 +25,14 @@ import {
 } from '$lib/utils/openChange.js';
 import {
 	focusedElement,
+	popupTriggerAttributes,
 	triggerActivation,
 	triggerFocusTarget,
 	writePopupAria,
 	type PopupTriggerProps
 } from '$lib/utils/trigger.js';
 import { useDirection } from '$lib/utils/useDirection.svelte.js';
+import { refuseDismissal } from '$lib/utils/dismissible.js';
 import {
 	applyStateAttributes,
 	openStateAttributes,
@@ -92,6 +94,8 @@ interface PopoverOptions<Payload = unknown> extends MakeRequired<
 		| 'tabBridge'
 		| 'closeOnFocusOut'
 		| 'arrow'
+		| 'dismissible'
+		| 'onDismissAttempt'
 	>,
 	| 'id'
 	| 'directedTransition'
@@ -164,6 +168,52 @@ interface PopoverSession {
 	addTrigger(node: HTMLElement): void;
 	removeTrigger(node: HTMLElement): void;
 }
+
+/** The input that last drove a popup; see `data-modality`. */
+type Modality = 'keyboard' | 'pointer';
+
+/** A modifier held on its own is the start of a shortcut or a modified click, not keyboard use. */
+const isModifierKey = (event: KeyboardEvent) =>
+	['Shift', 'Control', 'Alt', 'Meta'].includes(event.key);
+
+/**
+ * What the page last saw, per document. `modality` is the input a panel's `data-modality` starts
+ * with: the key or press that opened it (an ArrowDown in a combobox input, which opens it from its
+ * own handler) happened before the panel existed. `moved` says whether the latest pointer move
+ * went anywhere: an engine that reports a move when content scrolls under a resting pointer (a
+ * list following the keyboard highlight) reports it at the same place. Capturing listeners, one
+ * set per document, installed by the first trigger that attaches and kept for the page's life.
+ */
+interface PageInput {
+	modality: Modality;
+	x: number | null;
+	y: number | null;
+	moved: boolean;
+}
+const pageInput = new WeakMap<Document, PageInput>();
+const watchPageInput = (doc: Document) => {
+	if (pageInput.has(doc)) return;
+	const input: PageInput = { modality: 'pointer', x: null, y: null, moved: true };
+	pageInput.set(doc, input);
+	const capture = { capture: true, passive: true };
+	doc.addEventListener(
+		'keydown',
+		(event) => {
+			if (!isModifierKey(event)) input.modality = 'keyboard';
+		},
+		capture
+	);
+	doc.addEventListener('pointerdown', () => (input.modality = 'pointer'), capture);
+	doc.addEventListener(
+		'pointermove',
+		(event) => {
+			input.moved = input.x !== event.screenX || input.y !== event.screenY;
+			input.x = event.screenX;
+			input.y = event.screenY;
+		},
+		capture
+	);
+};
 
 /** A press on a trigger, remembered while its event dispatches. */
 type TriggerPress = { node: HTMLElement; event: Event; reason: OpenChangeReason };
@@ -306,6 +356,12 @@ export class PopoverState<Payload = unknown>
 		expanded: this.isOpen,
 		controls: this.isOpen && !this.isMobileSheet ? this.controlsId : undefined
 	});
+	/**
+	 * `aria-haspopup` and `aria-expanded` for a snippet trigger to spread, so they are in the server
+	 * markup; `reference` keeps them right on the client (with several triggers, only the anchored
+	 * one reads as expanded: its effect runs after the template's).
+	 */
+	triggerAttributes = $derived(popupTriggerAttributes(this.triggerProps));
 	/**
 	 * Whether Tab is bridged between the trigger and the portaled panel: a floating dialog popup
 	 * opened from a trigger, unless `tabBridge` is off. Menus, listboxes and the like manage focus
@@ -855,6 +911,9 @@ export class PopoverState<Payload = unknown>
 			return true;
 		}
 		const details = this.#details(input);
+		// A gesture a non-dismissible popover refuses is not a change request: `onOpenChange` does
+		// not hear of it, only `onDismissAttempt`.
+		if (refuseDismissal(nextOpen, details, this.dismissible, this.onDismissAttempt)) return false;
 		if (!requestOpenChange(this.onOpenChange, nextOpen, details)) return false;
 		// A hover open still waiting on its delay belongs to the state before this change: left
 		// pending, it would reopen a popover the user just closed by click or Escape.
@@ -1030,13 +1089,72 @@ export class PopoverState<Payload = unknown>
 			if (session) {
 				cleanups.push(session.layer.node(node));
 				cleanups.push(session.focusScope.attachment(node));
+				// Svelte makes an element `inert` as soon as its outro starts, so the engine blurs
+				// whatever had focus inside the closing panel at its next rendering update, and focus
+				// sat on <body> until the transition ended and the after-close restore ran (a MenuBar
+				// menu closed with Escape lost it for some ten frames). That blur, which goes nowhere,
+				// restores focus at once, before the frame is painted. Restoring earlier, as the close
+				// begins, would take focus from a popover opening in the same step (the next menu of
+				// a MenuBar) and hand it to this one's trigger. The scope restores once per open, so
+				// the after-close call is then a no-op.
+				cleanups.push(
+					on(node, 'focusout', (event) => {
+						if (!this.isOpen && event.relatedTarget === null) session.focusScope.restore();
+					})
+				);
 				cleanups.push(session.safeArea.floatingReference(node));
 			}
 			if (!this.isDialogPopup) cleanups.push(this.#labelPopupOwner(node));
+			cleanups.push(this.#trackModality(node));
 			return () => {
 				cleanups.forEach((cleanup) => cleanup?.());
 			};
 		});
+	};
+
+	/**
+	 * Writes `data-modality` on the panel: `keyboard` after a key pressed while focus is in the
+	 * popover's tree (the panel, a trigger, a combobox input), `pointer` after a press or a real
+	 * move of the pointer over the panel. `:focus-visible` never matches an option under virtual
+	 * focus (`aria-activedescendant`), so this is what lets a theme show a keyboard ring on the
+	 * `data-highlighted` row only while the keyboard drives the list. Written on the element, not
+	 * through state: the input modality changes on every key and move, and nothing re-renders.
+	 */
+	#trackModality = (panel: HTMLElement) => {
+		const write = (modality: Modality) => {
+			if (panel.getAttribute('data-modality') !== modality)
+				panel.setAttribute('data-modality', modality);
+		};
+		const doc = panel.ownerDocument;
+		// The change that opened it says how, when it carries an input; else the page's last input.
+		const interaction = this.lastOpenChange?.interaction;
+		write(
+			interaction === 'keyboard'
+				? 'keyboard'
+				: interaction && interaction !== 'programmatic'
+					? 'pointer'
+					: (pageInput.get(doc)?.modality ?? 'pointer')
+		);
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (isModifierKey(event)) return;
+			const origin = event.composedPath()[0] ?? event.target;
+			if (origin instanceof Node && (composedContains(panel, origin) || this.#focusInTree(origin)))
+				write('keyboard');
+		};
+		// Only a move that goes somewhere (the page's listener, which runs first, measured it):
+		// content scrolled under a resting pointer is not the pointer taking over.
+		const onPointerMove = () => {
+			if (pageInput.get(doc)?.moved ?? true) write('pointer');
+		};
+		const offs = [
+			on(doc, 'keydown', onKeyDown, { capture: true }),
+			on(panel, 'pointerdown', () => write('pointer')),
+			on(panel, 'pointermove', onPointerMove)
+		];
+		return () => {
+			offs.forEach((off) => off());
+			panel.removeAttribute('data-modality');
+		};
 	};
 
 	/**
@@ -1130,6 +1248,7 @@ export class PopoverState<Payload = unknown>
 			});
 		});
 		return untrack(() => {
+			watchPageInput(node.ownerDocument);
 			this.#triggers.set(node, ++this.#triggerSequence);
 			this.#recentTriggers.add(node);
 			queueMicrotask(() => this.#recentTriggers.delete(node));

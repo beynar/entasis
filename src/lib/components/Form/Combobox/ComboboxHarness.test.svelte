@@ -75,7 +75,8 @@
 
 <Theme>
 	{#if rtl}
-		<I18n dir="rtl" manageDocument={false}>{@render content()}</I18n>
+		<!-- Keys follow the direction the control is laid out in, so the island carries `dir`. -->
+		<I18n dir="rtl" manageDocument={false}><div dir="rtl">{@render content()}</div></I18n>
 	{:else}
 		{@render content()}
 	{/if}

@@ -3,10 +3,12 @@
 	import { dotsThreeIcon } from '$lib/components/Icons/dotsThree.js';
 	import PopupMenu from '$lib/components/PopupMenu/PopupMenu.svelte';
 	import type { MenuItem } from '$lib/components/Menu/index.js';
+	// The actions type is imported under another name: the emitted declaration of this component
+	// declares `PageShellActions` itself, and an import of the same name conflicts with it.
 	import type {
 		PageShellAction,
 		PageShellActionOverflow,
-		PageShellActions,
+		PageShellActions as PageShellActionList,
 		PageShellApi,
 		PageShellMobileActionCount
 	} from './pageShell.props.js';
@@ -21,7 +23,7 @@
 		theme
 	}: {
 		api: PageShellApi;
-		actions?: PageShellActions;
+		actions?: PageShellActionList;
 		actionOverflow?: PageShellActionOverflow;
 		mobileActionCount?: PageShellMobileActionCount;
 		theme?: PageShellThemeProps;

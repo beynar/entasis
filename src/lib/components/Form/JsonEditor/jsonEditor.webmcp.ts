@@ -17,6 +17,8 @@ import type { JsonEditorIssue } from './jsonEditor.props.js';
 
 export type JsonEditorToolSource = {
 	readonly tool: WebMCPToolProp | undefined;
+	/** The element it renders into: the tools go while it sits in a `data-webmcp-off` zone. */
+	readonly root?: HTMLElement | null;
 	readonly label: unknown;
 	readonly schema: JsonSchema | undefined;
 	readonly value: unknown;

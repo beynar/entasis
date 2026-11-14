@@ -7,6 +7,7 @@
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { createFieldState, type FieldValidatorResult } from '../Field/field.state.svelte.js';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import type { FieldValue } from '../Field/field.js';
 	import type { SelectOption, SelectProps, SelectValue } from './select.props.js';
 	import { useSelectTheme } from './select.theme.js';
@@ -60,7 +61,7 @@
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
 	const generatedId = $props.id();
-	const id = untrack(() => idProp) ?? generatedId;
+	const id = untrack(() => resolveControlId(idProp, triggerAttrs, generatedId));
 	let valueEl = $state<HTMLElement | null>(null);
 	let listEl = $state<HTMLDivElement | null>(null);
 	let viewportEl = $state<HTMLDivElement | null>(null);
@@ -214,6 +215,14 @@
 		const stops = labels.map((element) => on(element, 'click', () => select.noteLabelClick()));
 		return () => stops.forEach((stop) => stop());
 	});
+	// The trigger names itself only when nothing else does: no field label, no labelledby, no
+	// external <label for>.
+	const triggerLabel = $derived(
+		triggerAttrs?.['aria-label'] ??
+			(label || triggerAttrs?.['aria-labelledby'] || externallyLabelled
+				? undefined
+				: (placeholder ?? t.selectOption))
+	);
 
 	// What a browser autofill can name: the options that can be chosen.
 	const autofillOptions = $derived(select.flatOptions.filter((option) => !option.disabled));
@@ -343,11 +352,8 @@
 				aria-expanded={select.isOpen}
 				aria-controls={select.isOpen ? select.listboxId : undefined}
 				aria-activedescendant={select.isOpen ? select.nav.activeDescendant : undefined}
-				aria-required={required || undefined}
-				aria-label={triggerAttrs?.['aria-label'] ??
-					(label || triggerAttrs?.['aria-labelledby'] || externallyLabelled
-						? undefined
-						: (placeholder ?? t.selectOption))}
+				aria-label={triggerLabel}
+				{...field.ariaAttrs({ role: 'combobox', label: triggerLabel, attrs: triggerAttrs })}
 				data-placeholder={hasValue ? undefined : ''}
 				data-readonly={presence(field.readOnly)}
 				data-disabled={presence(field.disabled)}

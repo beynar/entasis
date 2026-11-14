@@ -6,6 +6,7 @@
 	import { eraserIcon } from '../../Icons/eraser.js';
 	import { tooltip } from '../../Tooltip/tooltip.attachment.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
@@ -42,11 +43,13 @@
 		i18n,
 		label,
 		theme,
+		id: idProp,
 		...rest
 	}: SignatureInputProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const statusId = `${id}-status`;
 
 	const field = createFieldState({
@@ -272,7 +275,11 @@
 			role="img"
 			tabindex={field.disabled ? -1 : 0}
 			aria-label={label ? undefined : t.signatureInput}
-			aria-describedby={statusId}
+			{...field.ariaAttrs({
+				role: 'img',
+				describedBy: statusId,
+				label: label ? undefined : t.signatureInput
+			})}
 			aria-disabled={field.disabled || undefined}
 			class={classes.pad({
 				size,

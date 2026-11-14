@@ -6,6 +6,7 @@
 	import ColorPicker from '../ColorPicker/ColorPicker.svelte';
 	import { closeFunctional, colorMask } from '../ColorPicker/colorMask.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import Popover from '../../Popover/Popover.svelte';
@@ -31,11 +32,13 @@
 		onValueChange,
 		visible,
 		i18n,
+		id: idProp,
 		...rest
 	}: ColorInputProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	let isPickerOpen = $state(false);
 
 	const field = createFieldState({
@@ -179,7 +182,11 @@
 		}
 	});
 
-	const isEmpty = $derived(!field.value);
+	// The swatch paints the canonical hex of a valid colour, never the stored text: a value such as
+	// `red;background-image:url(…)` must not add declarations to the swatch's style, and a lenient
+	// parse (`rgb(1, 2, 3);x:y`) is rewritten to a plain hex first. Anything else shows the empty
+	// swatch.
+	const swatchColor = $derived(field.value ? toHex(field.value) : null);
 </script>
 
 <Popover
@@ -206,9 +213,9 @@
 
 	{#snippet trigger(popover: PopoverApi)}
 		{#snippet swatch()}
-			<span class={classes.swatch({ empty: isEmpty, class: theme?.swatch?.base })}>
-				{#if !isEmpty}
-					<span class="absolute inset-0" style="background-color: {field.value};"></span>
+			<span class={classes.swatch({ empty: !swatchColor, class: theme?.swatch?.base })}>
+				{#if swatchColor}
+					<span class="absolute inset-0" style:background-color={swatchColor}></span>
 				{/if}
 			</span>
 		{/snippet}
@@ -251,6 +258,7 @@
 				data-1p-ignore
 				type="text"
 				{id}
+				{...field.ariaAttrs({ role: 'textbox', native: 'text', label: `${t.color} ${t.value}` })}
 				name={field.name}
 				bind:this={field.node}
 				placeholder={effectivePlaceholder}

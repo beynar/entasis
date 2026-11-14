@@ -49,7 +49,14 @@ export function askFormTool(options: AskOptions<FormInputs>): WebMCPToolProp {
 const cancelTool = ({ id, options }: AskToolState, source: AskToolSource): WebMCPTool => ({
 	name: 'cancel_dialog',
 	description: `Dismisses the open dialog with "${buttonText(options.cancel)}", without answering it.`,
-	execute: () => ({ status: source.cancel(id) ? 'cancelled' : 'busy' })
+	execute: () =>
+		source.cancel(id)
+			? { status: 'cancelled' }
+			: {
+					status: 'busy',
+					message:
+						'The dialog is submitting its answer or has already closed, so it cannot be dismissed now.'
+				}
 });
 
 export const expose: WebMCPExpose<AskToolSource> = (source, config) => {

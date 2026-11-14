@@ -146,6 +146,40 @@ describe('Form under <Theme webmcp>', () => {
 		expect(onSubmit).not.toHaveBeenCalled();
 	});
 
+	test('a disabled option already in a list stays there: the agent can neither drop nor add one', async () => {
+		const onSubmit = vi.fn();
+		const tags = {
+			tags: {
+				type: 'checkboxes',
+				label: 'Tags',
+				defaultValue: ['legacy', 'a'],
+				items: [
+					{ value: 'a', label: 'A' },
+					{ value: 'b', label: 'B' },
+					{ value: 'legacy', label: 'Legacy', disabled: true },
+					{ value: 'gone', label: 'Gone', disabled: true }
+				]
+			}
+		} as const satisfies FormInputs;
+		const tool = await mount({ title: 'Tags', inputs: tags, onSubmit }, 'tags');
+		const schema = tool.inputSchema.properties.tags;
+		expect((schema.items as { enum: string[] }).enum).toEqual(['a', 'b', 'legacy']);
+		expect(schema.description).toMatch(/"Legacy" is disabled: keep it/);
+
+		const dropped = await tool.execute({ tags: ['a'] }, {});
+		expect(dropped).toMatchObject({ status: 'invalid', filled: [] });
+		expect(dropped.refused).toEqual({
+			tags: '"Legacy" is disabled and already selected: keep it in the list, as the user cannot remove it either.'
+		});
+		const added = await tool.execute({ tags: ['legacy', 'gone'] }, {});
+		expect((added.refused as Record<string, string>).tags).toMatch(/"Gone" is disabled/);
+		expect(onSubmit).not.toHaveBeenCalled();
+
+		const kept = await tool.execute({ tags: ['legacy', 'b'] }, {});
+		expect(kept).toMatchObject({ status: 'submitted', filled: ['tags'] });
+		expect(onSubmit.mock.calls[0][0]).toMatchObject({ tags: ['legacy', 'b'] });
+	});
+
 	test('a handler that throws does not reach the model', async () => {
 		const tool = await mount({
 			onSubmit: () => {

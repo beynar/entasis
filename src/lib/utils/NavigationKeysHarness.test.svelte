@@ -1,7 +1,8 @@
 <script lang="ts">
 	// Harness for `useNavigation.keys.svelte.test.ts`: an inline Menu (hover-to-navigate) beside an
 	// unrelated text field, a PopupMenu opened by a button, a MenuBar and a SegmentedControl, each
-	// inside <Theme> and an <I18n> that sets the writing direction.
+	// inside <Theme> and an <I18n> that sets the writing direction of the document, which the
+	// portaled menus share.
 	import I18n from '../i18n/I18n.svelte';
 	import Theme from '../components/Theme/Theme.svelte';
 	import Menu from '../components/Menu/Menu.svelte';
@@ -23,7 +24,7 @@
 	} = $props();
 </script>
 
-<I18n {dir} manageDocument={false}>
+<I18n {dir}>
 	<Theme>
 		{#if scenario === 'menu'}
 			<input aria-label="Search" />

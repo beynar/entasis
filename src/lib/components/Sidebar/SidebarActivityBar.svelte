@@ -7,8 +7,10 @@
 	import { tooltip } from '$lib/components/Tooltip/tooltip.attachment.svelte.js';
 	import { useDirection } from '$lib/utils/useDirection.svelte.js';
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
+	// Aliased: the declaration emitted for this component declares `SidebarActivityBar`, and an
+	// import of the same name would conflict with it in a consumer that type-checks the package.
 	import type {
-		SidebarActivityBar,
+		SidebarActivityBar as SidebarActivityBarData,
 		SidebarActivityBarItem,
 		SidebarDensity,
 		SidebarSide,
@@ -32,7 +34,7 @@
 		class: className,
 		theme
 	}: {
-		activityBar: SidebarActivityBar;
+		activityBar: SidebarActivityBarData;
 		side: SidebarSide;
 		size: SidebarSize;
 		density: SidebarDensity;
@@ -81,7 +83,13 @@
 		enableHoverFocus: false,
 		// Escape belongs to the layer around the rail: a square's popover, the mobile drawer.
 		preventKeyboardDefault: false,
-		defaultFocusedIndex: () => (activeIndex === -1 ? null : activeIndex)
+		defaultFocusedIndex: () => (activeIndex === -1 ? null : activeIndex),
+		// The squares as the rail renders them, so `tabIndexAt` puts its one Tab stop in the
+		// server markup: the active square, else the first that is not disabled.
+		renderedItems: () => ({
+			count: entries.length,
+			isUnfocusable: (index) => !!entries[index]?.item.disabled
+		})
 	});
 
 	function tooltipContent(item: SidebarActivityBarItem) {
@@ -152,6 +160,7 @@
 			aria-current={item.isActive ? 'page' : undefined}
 			aria-label={accessibleName(item)}
 			aria-disabled={item.disabled || undefined}
+			tabindex={navigation.tabIndexAt(entry.index)}
 			class={classes.activityBarItem({
 				size,
 				density,
@@ -176,6 +185,8 @@
 			aria-current={item.isActive ? 'page' : undefined}
 			aria-label={accessibleName(item)}
 			disabled={item.disabled || undefined}
+			tabindex={navigation.tabIndexAt(entry.index)}
+			{...popover?.triggerAttributes}
 			class={classes.activityBarItem({
 				size,
 				density,

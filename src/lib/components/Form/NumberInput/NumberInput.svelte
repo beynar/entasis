@@ -7,6 +7,7 @@
 	import { minusIcon } from '../../Icons/minus.js';
 	import { plusIcon } from '../../Icons/plus.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { useFieldTheme } from '../Field/field.theme.js';
 	import { createFieldState, type FieldValidatorResult } from '../Field/field.state.svelte.js';
@@ -52,12 +53,14 @@
 		format,
 		locale,
 		inputAttrs,
+		id: idProp,
 		...rest
 	}: NumberInputProps = $props();
 	const t = $derived(useI18n());
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, inputAttrs, generatedId));
 	const activeLocale = $derived(locale ?? t.locale);
 	// Compact suffixes ("1.2K") cannot be read back, so entry always uses the standard notation.
 	const entryFormat = $derived<Intl.NumberFormatOptions | undefined>(
@@ -454,6 +457,7 @@
 		type="text"
 		role="spinbutton"
 		inputmode={inputAttrs?.inputmode ?? inputMode}
+		{...field.ariaAttrs({ role: 'spinbutton', native: 'text', attrs: inputAttrs })}
 		{id}
 		bind:this={field.node}
 		{@attach wheel}

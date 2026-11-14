@@ -26,11 +26,13 @@ import {
 	type OpenChangeInit
 } from '$lib/utils/openChange.js';
 import {
+	popupTriggerAttributes,
 	triggerActivation,
 	triggerFocusTarget,
 	writePopupAria,
 	type PopupTriggerProps
 } from '$lib/utils/trigger.js';
+import { refuseDismissal } from '$lib/utils/dismissible.js';
 import { useDialogMotion, type DialogThemeProps } from './dialog.theme.js';
 import type { DialogApi } from './dialog.api.js';
 
@@ -59,6 +61,8 @@ interface DialogOptions extends MakeRequired<
 		| 'snapPoints'
 		| 'defaultSnapPoint'
 		| 'onSnapPointChange'
+		| 'dismissible'
+		| 'onDismissAttempt'
 	>,
 	'id' | 'closeOnEscape' | 'closable' | 'modal'
 > {
@@ -139,6 +143,11 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 		expanded: this.isOpen,
 		controls: this.isOpen ? this.id : undefined
 	});
+	/**
+	 * `aria-haspopup` and `aria-expanded` for a snippet trigger to spread, so they are in the server
+	 * markup; `reference` keeps them in sync on the client and adds `aria-controls`.
+	 */
+	triggerAttributes = $derived(popupTriggerAttributes(this.triggerProps));
 
 	/**
 	 * How many open modal dialogs sit above this one. A non-modal dialog leaves the page usable, so
@@ -430,6 +439,9 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 		this.#openRequests += 1;
 		if (this.isOpen === nextOpen) return true;
 		const details = this.#details(input);
+		// A gesture a non-dismissible dialog refuses is not a change request: `onOpenChange` does
+		// not hear of it, only `onDismissAttempt`. A refused swipe snaps back like a cancelled one.
+		if (refuseDismissal(nextOpen, details, this.dismissible, this.onDismissAttempt)) return false;
 		if (!requestOpenChange(this.onOpenChange, nextOpen, details)) return false;
 		if (nextOpen) {
 			this.#opener = details.trigger ? triggerFocusTarget(details.trigger, details.event) : null;

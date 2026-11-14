@@ -169,6 +169,7 @@ describe('law 12 · styling hooks (R1 · CX-6)', () => {
 		expectHook('popover', trigger, 'data-popup-open', '');
 		await waitFor(() => expectHook('popover', panel, 'data-side', 'bottom'));
 		expectHook('popover', panel, 'data-align', 'center');
+		expectHook('popover', panel, 'data-modality');
 		expectHook('popover', panel, 'data-entering', false);
 		expectHook('popover', panel, 'data-exiting', false);
 		expectHook('popover', trigger, 'data-popup-side', 'bottom');
@@ -314,6 +315,7 @@ describe('law 12 · styling hooks (R1 · CX-6)', () => {
 		expectHook('hoverCard', card, 'data-closed', false);
 		await waitFor(() => expectHook('hoverCard', card, 'data-side', 'bottom'));
 		expectHook('hoverCard', card, 'data-align', 'center');
+		expectHook('hoverCard', card, 'data-modality', 'pointer');
 		await waitFor(() => expectHook('hoverCard', card, 'data-entering', false));
 		expectHook('hoverCard', card, 'data-exiting', false);
 		expectHook('hoverCard', trigger, 'data-popup-open', '');
@@ -346,6 +348,7 @@ describe('law 12 · styling hooks (R1 · CX-6)', () => {
 			document.querySelector('[role="menu"] [data-highlighted]'),
 			'data-highlighted'
 		);
+		expectHook('menu', panel, 'data-modality', 'keyboard');
 
 		const submenuRow = screen.getByRole('menuitem', { name: 'Move to' });
 		expectHook('menu', submenuRow, 'data-popup-open', false);

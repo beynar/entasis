@@ -127,6 +127,7 @@ Attributes are presence attributes (set while the state holds, omitted otherwise
 - \`data-side\`: On the card: the side of the trigger it sits on after flipping, \`top\`, \`right\`, \`bottom\` or \`left\`; \`inline-start\` / \`inline-end\` when a logical \`position\` was requested.
 - \`data-align\`: On the card: \`start\`, \`center\` or \`end\`, how it lines up with the trigger.
 - \`data-anchor-hidden\`: On the card: present while the trigger is scrolled out of view.
+- \`data-modality\`: On the card: \`keyboard\` or \`pointer\`, the last input that drove it (see \`popoverDataAttributes\`).
 - \`data-state\`: On the trigger: \`open\` or \`closed\` (kept for compatibility; prefer \`data-popup-open\`).
 - \`data-popup-open\`: On the trigger: present while the card is open.
 - \`data-popup-side\`: On the trigger: the card's \`data-side\` while it is placed.

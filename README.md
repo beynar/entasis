@@ -319,7 +319,8 @@ Snippet props: `size` (px number or CSS length, default `1lh`), `color` (a role 
 ## Docs and agent skills
 
 - `pnpm dev` runs the documentation site with a page per component under `/components/<name>`.
-- `.claude/skills/entasis/` (mirrored in `.agents/skills/entasis/`) holds the coding-agent skill: import conventions, per-component references, theming notes.
+- `.claude/skills/entasis/` (mirrored in `.agents/skills/entasis/`) holds the coding-agent skill, organised by task: build an interface, make it agent-ready with WebMCP, test it, and a done checklist, with the component inventory and theme parts as references. The npm package ships the same skill in `skills/entasis/`, with `docs/llms.txt` and a Markdown page per component in `docs/components/`, matched to the installed version.
+- The docs site serves `/llms.txt` and a Markdown version of each page (`/components/<id>.md`, `/utilities/<id>.md`).
 - Each component folder ships a `*.mcp.ts` description, served by the MCP server the docs site runs at
   `https://entasis.beynar.workers.dev/mcp` (one `components` tool that returns a component's documentation).
   Add it to a project for Claude Code with:

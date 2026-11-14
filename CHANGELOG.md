@@ -6,6 +6,99 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `Dialog` (drawers included) and `Popover` take `dismissible={false}`: Escape, an outside press,
+  the browser's close request (Android Back), a swipe and, on Popover, focus leaving no longer
+  close it, while its close buttons, the trigger and code still do. `onDismissAttempt(details)`
+  hears each refused gesture with its reason, so an app can ask "Discard changes?". A refused
+  gesture never reaches `onOpenChange`. Opt-in; `dismissible={false}` wins over `closeOnEscape`,
+  `closeOnClickOutside` and `swipeToDismiss`.
+- Popup panels (Popover, Menu, HoverCard, Select, Combobox) carry
+  `data-modality="keyboard" | "pointer"`, the last kind of input inside them, written without a
+  re-render: style a highlighted row for the keyboard where `:focus-visible` cannot match (virtual
+  focus through `aria-activedescendant`).
+- `PopoverApi` and `DialogApi` have `triggerAttributes` (`aria-haspopup`, `aria-expanded`): spread
+  them on a snippet trigger so they are in the server-rendered HTML, before hydration.
+- WebMCP: `data-webmcp-off` takes a subtree away from agents (its buttons, its text, its
+  components' tools). An open change made by a tool reports `interaction: 'agent'`
+  (`OpenChangeInteraction` gains `'agent'`; an exhaustive `switch` needs the new case), and
+  `isAgentAction()` from `entasis/webmcp` tells a value callback that an agent made the change.
+- WebMCP refusals say what is there and what to do: a stale id answers that the list changed, with
+  the current ids; a disabled, hidden or covered option says so; a handler that throws is reported
+  as the app's refusal; a list cut at its limit says how many items it leaves out. Form results add
+  `refused` reasons. Tool results may carry `message`, `current`, `refused`, `omitted` and
+  `ignoredBecause`.
+- Value controls take an `id` prop.
+- The docs site serves `/llms.txt` and a Markdown version of each
+  component and utility page (`/components/<id>.md`, `/utilities/<id>.md`), from the same text as
+  the MCP server.
+- The package ships `docs/llms.txt`, `docs/components/<id>.md` and the agent skill in
+  `skills/entasis/`, matched to the installed version.
+
+### Changed
+
+- The entasis skill is organised by task: build an interface, make it agent-ready with WebMCP,
+  test it, and a done checklist, with the component inventory and theme parts as references.
+- When the control that opened an overlay has been removed (a row deleted from its own menu),
+  focus returns to the nearest control that survived where it was, before the focus history.
+- Arrow keys follow the element's own direction before the locale's, so a `dir` island inside a page
+  in the other direction gets the arrows it shows; a popup moved to the body follows the direction
+  it is displayed in. `useNavigation` adds `renderedItems` and `tabIndexAt`.
+- `move_row` with an unknown row answers `invalid` instead of `refused`.
+
+### Fixed
+
+- Value controls render the `id` their author passes, through `id` or `inputAttrs.id`, and the
+  label, description and error ids follow it; a fieldset Field carries it on the fieldset (its root
+  id is `x`, no longer `x-field`).
+- Field's `aria-labelledby`, `aria-describedby`, `aria-required`, `aria-readonly` and
+  `aria-invalid` are in the server-rendered HTML for text, number, password, date, time, phone,
+  colour, tags, PIN, rating, signature, Select, Combobox, Autocomplete and Switch controls.
+- Keyboard lists render a single `tabindex="0"` in the server HTML (Tabs, Tabbar,
+  SegmentedControl, ToggleButtonGroup), so Tab reaches one item before hydration.
+- ColorInput's swatch paints only a valid colour, as a hex: a stored value can no longer add style
+  declarations.
+- A modal dialog portaled into a shadow root makes the rest of that root and the page around its
+  host inert.
+- A loading link `Button` drops its `href` (it stays focusable and `aria-disabled`), so a middle
+  click or a click before hydration no longer navigates.
+- DataTable: Command+Home/End jump to the first and last row on Apple platforms, Left and Right are
+  mirrored in right-to-left pages, and Alt+Arrow is left to the browser.
+- Tabbar and SegmentedControl place their indicator at fractional pixels.
+- WebMCP no longer offers buttons inside `aria-hidden` subtrees (Marquee's copies), and button
+  names follow the accessible name (`aria-labelledby`, `aria-label`, then the text without its
+  hidden parts).
+- WebMCP: a disabled option already held by a multi-value field no longer makes the agent's write
+  fail, and the agent cannot drop it, as a person cannot.
+- Tree: `aria-label` and `aria-labelledby` name the tree itself (in the server HTML too), the
+  arrows are mirrored right to left, and typing a character moves to the next matching row.
+- Closing a Popover, Menu or MenuBar with a transition no longer drops focus on `<body>`: focus
+  returns to the trigger as the panel starts closing.
+- RadioInput, MenuBar, Breadcrumbs, ToggleMenu, the Sidebar activity bar, the Calendar month and
+  year pickers and TagsInput render their single Tab stop in the server HTML; the built-in popup
+  triggers (Sidebar activity squares and menus, Tabbar menu tabs, ToggleMenu menus and overflow,
+  Menu submenu rows) render `aria-haspopup` and `aria-expanded` there too.
+- The shipped declarations typecheck with `skipLibCheck: false` (FormState, ImageGallery,
+  ImageZoom, Mermaid, Slot, Toast, Toaster, ScrollArea). Slot and Toast type their props instead of
+  `any`, which can surface real type errors in an app. `RichTextInputCollaboration` no longer needs
+  edytor installed, and entasis no longer augments the global `Document` type, which broke the DOM
+  types.
+
+### Internal
+
+- CI retries browser and e2e tests twice and lists the tests that passed only on a retry in the job
+  summary. The contracts workflow runs as parallel jobs on a cached shared setup, and now runs lint.
+- `npm run check:test-coverage` (a browser test, an SSR test and, for overlay and list owners, an
+  `.attributes.ts` per component, or an exemption that can only shrink) and
+  `npm run check:bundle-absent` (no entry statically bundles a WebMCP module, MapLibre or
+  intl-tel-input).
+- Leak tests open and close seven overlays 200 times and check listeners and DOM nodes.
+- An internal APG keyboard pattern checker runs on menus, tabs, tree, listboxes, toolbar and radio
+  groups, in left-to-right and right-to-left.
+- `scripts/test-slot.sh` allows two local test runs at a time on one machine.
+- The packed-library check typechecks entasis's shipped declarations with `skipLibCheck: false`.
+
 ## 0.22.0 — 2026-11-14
 
 ### Added

@@ -99,7 +99,8 @@ export type DateSelectorInputProps<Mode extends DateSelectorInputMode = 'date'> 
 	DateSelectorProps<Mode>,
 	'value' | 'defaultValue' | 'onValueChange' | 'disabled' | 'class' | 'theme'
 > &
-	Omit<InputProps<DateSelectorFieldType<Mode>>, 'theme'> & {
+	// `id` keeps its DateSelector meaning: the id of the selector popover.
+	Omit<InputProps<DateSelectorFieldType<Mode>>, 'theme' | 'id'> & {
 		/** Theme overrides for the selector popover and its field wrapper. */
 		theme?: {
 			/** Theme overrides for the selector popover parts. */

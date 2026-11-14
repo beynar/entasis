@@ -23,22 +23,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      # Chromium for e2e; Chromium and WebKit for the browser-mode unit tests.
+      - uses: ./.github/actions/setup
         with:
-          node-version: 24
           registry-url: https://registry.npmjs.org
-          package-manager-cache: false
-      - run: npm install --global pnpm@11
-      - run: pnpm install --frozen-lockfile
+          browsers: chromium webkit
       # Trusted publishing needs npm >= 11.5.1; the bundled npm is upgraded to be safe.
       - run: npm install --global npm@latest
-      # Chromium for e2e; Chromium and WebKit for the browser-mode unit tests.
-      - run: pnpm exec playwright install --with-deps chromium webkit
       # `entasis/icons/*` is the one subpath the generated alias map cannot type under NodeNext
       # (kit emits an extensionless wildcard path), so its types come from dist like a consumer's
       # would. Packaging before the check is what makes it pass locally too.
       - run: pnpm exec svelte-package
       - run: npm run check
+      - run: npm run check:test-coverage
+      - run: npm run check:bundle-absent
+      # The full suite, serially. Vitest browser tests and Playwright retry twice on CI; a test that
+      # passed only on a retry is a warning in the job summary instead of a failed release.
       - run: npm run test:unit -- --run
       - run: npm run test:e2e
       # The tag must be the version being published, or the package on npm and the git history

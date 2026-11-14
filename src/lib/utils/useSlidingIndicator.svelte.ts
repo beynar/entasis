@@ -1,5 +1,38 @@
 import { untrack } from 'svelte';
 
+/** An item's box in its offset parent's padding box, in CSS pixels, before any transform. */
+export type IndicatorBox = { x: number; y: number; width: number; height: number };
+
+/**
+ * Where `element` sits in its offset parent, like `offsetLeft`/`offsetWidth` but fractional:
+ * those round to whole pixels, so an indicator sized from them can stop a pixel short of an item
+ * laid out at 80.5px. The rectangles are taken relative to the parent's padding box (its border
+ * excluded, its scroll position added back), and divided by the parent's scale so an ancestor
+ * transform (a dialog zooming in) does not shrink the measure.
+ */
+export const measureIndicatorBox = (element: HTMLElement): IndicatorBox => {
+	const parent = element.offsetParent;
+	if (!(parent instanceof HTMLElement)) {
+		const { offsetLeft: x, offsetTop: y, offsetWidth: width, offsetHeight: height } = element;
+		return { x, y, width, height };
+	}
+	const box = element.getBoundingClientRect();
+	const frame = parent.getBoundingClientRect();
+	const scaleX = scaleOf(frame.width, parent.offsetWidth);
+	const scaleY = scaleOf(frame.height, parent.offsetHeight);
+	return {
+		x: (box.left - frame.left) / scaleX - parent.clientLeft + parent.scrollLeft,
+		y: (box.top - frame.top) / scaleY - parent.clientTop + parent.scrollTop,
+		width: box.width / scaleX,
+		height: box.height / scaleY
+	};
+};
+
+// The offset size is rounded to a whole pixel, so a gap under one pixel is that rounding, not a
+// transform; a scale too slight to open a one-pixel gap moves the indicator by less than that.
+const scaleOf = (rendered: number, offset: number) =>
+	offset > 0 && rendered > 0 && Math.abs(rendered - offset) >= 1 ? rendered / offset : 1;
+
 type SlidingIndicatorOptions = {
 	activeIndex: () => number;
 	getStyle: (element: HTMLElement) => string;

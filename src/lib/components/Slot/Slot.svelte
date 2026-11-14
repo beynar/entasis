@@ -1,5 +1,7 @@
 <script lang="ts" generics="Payload = undefined">
-	import { type Slot } from './slot.js';
+	// The snippet type is imported under another name: the emitted declaration of this component declares
+	// `Slot` itself, and an import of the same name conflicts with it.
+	import type { Slot as SlotSnippet } from './slot.js';
 	import type { Snippet } from 'svelte';
 	import type { WithAttachments } from '$lib/types/props.js';
 	let {
@@ -25,7 +27,7 @@
 			/** Inline styles for the optional wrapper. */
 			style?: string;
 			/** Text or a snippet to render. */
-			render?: Slot<Payload>;
+			render?: SlotSnippet<Payload>;
 			/** Allows fallback content when render is absent. */
 			renderIf?: boolean;
 		} & (undefined extends Payload

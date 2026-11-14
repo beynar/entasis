@@ -108,6 +108,30 @@
 // click_danger_button({ id: 'delete_2' })
 { "status": "pressed", "id": "delete_2" }`;
 
+	const offZoneCode = `<!-- Nothing in here reaches an agent: buttons, context, component tools -->
+<section data-webmcp-off>
+	<Form title="Payment" {inputs} {onSubmit} />
+</section>
+
+<!-- Off while the condition holds -->
+<aside data-webmcp-off={isAdminPanel}>…</aside>`;
+
+	const agentSourceCode = `<script lang="ts">
+	import { isAgentAction } from 'entasis/webmcp';
+	import type { OpenChangeDetails } from 'entasis/types';
+</${'script'}>
+
+<Form
+	{inputs}
+	onValueChange={(value) => audit(isAgentAction() ? 'agent' : 'user', value)}
+/>
+<Popover
+	onOpenChange={(open: boolean, details: OpenChangeDetails) => {
+		// An agent opened it: keep this one for people.
+		if (open && details.interaction === 'agent') details.cancel();
+	}}
+/>`;
+
 	const refineCode = `<!-- Keep a component from agents -->
 <Button tool={false} onclick={openDebugPanel}>Debug</Button>
 
@@ -421,9 +445,12 @@ await document.modelContext.executeTool(form, { email: 'ada@example.com' });`;
 			Page tools pause behind any modal, with or without a tool of its own.
 		</li>
 		<li>
-			<strong class="text-neutral">Fields.</strong> Disabled, read-only and hidden fields are not in the
-			schema, and a value sent for one is ignored. A value no control could produce, such as a disabled
-			option or one past a limit, is refused with a catalog message.
+			<strong class="text-neutral">Fields.</strong> Disabled, read-only and hidden fields are not in
+			the schema, and a value sent for one is ignored. A value no control could produce, such as a
+			disabled option or one past a limit, is refused with a catalog message, and {@render ic(
+				'refused'
+			)} says why. A disabled option the value already holds stays: the agent can neither drop it from
+			a list nor pick another one, as a person can do neither.
 		</li>
 		<li>
 			<strong class="text-neutral">Passwords.</strong> They can be filled in and are never sent back.
@@ -435,11 +462,13 @@ await document.modelContext.executeTool(form, { email: 'ada@example.com' });`;
 			{@render ic('toolSchema')}. The tool’s description tells the model.
 		</li>
 		<li>
-			<strong class="text-neutral">Buttons.</strong> Disabled, loading, hidden and nameless buttons are
-			left out, as are links off the site and anything past the first 100. So are the buttons inside components
-			that only change how a person looks at something, such as copying code, zoom or text formatting.
-			A button is checked again when pressed, and a menu row that was removed or disabled can no longer
-			run.
+			<strong class="text-neutral">Buttons.</strong> Disabled, loading, hidden and nameless buttons
+			are left out, as are buttons in an {@render ic('aria-hidden')} subtree such as Marquee’s repeated
+			copies, links off the site and anything past the first 100, which the tool counts. A button’s name
+			is the one a screen reader announces, without an {@render ic('aria-hidden')} shortcut hint. So are
+			the buttons inside components that only change how a person looks at something, such as copying
+			code, zoom or text formatting. A button is checked again when pressed, and a menu row that was removed
+			or disabled can no longer run.
 		</li>
 		<li>
 			<strong class="text-neutral">Links.</strong>
@@ -451,6 +480,34 @@ await document.modelContext.executeTool(form, { email: 'ada@example.com' });`;
 			screen reads as empty there.
 		</li>
 	</ul>
+
+	<Separator class="my-2" children="When an agent is told no" />
+
+	<p class="text-neutral/70">
+		Every refusal says what is there and what to do. An id that is gone answers that the list
+		changed, with the current ids; a button that is disabled or covered by a dialog says so; a
+		handler of yours that throws is reported as failed, without its message. A list cut short, such
+		as table rows past 100, says how many it leaves out and how to narrow it.
+	</p>
+
+	<Separator class="my-2" children="Keep a zone from agents" />
+
+	<p class="text-neutral/70">
+		{@render ic('data-webmcp-off')} on any element takes its whole subtree from agents: its buttons, its
+		text as context for the buttons around it, and the tools of the components inside. It is read when
+		a component’s tool is built, so render it with the content. Menu rows, command palettes and breadcrumbs
+		are not placed in the page: pass them {@render ic('tool={false}')}.
+	</p>
+	<Code language="svelte" code={offZoneCode} />
+
+	<Separator class="my-2" children="Tell an agent’s change apart" />
+
+	<p class="text-neutral/70">
+		An overlay a tool opens or closes reports {@render ic("interaction: 'agent'")} to
+		{@render ic('onOpenChange')}, which can cancel it like any other change. In any other callback a
+		tool sets off, {@render ic('isAgentAction()')} is true while the call runs synchronously.
+	</p>
+	<Code language="svelte" code={agentSourceCode} />
 
 	<Separator class="my-2" children="Refine a tool" />
 

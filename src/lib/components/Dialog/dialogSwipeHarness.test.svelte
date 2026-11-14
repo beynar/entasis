@@ -15,6 +15,8 @@
 		snapPoint = $bindable(),
 		onSnapPointChange,
 		onOpenChange,
+		dismissible,
+		onDismissAttempt,
 		onAction
 	}: Pick<
 		DialogProps,
@@ -28,6 +30,8 @@
 		| 'snapPoint'
 		| 'onSnapPointChange'
 		| 'onOpenChange'
+		| 'dismissible'
+		| 'onDismissAttempt'
 	> & {
 		onAction?: () => void;
 	} = $props();
@@ -46,6 +50,8 @@
 		bind:snapPoint
 		{onSnapPointChange}
 		{onOpenChange}
+		{dismissible}
+		{onDismissAttempt}
 		responsive={false}
 		transition={{ in: { duration: 0 }, out: { duration: 0 } }}
 	>

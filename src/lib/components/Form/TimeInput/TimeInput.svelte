@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { focusIntoPopup } from '../Field/focusIntoPopup.js';
 	import Popover from '../../Popover/Popover.svelte';
 	import TimeInputPicker from './TimeInputPicker.svelte';
@@ -45,11 +46,13 @@
 		onValidate,
 		visible,
 		onValueChange,
+		id: idProp,
 		...rest
 	}: TimeInputProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	let pickerOpen = $state(false);
 
 	const field = createFieldState({
@@ -240,6 +243,7 @@
 		>
 			<input
 				data-1p-ignore
+				{...field.ariaAttrs({ role: 'textbox', native: 'text' })}
 				inputmode="decimal"
 				{id}
 				name={field.name}

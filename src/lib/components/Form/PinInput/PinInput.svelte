@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState, type FieldValidatorResult } from '../Field/field.state.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import PinInputCells from './PinInputCells.svelte';
@@ -40,12 +41,14 @@
 		visible,
 		label,
 		description,
+		id: idProp,
 		...rest
 	}: PinInputProps = $props();
 	const t = $derived(useI18n());
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const resolvedLength = () => (Number.isFinite(length) ? Math.max(1, Math.floor(length)) : 6);
 
 	const field = createFieldState({
@@ -164,6 +167,11 @@
 			type="text"
 			dir="ltr"
 			{id}
+			{...field.ariaAttrs({
+				role: 'textbox',
+				native: 'text',
+				label: label ? undefined : t.oneTimeCode
+			})}
 			name={field.name}
 			value={state.value}
 			maxlength={state.length + PIN_INPUT_TEXT_MARGIN}

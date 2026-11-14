@@ -382,16 +382,15 @@ Utility component for rendering dynamic content types uniformly.
 
 ### Props
 
-| Prop     | Type     | Description                                         |
-| -------- | -------- | --------------------------------------------------- |
-| `render` | `Slot`   | Content: `string \| number \| Snippet \| Component` |
-| `class`  | `string` | CSS class on wrapper                                |
+| Prop     | Type     | Description                  |
+| -------- | -------- | ---------------------------- |
+| `render` | `Slot`   | Content: `string \| Snippet` |
+| `class`  | `string` | CSS class on wrapper         |
 
 ### Behavior
 
-- Strings/numbers render as text
+- Strings render as text
 - Snippets render with props
-- Components render as Svelte components
 - `null`/`undefined` render as empty
 
 ### Example
@@ -409,7 +408,6 @@ Utility component for rendering dynamic content types uniformly.
 
 <Slot render={greeting} class="text-primary" />
 <Slot render="Plain text" />
-<Slot render={42} />
 <Slot render={isLoading ? 'Loading...' : greeting} />
 ```
 

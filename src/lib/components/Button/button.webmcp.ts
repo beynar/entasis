@@ -2,6 +2,13 @@
 // `click_button`, and `click_danger_button` for those the browser may want confirmed.
 
 import { createChoiceTool, type WebMCPChoice } from '$lib/utils/webmcp/webmcp.choices.js';
+import {
+	accessibleName,
+	AGENT_OFF_SELECTOR,
+	isAgentOff,
+	isDecorative,
+	isReachableNow
+} from '$lib/utils/webmcp/webmcp.dom.js';
 import { siteAddress } from '$lib/utils/webmcp/webmcp.navigation.js';
 import { toolText } from '$lib/utils/webmcp/webmcp.registry.js';
 import type { WebMCPOptions } from '$lib/utils/webmcp/webmcp.types.js';
@@ -25,6 +32,8 @@ const clickTool = createChoiceTool({
 	param: 'id',
 	doneStatus: 'pressed',
 	limit: 100,
+	beyondLimit:
+		'Narrowing what the page shows, with a search, a filter, another tab or page, brings the others into the list.',
 	read: {
 		name: 'read_buttons',
 		consequentialName: 'read_danger_buttons',
@@ -37,15 +46,18 @@ const clickTool = createChoiceTool({
 const tracked = new Set<TrackedButton>();
 
 // Not a matter of `inert`: the page is inert behind a modal, and a list built then would stay
-// empty once it closes. The registry pauses those tools meanwhile; a press still checks it.
+// empty once it closes. The registry pauses those tools meanwhile; a press still checks it. An
+// `aria-hidden` subtree is another matter: no entasis overlay hides the page that way, so it marks
+// decoration, such as Marquee's repeated copies, which is never offered.
 const canBeOffered = (node: HTMLElement): boolean =>
 	node.isConnected &&
 	(node.checkVisibility?.() ?? true) &&
 	!node.matches(':disabled, [aria-disabled="true"]') &&
-	['button', 'link'].includes(node.getAttribute('role') ?? '');
+	['button', 'link'].includes(node.getAttribute('role') ?? '') &&
+	!isDecorative(node) &&
+	!isAgentOff(node);
 
-const isPressable = (node: HTMLElement): boolean =>
-	canBeOffered(node) && node.closest('[inert]') === null;
+const isPressable = (node: HTMLElement): boolean => canBeOffered(node) && isReachableNow(node);
 
 const staysOnSite = (node: HTMLElement): boolean =>
 	!(node instanceof HTMLAnchorElement) || siteAddress(node.href, node.target) !== null;
@@ -56,9 +68,9 @@ const isCoveredByAnotherTool = ({ node, tool }: TrackedButton): boolean =>
 	!tool &&
 	(node.closest('[data-webmcp-owned]') !== null || node.getAttribute('aria-haspopup') === 'menu');
 
-// Text that is not a value or a control's own: a field's content is not for this tool to read.
-const NOT_CONTEXT =
-	'button, [role="button"], input, select, textarea, script, style, svg, [hidden], [aria-hidden="true"]';
+// Text that is not a value or a control's own: a field's content is not for this tool to read,
+// and an app's off zone is not for any.
+const NOT_CONTEXT = `button, [role="button"], input, select, textarea, script, style, svg, [hidden], [aria-hidden="true"], ${AGENT_OFF_SELECTOR}`;
 
 function visibleText(root: Element): string {
 	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -107,9 +119,8 @@ function choices(): WebMCPChoice[] {
 		.map((button) => ({
 			key: button.node,
 			node: button.node,
-			label:
-				toolText(button.node.getAttribute('aria-label') ?? '') ||
-				toolText(button.node.textContent ?? ''),
+			// What a screen reader announces: a shortcut hint marked `aria-hidden` is not in the name.
+			label: toolText(accessibleName(button.node)),
 			description: button.tool?.description,
 			consequential: button.tool?.consequential ?? button.danger,
 			surface: button.surface,

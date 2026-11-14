@@ -1,5 +1,9 @@
 name: Public contracts
 
+# Parallel jobs on one shared setup (.github/actions/setup: pnpm store and Playwright browsers
+# cached). Vitest browser tests and Playwright retry twice on CI (vite.config.ts,
+# playwright.config.ts); a test that passed only on a retry is a warning in the job summary.
+
 on:
   pull_request:
   push:
@@ -7,17 +11,18 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: contracts-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  contracts:
+  static:
+    name: Lint, types and contracts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          package-manager-cache: false
-      - run: npm install --global pnpm@11
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
+      - run: npm run lint
       - run: npm run check:component-contract
       - run: npm run check:feature-chips
       - run: npm run check:semantic-theme-tokens
@@ -25,16 +30,66 @@ jobs:
       - run: npm run check:public-api-contract
       - run: npm run check:readme-tokens
       - run: npm run test:contracts
+      # Known test gaps (tooling/test-coverage/exemptions.json) only shrink: on a pull request a
+      # new "todo" against the base branch fails.
+      - if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          npm run check:test-coverage -- --base FETCH_HEAD
+      - if: github.event_name != 'pull_request'
+        run: npm run check:test-coverage
       # dist before check: `entasis/icons/*` is typed through dist (see release.yml).
       - run: pnpm exec svelte-package
       - run: npm run check
-      # Browser-mode unit tests (*.browser.test.ts) run in Chromium and WebKit.
-      - run: pnpm exec playwright install --with-deps chromium webkit
-      - run: npm run test:unit -- --run
+
+  unit:
+    name: Unit (jsdom and node)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - run: npm run test:unit -- --run --project client --project server
+
+  browser:
+    # Browser-mode unit tests (*.browser.test.ts), one engine per job.
+    name: Unit (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          browsers: ${{ matrix.browser }}
+      - run: npm run test:unit -- --run --project "browser (${{ matrix.browser }})"
+
+  package:
+    name: Package and consumers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - run: pnpm exec svelte-package
+      # Entries never statically reach a WebMCP module, MapLibre or intl-tel-input.
+      - run: npm run check:bundle-absent
       - run: npm run check:packed-library
       # The same consumer with the oldest Svelte the peer range admits (`fromAction` needs 5.32).
       - run: ENTASIS_CHECK_SVELTE_VERSION=5.32.0 npm run check:packed-library
       - run: npm run check:package-consumer
       - run: npm run check:doc-fences
       - run: pnpm exec publint
+
+  e2e:
+    name: End-to-end
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          browsers: chromium
+      # The package job runs prepack's checks; this one builds only the docs app.
       - run: npm run test:e2e
+        env:
+          E2E_BUILD_COMMAND: pnpm exec svelte-kit sync && pnpm exec vite build

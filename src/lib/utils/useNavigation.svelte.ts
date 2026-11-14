@@ -40,8 +40,8 @@ type NavigationOptions = {
 	/**
 	 * Swap ArrowLeft/ArrowRight in right-to-left contexts: they move between items of a horizontal
 	 * list, and in a vertical list ArrowLeft opens a level (`onNext`) and ArrowRight leaves it
-	 * (`onPrevious`). Default `true`; direction comes from the i18n context, then the container's
-	 * computed style.
+	 * (`onPrevious`). Default `true`; direction comes from the container's computed style,
+	 * then the i18n context.
 	 */
 	rtl?: boolean;
 	/**
@@ -68,6 +68,13 @@ type NavigationOptions = {
 	 * not select on Enter: it continues its form). Default `true`.
 	 */
 	enterActivates?: boolean;
+	/**
+	 * The items as the template renders them: how many there are and which ones can never hold
+	 * the tab stop (natively disabled, or soft-disabled without `disabledItemsFocusable`). It lets
+	 * `tabIndexAt` give server HTML and the first client render their single tab stop before any
+	 * item attaches. Without it the tab stop appears only once the items attach.
+	 */
+	renderedItems?: () => { count: number; isUnfocusable?: (index: number) => boolean };
 };
 
 /**
@@ -314,6 +321,22 @@ export const useNavigation = (opts: NavigationOptions) => {
 		return items[edge] ?? null;
 	};
 
+	// The tab stop the template renders before the items attach: the default item when it can
+	// hold the stop, otherwise the first item that can. Hidden items cannot be known before
+	// layout, so only disabled ones are skipped here; `sync` refines it once the items attach.
+	const renderedTabStop = $derived.by(() => {
+		const rendered = opts.renderedItems?.();
+		if (!rendered || opts.virtualFocus) return -1;
+		const canHold = (index: number) =>
+			index >= 0 && index < rendered.count && !rendered.isUnfocusable?.(index);
+		const preferred = opts.defaultFocusedIndex?.();
+		if (preferred != null && canHold(preferred)) return preferred;
+		for (let index = 0; index < rendered.count; index += 1) {
+			if (canHold(index)) return index;
+		}
+		return -1;
+	});
+
 	/**
 	 * Brings `tabindex`, `data-highlighted` and the container's `aria-activedescendant` in line
 	 * with the highlighted item and the tab stop, touching only the items that changed role.
@@ -554,6 +577,19 @@ export const useNavigation = (opts: NavigationOptions) => {
 			scheduleRestore(previous, node);
 		}
 		revision += 1;
+	};
+
+	// A template rendering `tabIndexAt` after mount may have written `-1` over the tab stop. State
+	// cannot change while a template renders, so the re-sync that writes the stop back waits for
+	// the next microtask, before any key can reach the list.
+	let resyncQueued = false;
+	const queueResync = () => {
+		if (resyncQueued) return;
+		resyncQueued = true;
+		queueMicrotask(() => {
+			resyncQueued = false;
+			if (containerRef) revision += 1;
+		});
 	};
 
 	// Keep the attributes in line after every change to the list, the highlight or the default
@@ -913,6 +949,20 @@ export const useNavigation = (opts: NavigationOptions) => {
 				};
 			});
 		},
+		/**
+		 * The `tabindex` the item at `index` renders with (`renderedItems` describes the items), so
+		 * server HTML already holds exactly one tab stop and keyboard users reach the list before
+		 * hydration. Once the container attaches the list owns the attribute itself. The value is
+		 * read untracked, so a selection change never re-renders it; a template that renders it
+		 * again anyway (a moved row, a spread whose other props changed) gets `-1`, which can only
+		 * take the stop away, never add a second one, and the list writes the stop back right after.
+		 */
+		tabIndexAt: (index: number): 0 | -1 =>
+			untrack(() => {
+				if (containerRef === null) return renderedTabStop === index ? 0 : -1;
+				queueResync();
+				return -1;
+			}),
 		// Expose focused index for external use
 		get focusedIndex() {
 			return readFocusedIndex();

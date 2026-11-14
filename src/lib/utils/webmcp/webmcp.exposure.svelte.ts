@@ -10,6 +10,7 @@ import {
 	type WebMCPConfig,
 	type WebMCPToolHandle
 } from './webmcp.registry.js';
+import { isAgentOff } from './webmcp.dom.js';
 import type { WebMCPRegisterOptions, WebMCPTool, WebMCPToolProp } from './webmcp.types.js';
 
 // A tool of any input: each `execute` restores its own.
@@ -18,12 +19,17 @@ type AnyTool = WebMCPTool<any>;
 
 const toolOf = (source: object) => (source as { readonly tool?: WebMCPToolProp }).tool;
 
+/** The element a source renders into, when it says: the tools go while it sits in an off zone. */
+const rootOf = (source: object) => (source as { readonly root?: Element | null }).root;
+
 /** What a component's `.webmcp.ts` file exports. It returns how to stop. */
 export type WebMCPExpose<Source> = (source: Source, config: WebMCPConfig) => () => void;
 
 /**
  * Exposes a component to agents while `<Theme webmcp>` is on, its `tool` prop is not `false` and
  * `enabled` allows it. Call during initialization, with a source whose getters read the props.
+ * A source with a `root` getter is kept from agents while that element sits inside a
+ * `data-webmcp-off` subtree; the attribute is read when the root or the tool changes.
  */
 export function useWebMCPExposure<Source extends object>(
 	load: () => Promise<{ expose: WebMCPExpose<Source> }>,
@@ -32,7 +38,9 @@ export function useWebMCPExposure<Source extends object>(
 ): void {
 	const config = useWebMCPConfig();
 	// A boolean, so a fresh `tool={{ … }}` object updates the tools instead of restarting them.
-	const active = $derived(Boolean(config.options) && enabled() && toolOf(source) !== false);
+	const active = $derived(
+		Boolean(config.options) && enabled() && toolOf(source) !== false && !isAgentOff(rootOf(source))
+	);
 	$effect(() => {
 		if (!active || !getModelContext()) return;
 		return startExposure(load, ({ expose }) => expose(source, config));

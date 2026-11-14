@@ -16,6 +16,14 @@
 	import { createTreeStyle } from './tree-token-style.js';
 	import { useTreeTheme } from './tree.theme.js';
 	import { preloadTree } from './preloadTree.js';
+	import {
+		createArrowMirror,
+		createTreeTypeahead,
+		findTreeElement,
+		labelTreeMarkup,
+		nameTreeElement
+	} from './tree.accessibility.js';
+	import { useDirection } from '$lib/utils/useDirection.svelte.js';
 
 	let {
 		ref = $bindable(),
@@ -65,6 +73,8 @@
 		contextMenu,
 		style,
 		theme,
+		'aria-label': ariaLabel,
+		'aria-labelledby': ariaLabelledby,
 		...attachments
 	}: TreeProps = $props();
 
@@ -73,6 +83,39 @@
 	const renderer = new TreeRenderer();
 	const snippetRenderer = new TreeSnippetRenderer(() => api);
 	const serverMarkup = createInitialServerMarkup();
+	const direction = useDirection(() => ref);
+	const mirrorArrowKey = createArrowMirror(() => direction() === 'rtl');
+	const typeahead = createTreeTypeahead(() => api);
+
+	// Keys reach this wrapper from the rows inside Pierre Trees' shadow root, so the listeners are
+	// added here rather than as markup handlers on a div that has no interactive role of its own.
+	const attachKeyboard: Attachment<HTMLDivElement> = (node) => {
+		// Focus moving from row to row also fires focusout; only leaving the tree ends the word.
+		const resetTypeahead = (event: FocusEvent) => {
+			if (!node.contains(event.relatedTarget as Node | null)) typeahead.reset();
+		};
+		node.addEventListener('keydown', mirrorArrowKey, { capture: true });
+		node.addEventListener('keydown', typeahead.handleKeydown);
+		node.addEventListener('focusout', resetTypeahead);
+		return () => {
+			node.removeEventListener('keydown', mirrorArrowKey, { capture: true });
+			node.removeEventListener('keydown', typeahead.handleKeydown);
+			node.removeEventListener('focusout', resetTypeahead);
+			typeahead.reset();
+		};
+	};
+
+	// Pierre Trees recreates the tree element on every mount, which also replaces `api`.
+	$effect(() => {
+		const element = findTreeElement(api);
+		if (!element) return;
+		nameTreeElement(
+			element,
+			{ label: ariaLabel, labelledby: ariaLabelledby },
+			ref?.getRootNode() ?? null
+		);
+	});
+
 	const heightStyle = $derived(typeof height === 'number' ? `${height}px` : height);
 	const hostClassName = $derived(classes.host({ className: hostClass }));
 	const wrapperStyle = $derived(createTreeStyle(style));
@@ -148,7 +191,9 @@
 
 	function createInitialServerMarkup(): string {
 		try {
-			return preloadInitialTree().markup;
+			// The name belongs on the role="tree" element, which Pierre Trees renders in its shadow
+			// root; on the outer div, which has no role, assistive technology never announces it.
+			return labelTreeMarkup(preloadInitialTree().markup, ariaLabel);
 		} catch (error) {
 			if (!BROWSER) throw error;
 			errorMessage = getErrorMessage(error);
@@ -227,6 +272,9 @@
 	<!-- Unavoidable: the initial rows are the SSR payload serialized by the tree engine
 	     (@pierre/trees/ssr), never caller supplied HTML; the client attachment then adopts
 	     this subtree, so it cannot be expressed as Svelte markup. -->
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-	<div {@attach attachTree} class={classes.viewport()}>{@html serverMarkup}</div>
+	<!-- eslint-disable svelte/no-at-html-tags -->
+	<div {@attach attachTree} class={classes.viewport()} {@attach attachKeyboard}>
+		{@html serverMarkup}
+	</div>
+	<!-- eslint-enable svelte/no-at-html-tags -->
 </div>

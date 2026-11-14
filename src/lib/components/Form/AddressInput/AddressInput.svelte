@@ -14,6 +14,7 @@
 	import type { AutocompleteItemsRequest } from '../Autocomplete/autocomplete.props.js';
 	import Combobox from '../Combobox/Combobox.svelte';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import TextInput from '../TextInput/TextInput.svelte';
@@ -65,11 +66,13 @@
 		label,
 		theme,
 		fieldAttrs,
+		id: idProp,
 		...rest
 	}: AddressInputProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const t = $derived(useI18n(i18n));
 	const classes = $derived(useAddressInputTheme(theme));
 

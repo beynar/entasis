@@ -17,6 +17,7 @@
 		unitClass,
 		unitReference,
 		buttonReference,
+		tabIndexAt,
 		onToggle
 	}: {
 		item: ToggleMenuGroupItem;
@@ -28,16 +29,19 @@
 		unitClass: string;
 		unitReference: Attachment<HTMLElement>;
 		buttonReference?: Attachment<HTMLElement>;
+		/** The roving `tabindex` of this unit's button at `offset`, from the toolbar's navigation. */
+		tabIndexAt?: (offset: number) => 0 | -1;
 		onToggle: (payload: { value: string; checked: boolean }) => void;
 	} = $props();
 
 	const classes = $derived(useToggleButtonGroupTheme(item.theme));
 	const pressed = $derived(item.value ?? item.defaultValue ?? []);
 
-	function getButtonProps(button: ToggleMenuGroupButton) {
+	function getButtonProps(button: ToggleMenuGroupButton, offset: number) {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Strip the group keys before forwarding native toggle props.
 		const { value: _value, onValueChange: _onValueChange, ...props } = button;
-		return props;
+		// The roving tabindex rides along with the native props ToggleButton forwards to its button.
+		return { ...props, tabindex: tabIndexAt?.(offset) };
 	}
 </script>
 
@@ -54,9 +58,9 @@
 	})}
 	{@attach unitReference}
 >
-	{#each item.items as button (button.value)}
+	{#each item.items as button, offset (button.value)}
 		<ToggleButton
-			{...getButtonProps(button)}
+			{...getButtonProps(button, offset)}
 			size={item.size ?? size}
 			color={item.color ?? color}
 			variant={item.variant ?? variant}

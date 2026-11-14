@@ -15,6 +15,8 @@ export const popoverDataAttributes = {
 		'On the panel: `start`, `center` or `end`, how it lines up with the trigger (absent with `data-side="none"`).',
 	'data-anchor-hidden':
 		'On the panel: present while the trigger is scrolled out of view; the panel is hidden meanwhile.',
+	'data-modality':
+		'On the panel: `keyboard` or `pointer`, the last input that drove the popup: a key pressed while focus is in the panel, on its trigger or in a combobox input, or a press or a real move of the pointer over the panel. Written on the element without re-rendering. `:focus-visible` never matches an option under virtual focus (`aria-activedescendant`), so pair it with `data-highlighted` to show a keyboard ring only while the keyboard drives the list: `[data-modality=keyboard] [data-highlighted]`.',
 	'data-uncentered':
 		'On the arrow: present while the trigger is not under the middle of the panel (a shift moved the panel).',
 	'data-popup-open':

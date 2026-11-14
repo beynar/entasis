@@ -655,6 +655,7 @@ Attributes are presence attributes (set while the state holds, omitted otherwise
 - \`data-exiting\`: On a popup menu or submenu panel: present while the exit transition plays.
 - \`data-side\`: On a popup menu or submenu panel: the side of its trigger it sits on after flipping.
 - \`data-align\`: On a popup menu or submenu panel: \`start\`, \`center\` or \`end\`.
+- \`data-modality\`: On a popup menu or submenu panel: \`keyboard\` or \`pointer\`, the last input that drove it (see \`popoverDataAttributes\`). Pair it with \`data-highlighted\` for a keyboard-only ring.
 - \`data-size\`: On the root and the list: the resolved \`size\`.
 - \`data-density\`: On the root and the list: the resolved \`density\`.
 

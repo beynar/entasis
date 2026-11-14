@@ -55,6 +55,8 @@
 		modal = false,
 		tabBridge = true,
 		closeOnFocusOut,
+		dismissible = true,
+		onDismissAttempt,
 		arrow = false,
 		class: className,
 		trigger,
@@ -182,6 +184,12 @@
 		},
 		get closeOnFocusOut() {
 			return closeOnFocusOut;
+		},
+		get dismissible() {
+			return dismissible;
+		},
+		get onDismissAttempt() {
+			return onDismissAttempt;
 		},
 		get arrow() {
 			return arrow;
@@ -313,6 +321,8 @@
 		{closeOnEscape}
 		{closeOnClickOutside}
 		{focusOnClose}
+		{dismissible}
+		{onDismissAttempt}
 		closable={closeOnEscape || closeOnClickOutside}
 		swipeToDismiss={closeOnClickOutside}
 		thumb={false}

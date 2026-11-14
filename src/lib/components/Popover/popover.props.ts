@@ -8,7 +8,7 @@ import { type Alignment, type Placement, type VirtualElement } from '@floating-u
 import type { WithAttachments } from '$lib/types/props.js';
 import type { PopupPlacementSide } from '$lib/utils/stateAttributes.js';
 import type { PopoverThemeProps } from './popover.theme.js';
-import type { OpenChangeHandler } from '$lib/utils/openChange.js';
+import type { OpenChangeDetails, OpenChangeHandler } from '$lib/utils/openChange.js';
 import type { FocusOnClose } from '$lib/utils/useFocusScope.svelte.js';
 
 /**
@@ -164,7 +164,9 @@ export type PopoverProps<Payload = unknown> = WithAttachments<{
 	 * trigger that opened the popover anchors it and gets focus back; an open popover closes when
 	 * that trigger unmounts (`reason: 'trigger-unmount'`), and a trigger re-rendered as a new
 	 * element keeps it open. The built-in button's `onclick` runs first: calling
-	 * `event.preventDefault()` there stops the toggle.
+	 * `event.preventDefault()` there stops the toggle. A snippet trigger spreads
+	 * `popover.triggerAttributes` (or `popover.triggerProps` on a Button) so its server markup
+	 * carries `aria-haspopup` and `aria-expanded`, as the built-in button's does.
 	 */
 	trigger?: Snippet<[PopoverApi<Payload>]> | (ButtonProps & { content?: string }) | false;
 	/**
@@ -178,8 +180,9 @@ export type PopoverProps<Payload = unknown> = WithAttachments<{
 	/**
 	 * Where focus goes when the popover closes with focus inside it or after a trigger opened it.
 	 * By default it returns to the trigger (with a visible focus ring after Escape or another
-	 * keyboard close); when that control is gone or disabled, to the most recent element that is
-	 * still on the page. `false` leaves focus where it is, an element receives it, and a function
+	 * keyboard close); when that control has left the page (a row its menu deleted), to the
+	 * nearest control that survived where it was (the next one, else the one before); when it is
+	 * disabled or none survived, to the most recent element still on the page. `false` leaves focus where it is, an element receives it, and a function
 	 * is called with the change details (`reason`, `interaction`…) and returns one of these, or
 	 * nothing to restore as usual. A close because focus moved on (`'focus-out'`) or because a
 	 * pointer pressed outside a non-modal popover never moves it.
@@ -241,6 +244,22 @@ export type PopoverProps<Payload = unknown> = WithAttachments<{
 	 * @default false
 	 */
 	arrow?: boolean;
+	/**
+	 * `false` refuses every dismissal by the user's gesture: Escape, a press outside, the Android
+	 * Back gesture (`close-watcher`), the mobile sheet's swipe and focus moving away (`focus-out`).
+	 * The trigger, a close button, items and code (`popover.close()`, the `open` prop) still close
+	 * it. A refused gesture is not a change request: `onOpenChange` is not called, the event is
+	 * left untouched (as for a cancelled change), and `onDismissAttempt` hears of it instead. It
+	 * wins over `closeOnEscape` and `closeOnClickOutside`; a gesture those turn off reports nothing.
+	 * @default true
+	 */
+	dismissible?: boolean;
+	/**
+	 * Called for each dismissal `dismissible={false}` refused, with the details it would have
+	 * carried (`reason` is `'escape-key'`, `'outside-press'`, `'close-watcher'`, `'swipe'` or
+	 * `'focus-out'`), so the app can ask "Discard changes?" and close it itself.
+	 */
+	onDismissAttempt?: (details: OpenChangeDetails) => void;
 	/** When true, pressing outside the popover closes it. A press that began before it opened does not count, and on touch screens only a tap does (a finger that starts scrolling the page does not). */
 	closeOnClickOutside?: boolean;
 	/** When true, pressing Escape closes the topmost open popover. */

@@ -14,6 +14,8 @@ export type TabsToolOption = {
 
 export type TabsToolSource = {
 	readonly tool: WebMCPToolProp | undefined;
+	/** The element it renders into: the tools go while it sits in a `data-webmcp-off` zone. */
+	readonly root?: HTMLElement | null;
 	readonly tabs: readonly TabsToolOption[];
 	readonly active: string | undefined;
 	readonly select: (value: string) => void;
@@ -47,7 +49,15 @@ export const expose: WebMCPExpose<TabsToolSource> = (source, config) =>
 				annotations: { consequentialHint: options.consequential ?? false },
 				execute: ({ value }: { value: string }) => {
 					const tab = source.tabs.find((candidate) => candidate.value === value);
-					if (!tab || tab.disabled) return { status: 'unavailable' };
+					if (!tab || tab.disabled) {
+						const offered = source.tabs.filter((candidate) => !candidate.disabled);
+						return {
+							status: 'unavailable',
+							value,
+							message: `${tab ? `The tab "${toolText(tab.label) || value}" is disabled` : `There is no tab "${String(value)}" any more`}: pick one of the current tabs.`,
+							current: offered.map((candidate) => candidate.value)
+						};
+					}
 					source.select(value);
 					const to = siteAddress(tab.href);
 					if (to) followLink(to);

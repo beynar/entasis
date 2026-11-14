@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { useHotKey } from '$lib/utils/useHotKey.svelte.js';
 	import { useSafeArea } from '$lib/utils/safeArea.svelte.js';
-	import { Toaster, type ToasterProps } from './toast.state.svelte.js';
+	// The toaster state class is imported under another name: the emitted declaration of this component declares
+	// `Toaster` itself, and an import of the same name conflicts with it.
+	import { Toaster as ToasterState, type ToasterProps } from './toast.state.svelte.js';
 	import Toast from './Toast.svelte';
 	import { useToastTheme } from './toast.theme.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
@@ -31,7 +33,7 @@
 
 	const t = $derived(useI18n());
 
-	const toaster = new Toaster({
+	const toaster = new ToasterState({
 		get collapseHorizontalAxis() {
 			return collapseHorizontalAxis;
 		},

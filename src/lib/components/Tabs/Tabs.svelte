@@ -97,6 +97,10 @@
 		get tool() {
 			return tool;
 		},
+		// Out of agents' reach while it sits in a `data-webmcp-off` zone.
+		get root() {
+			return root;
+		},
 		get tabs() {
 			return items.map((item, index) => ({
 				value: tabValues[index],

@@ -128,7 +128,10 @@ const areValuesEqual = (left: LiveFormValue<FormInputs> | undefined, right: obje
 };
 
 export class FormState<I extends FormInputs = FormInputs> {
-	readonly fields = new SvelteMap<string, RegisteredField>();
+	// The annotation is explicit because an inferred type makes the declaration emitter inline
+	// FieldState's structure, and that inlined copy keeps references to the type parameter T of
+	// createFieldState, which the shipped .d.ts does not declare.
+	readonly fields: SvelteMap<string, RegisteredField> = new SvelteMap();
 	loading = $state(false);
 	hasError = $state(false);
 	private valueCache = $state<FormValueRecord>({});

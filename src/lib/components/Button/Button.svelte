@@ -60,9 +60,18 @@
 	// keeps their place, and refuses activation through `aria-disabled` instead.
 	const nativeDisabled = $derived(!isAnchor && disabled && !focusableWhenDisabled);
 	const inactive = $derived(disabled || loading);
-	// A disabled anchor has no `href`, so only an explicit tabindex keeps it focusable.
+	// An inactive anchor drops its `href`: refusing the click from script cannot stop a middle
+	// click (`auxclick` opens a new tab) or a click before hydration. Without `href` only a
+	// tabindex keeps it focusable: a loading link keeps its place like a loading button, a
+	// disabled one leaves the tab order unless it is `focusableWhenDisabled`.
 	const anchorTabindex = $derived(
-		isAnchor && disabled ? (focusableWhenDisabled ? (tabindex ?? 0) : -1) : tabindex
+		isAnchor && disabled
+			? focusableWhenDisabled
+				? (tabindex ?? 0)
+				: -1
+			: isAnchor && loading
+				? (tabindex ?? 0)
+				: tabindex
 	);
 
 	const resolvedColor = $derived(useDefaultColor(color));
@@ -137,7 +146,7 @@
 	aria-disabled={inactive && !nativeDisabled ? true : undefined}
 	aria-busy={loading ? true : undefined}
 	role={role ?? (isAnchor ? 'link' : 'button')}
-	href={isAnchor && !disabled ? link : undefined}
+	href={isAnchor && !inactive ? link : undefined}
 	{rel}
 	{target}
 	{download}

@@ -11,7 +11,9 @@
 	import type { MermaidProps } from './mermaid.props.js';
 	import { MermaidState } from './mermaid.state.svelte.js';
 	import { useMermaidTheme } from './mermaid.theme.js';
-	import Mermaid from './Mermaid.svelte';
+	// The component renders itself in its fullscreen dialog under another name: the emitted
+	// declaration declares `Mermaid`, and a self-import of the same name conflicts with it.
+	import MermaidSelf from './Mermaid.svelte';
 
 	let {
 		chart,
@@ -156,7 +158,7 @@
 
 {#if has('expand')}
 	<Dialog type="fullScreen" bind:open={expanded} closable title={t.mermaidDiagram}>
-		<Mermaid
+		<MermaidSelf
 			{chart}
 			{config}
 			{errorForgiving}

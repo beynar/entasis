@@ -213,8 +213,7 @@
 					data-slot="sidebar-menu-button"
 					data-size={rowSize}
 					class={buttonClass}
-					aria-expanded={popover.isOpen}
-					aria-haspopup="menu"
+					{...popover.triggerAttributes}
 					aria-controls={popover.isOpen ? popover.id : undefined}
 					{@attach popover.reference}
 					onclick={() => popover.toggle()}

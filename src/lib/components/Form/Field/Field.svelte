@@ -1,36 +1,7 @@
 <script lang="ts" module>
 	import type { Attachment } from 'svelte/attachments';
 	import { on } from 'svelte/events';
-	// Roles that take aria-required / aria-readonly (ARIA 1.2, plus slider from 1.3, which axe
-	// accepts). Native inputs keep their own `required` and `readonly` attributes instead.
-	const ARIA_REQUIRED_ROLES = new Set([
-		'checkbox',
-		'combobox',
-		'gridcell',
-		'listbox',
-		'radiogroup',
-		'searchbox',
-		'slider',
-		'spinbutton',
-		'switch',
-		'textbox',
-		'tree',
-		'treegrid'
-	]);
-	const ARIA_READONLY_ROLES = new Set([
-		'checkbox',
-		'combobox',
-		'grid',
-		'gridcell',
-		'listbox',
-		'radiogroup',
-		'searchbox',
-		'slider',
-		'spinbutton',
-		'switch',
-		'textbox',
-		'treegrid'
-	]);
+	import { ARIA_READONLY_ROLES, ARIA_REQUIRED_ROLES, splitIds } from './field.aria.js';
 	// Input types whose native `readonly` attribute the browser honours.
 	const TEXT_ENTRY_INPUT_TYPES = new Set([
 		'date',
@@ -49,8 +20,6 @@
 	// Presses on these keep their own behaviour instead of focusing the field's control.
 	const INTERACTIVE =
 		'a[href], button, input, select, textarea, label, summary, [contenteditable]:not([contenteditable="false"]), [tabindex], [role="button"], [role="link"], [role="checkbox"], [role="switch"], [role="radio"], [role="slider"], [role="option"], [role="tab"], [role="menuitem"]';
-
-	const splitIds = (value: string | null) => value?.split(/\s+/).filter(Boolean) ?? [];
 
 	const acceptsNativeReadOnly = (element: Element) =>
 		element instanceof HTMLTextAreaElement ||
@@ -199,7 +168,25 @@
 		label || actions || header ? labelPosition : ('top' as const)
 	);
 
+	// Declared while rendering, so the ids a control references from its attributes are in the
+	// server markup. A description or helper renders, with its id, unless a footer snippet
+	// replaces them or an empty theme class leaves them without a wrapper to carry the id.
+	untrack(() =>
+		field.declareLayout(() => ({
+			labelledBy: Boolean(label) && labelFor === false && as !== 'fieldset',
+			description:
+				Boolean(description) &&
+				!footer &&
+				Boolean(classes.description({ size, disabled: field.disabled })),
+			helper:
+				Boolean(helper) && !footer && Boolean(classes.helper({ size, disabled: field.disabled }))
+		}))
+	);
+
+	// The fallback for a control that does not render `field.ariaAttrs` (a custom control that
+	// spreads `controlAttrs`, a group): the attributes are written on its element once mounted.
 	$effect(() => {
+		if (field.rendersAria) return;
 		const control = field.node ?? field.rootNode;
 		if (!control) return;
 
@@ -266,7 +253,9 @@
 </script>
 
 <!-- Suffixed id: the bare field.id belongs to the control element, so <label for={field.id}>
-     resolves to it — a duplicate id here (first in tree order) would steal the label linkage. -->
+     resolves to it — a duplicate id here (first in tree order) would steal the label linkage. A
+     fieldset is the control itself (a radio group, a set of checkboxes), so it takes the bare id:
+     an id the author passes names the group. -->
 <svelte:element
 	this={as}
 	data-label-position={resolvedLabelPosition}
@@ -287,7 +276,7 @@
 	})}
 	bind:this={field.rootNode}
 	{...fieldAttrs}
-	id="{field.id}-field"
+	id={as === 'fieldset' ? field.id : `${field.id}-field`}
 	{...attachments}
 	{@attach fieldNativeForm(field)}
 >
@@ -362,13 +351,11 @@
 				class={classes.description({ size, disabled: field.disabled })}
 				render={description}
 				attrs={{ id: field.descriptionId }}
-				{@attach field.descriptionPart}
 			/>
 			<Slot
 				class={classes.helper({ size, disabled: field.disabled })}
 				render={helper}
 				attrs={{ id: field.helperId }}
-				{@attach field.helperPart}
 			/>
 		</Slot>
 	{/if}

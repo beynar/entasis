@@ -13,6 +13,8 @@
 		emptyClose = false,
 		closeOnClickOutside,
 		onOpenChange,
+		dismissible,
+		onDismissAttempt,
 		onAfterOpen,
 		onAfterClose
 	}: {
@@ -28,6 +30,8 @@
 		| 'closeButton'
 		| 'closeOnClickOutside'
 		| 'onOpenChange'
+		| 'dismissible'
+		| 'onDismissAttempt'
 		| 'onAfterOpen'
 		| 'onAfterClose'
 	> = $props();
@@ -46,6 +50,8 @@
 		closeButton={emptyClose ? emptyCloseButton : closeButton}
 		{closeOnClickOutside}
 		{onOpenChange}
+		{dismissible}
+		{onDismissAttempt}
 		{onAfterOpen}
 		{onAfterClose}
 		transition={{ in: { duration: 0 }, out: { duration: 0 } }}

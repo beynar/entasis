@@ -30,6 +30,25 @@ and error messages to this control, preserving the app's own accessible descript
 control's aria-describedby lists the app's ids, then the description, the helper, and the
 errors last. Errors render in one role="alert" container.
 
+## Ids and server markup
+
+Every value control takes an id prop naming its focusable element: the input of a TextInput, the
+trigger of a Select, the button of a Switch. An external <label for> can target it, and the
+field's labelId, descriptionId, helperId and errorId derive from it. A group rendered as a
+fieldset (RadioInput, CheckboxesInput, TagGroup, FileInput, AddressInput, CalendarInput,
+ColorPickerInput, KeyValueInput, JsonEditor) puts the id on the fieldset, whose legend names it.
+Without an id the control uses a generated one. On DateSelectorInput, id keeps its DateSelector
+meaning: the id of the selector popover. The id of a Form entry names its control the same way,
+and controlAttrs carries it.
+
+Field computes the label, description, required, read-only and invalid attributes while it
+renders, so the server markup carries them and the browser keeps them current. A custom control
+can spread field.ariaAttrs({ role, native, attrs }) on its focusable element to get all of them:
+role is the element's role, native marks a native input (native: 'text' for one whose readonly
+attribute the browser honours), and attrs are the app's own native attributes, whose
+aria-describedby, aria-labelledby and aria-label are merged. A control that spreads only
+controlAttrs gets the remaining attributes written on its node once it has mounted.
+
 ## Disabled and read-only
 
 disabled and readOnly are effective states: a field is disabled when it is, or when a disabled

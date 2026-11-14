@@ -3,6 +3,7 @@
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { tick } from 'svelte';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { PasswordInputProps } from './passwordInput.props.js';
@@ -31,6 +32,7 @@
 		autocomplete,
 		minLength,
 		inputAttrs,
+		id: idProp,
 		...rest
 	}: PasswordInputProps = $props();
 	const t = $derived(useI18n());
@@ -43,7 +45,8 @@
 	);
 
 	let showPassword = $state(false);
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, inputAttrs, generatedId));
 
 	const field = createFieldState({
 		id,
@@ -148,6 +151,7 @@
 		{placeholder}
 		class={classes.input({ disabled: field.disabled, size: rest.size })}
 		disabled={field.disabled}
+		{...field.ariaAttrs({ role: 'textbox', native: 'text', attrs: inputAttrs })}
 		onkeydown={(event) => {
 			inputAttrs?.onkeydown?.(event);
 			// The reveal button is out of the Tab order (Tab goes to the next field); Alt+F8, the

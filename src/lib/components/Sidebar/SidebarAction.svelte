@@ -49,8 +49,7 @@
 				type="button"
 				class={classes.actionTrigger({ size })}
 				aria-label={actionLabel}
-				aria-expanded={popover.isOpen}
-				aria-haspopup="menu"
+				{...popover.triggerAttributes}
 				aria-controls={popover.isOpen ? popover.id : undefined}
 				{@attach popover.reference}
 				onclick={() => popover.toggle()}

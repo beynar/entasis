@@ -1,11 +1,13 @@
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, test, vi } from 'vitest';
+import Button from './Button/Button.svelte';
 import Card from './Card/Card.svelte';
 import DisabledAnchorHarness from './DisabledAnchorHarness.test.svelte';
 import LinkPreview from './LinkPreview/linkPreviewHarness.test.svelte';
 import MenuOption from './MenuOption/MenuOption.svelte';
 import Tabbar from './Tabbar/Tabbar.svelte';
+import { renderInTheme } from './Theme/renderInTheme.test-helper.js';
 
 function expectDisabledAnchor(anchor: HTMLAnchorElement) {
 	expect(anchor).not.toHaveAttribute('href');
@@ -24,6 +26,22 @@ function getAnchor(name: string) {
 }
 
 describe('shared disabled anchor owners', () => {
+	test('drops the href of a loading Button link, so a middle click cannot open it', async () => {
+		const onclick = vi.fn();
+		renderInTheme(Button, { children: 'Loading destination', href: '#loading', loading: true });
+		const anchor = getAnchor('Loading destination');
+		expect(anchor).not.toHaveAttribute('href');
+		expect(anchor).toHaveAttribute('aria-disabled', 'true');
+		// Loading keeps the keyboard user's place, unlike disabled.
+		expect(anchor).toHaveAttribute('tabindex', '0');
+		anchor.addEventListener('click', onclick);
+		const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+		expect(anchor.dispatchEvent(click)).toBe(false);
+		await fireEvent(anchor, new MouseEvent('auxclick', { bubbles: true, button: 1 }));
+		expect(anchor).not.toHaveAttribute('href');
+		expect(onclick).not.toHaveBeenCalled();
+	});
+
 	test('blocks disabled Card anchors', () => {
 		render(Card, {
 			props: { children: 'Card destination', href: '#card', disabled: true }

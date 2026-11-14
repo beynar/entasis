@@ -1106,8 +1106,8 @@ component. It is keyed by theme name (`dialog`, `button`, ...); each entry takes
 that component's `theme` prop, the `motion` slot included. The key is the component's kebab-case
 name — `hover-card`, `ai-chat`, `data-table` — the same word as its import subpath
 (`entasis/hover-card`). Every key, and every part each one takes with its element, variants and
-default classes, is listed in the generated `theme-parts/` folder next to this file, one file per
-component (`theme-parts/sidebar.md`).
+default classes, is listed in the generated `theme-parts/` folder at the root of this skill, one
+file per component ([`theme-parts/sidebar.md`](../theme-parts/sidebar.md)).
 
 ```svelte
 <script lang="ts">

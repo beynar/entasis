@@ -67,8 +67,9 @@ export type DialogProps = WithSlot<
 		/**
 		 * Where focus goes when the dialog closes. By default it returns to the control that
 		 * opened the dialog (with a visible focus ring after Escape or another keyboard close);
-		 * when that control is gone or disabled, to the most recent element that is still on the
-		 * page. `false` leaves focus where it is, an element receives it, and a function is called
+		 * when that control has left the page (a row its dialog deleted), to the nearest control
+		 * that survived where it was (the next one, else the one before); when it is disabled or
+		 * none survived, to the most recent element that is still on the page. `false` leaves focus where it is, an element receives it, and a function is called
 		 * with the change details (`reason`, `interaction`…) and returns one of these, or nothing
 		 * to restore as usual.
 		 * @default true
@@ -106,11 +107,30 @@ export type DialogProps = WithSlot<
 		 * button carries `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`, and its
 		 * `onclick` runs first: calling `event.preventDefault()` there keeps the dialog closed. A
 		 * snippet trigger gets the same contract with `{@attach dialog.trigger}`; focus returns to
-		 * the trigger when the dialog closes.
+		 * the trigger when the dialog closes. Spread `dialog.triggerAttributes` on it (or
+		 * `dialog.triggerProps` on a Button) so its server markup carries `aria-haspopup` and
+		 * `aria-expanded`, as the built-in button's does.
 		 */
 		trigger?: Snippet<[DialogApi]> | (ButtonProps & { content?: string });
 		/** When true, shows a close button and allows Escape to close the dialog. */
 		closable?: boolean;
+		/**
+		 * `false` refuses every dismissal by the user's gesture: Escape, a press outside (the
+		 * backdrop included), the Android Back gesture (`close-watcher`) and a drawer's swipe, which
+		 * snaps back. The close button, buttons inside the dialog and code (`dialog.close()`, the
+		 * `open` prop) still close it. A refused gesture is not a change request: `onOpenChange` is
+		 * not called, the event is left untouched (as for a cancelled change), and
+		 * `onDismissAttempt` hears of it instead. It wins over `closeOnEscape`,
+		 * `closeOnClickOutside` and `swipeToDismiss`; a gesture those turn off reports nothing.
+		 * @default true
+		 */
+		dismissible?: boolean;
+		/**
+		 * Called for each dismissal `dismissible={false}` refused, with the details it would have
+		 * carried (`reason` is `'escape-key'`, `'outside-press'`, `'close-watcher'` or `'swipe'`), so
+		 * the app can ask "Discard changes?" and close the dialog itself.
+		 */
+		onDismissAttempt?: (details: OpenChangeDetails) => void;
 		/** `false` keeps the close button from AI agents under `<Theme webmcp>`. */
 		tool?: boolean;
 		/** When true, pressing outside the dialog panel closes the topmost open dialog. Defaults to

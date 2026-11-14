@@ -2,6 +2,8 @@
 // `onOpenChange(open, details)` *before* it changes that state; `details.cancel()` leaves the
 // overlay as it was and the originating event untouched (Base UI's change-event details).
 
+import { isAgentAction } from './webmcp/webmcp.agent.js';
+
 /** Why an overlay asked to open or close. One shared list for every component. */
 export type OpenChangeReason =
 	/** A press (click, tap, Enter or Space) on the trigger. */
@@ -38,8 +40,12 @@ export type OpenChangeReason =
 	/** Code called `open()`, `close()`, `toggle()` or `setOpen()` with no user event behind it. */
 	| 'imperative-action';
 
-/** The input modality behind a change; `programmatic` when no user input caused it. */
-export type OpenChangeInteraction = 'mouse' | 'touch' | 'pen' | 'keyboard' | 'programmatic';
+/**
+ * The input modality behind a change: `programmatic` when no user input caused it, and `agent` when
+ * a WebMCP tool did, whatever event that tool dispatched to get there.
+ */
+export type OpenChangeInteraction =
+	'mouse' | 'touch' | 'pen' | 'keyboard' | 'programmatic' | 'agent';
 
 /** The second argument of every `onOpenChange`. */
 export interface OpenChangeDetails {
@@ -83,11 +89,14 @@ const isPointerKind = (value: unknown): value is 'mouse' | 'touch' | 'pen' =>
  * The modality behind an event. A click with `detail === 0` and no pointer type is a virtual
  * click: Enter or Space on a control, or a screen reader's activation. `pointerType` is the type
  * of the press that preceded a click, for browsers whose click event does not carry one (Safari).
+ * Anything a WebMCP tool sets off is `agent`: its press is a virtual click that would otherwise
+ * read as the keyboard.
  */
 export function getInteractionType(
 	event?: Event | null,
 	pointerType?: string | null
 ): OpenChangeInteraction {
+	if (isAgentAction()) return 'agent';
 	if (!event) return 'programmatic';
 	if (typeof KeyboardEvent !== 'undefined' && event instanceof KeyboardEvent) return 'keyboard';
 	if (typeof MouseEvent !== 'undefined' && event instanceof MouseEvent) {
@@ -110,7 +119,9 @@ export function createOpenChangeDetails(init: OpenChangeInit = {}): OpenChangeDe
 		reason: init.reason ?? 'imperative-action',
 		event: init.event,
 		trigger: init.trigger,
-		interaction: init.interaction ?? getInteractionType(init.event),
+		// An owner that tracks its own modality (the pointer of a hover, the keyboard of a focus
+		// move) still reports the agent, which caused the event it read.
+		interaction: isAgentAction() ? 'agent' : (init.interaction ?? getInteractionType(init.event)),
 		cancel() {
 			if (cancelable) canceled = true;
 		},

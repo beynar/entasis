@@ -1,0 +1,53 @@
+name: Setup
+description: >-
+  Node 24, pnpm 11 and the dependencies, with the pnpm store cached on the lockfile; optionally the
+  Playwright browsers, cached on the Playwright version.
+
+inputs:
+  browsers:
+    description: Playwright browsers to install, space-separated (e.g. "chromium webkit"); empty for none.
+    default: ''
+  registry-url:
+    description: npm registry for publishing (release only).
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v6
+      with:
+        node-version: 24
+        registry-url: ${{ inputs.registry-url }}
+        # pnpm is installed after Node, so setup-node's own cache cannot find it; the store is
+        # cached below instead.
+        package-manager-cache: false
+    - run: npm install --global pnpm@11
+      shell: bash
+    - id: pnpm-store
+      run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+      shell: bash
+    - uses: actions/cache@v4
+      with:
+        path: ${{ steps.pnpm-store.outputs.path }}
+        key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: pnpm-store-${{ runner.os }}-
+    - run: pnpm install --frozen-lockfile
+      shell: bash
+
+    - id: playwright
+      if: inputs.browsers != ''
+      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      shell: bash
+    - id: playwright-cache
+      if: inputs.browsers != ''
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ inputs.browsers }}
+    # A cached browser still needs its system libraries, which live outside the cache.
+    - if: inputs.browsers != '' && steps.playwright-cache.outputs.cache-hit == 'true'
+      run: pnpm exec playwright install-deps ${{ inputs.browsers }}
+      shell: bash
+    - if: inputs.browsers != '' && steps.playwright-cache.outputs.cache-hit != 'true'
+      run: pnpm exec playwright install --with-deps ${{ inputs.browsers }}
+      shell: bash

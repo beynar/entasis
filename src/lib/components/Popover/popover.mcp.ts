@@ -62,13 +62,15 @@ The Popover component displays floating content positioned relative to a trigger
 - **delay**: number (default: 100) - Delay in ms before opening on hover; leaving the trigger before it elapses cancels the open, and so does any other open-state change meanwhile (a click that opens and closes it, Escape), so a pending hover never reopens a popover the user just closed
 - **closeOnEscape**: boolean (default: true) - Close on Escape. Only the topmost open layer closes, so Escape inside a nested popover leaves its parent open
 - **closeOnClickOutside**: boolean (default: true) - Close on an outside press. A press dismisses this popover and every layer stacked above it, but never the layer that was pressed. A press that began before the popover opened does not count, and on a touch screen only a tap does: a finger that starts scrolling the page leaves it open
+- **dismissible**: boolean (default: true) - \`false\` refuses every dismissal by the user's gesture: Escape, a press outside, the Android Back gesture (\`close-watcher\`), the mobile sheet's swipe and focus moving away (\`focus-out\`). The trigger, a close button, items and code (\`popover.close()\`, the \`open\` prop) still close it. A refused gesture is not a change request: \`onOpenChange\` is not called and the event is left untouched (as for a cancelled change). It wins over \`closeOnEscape\` and \`closeOnClickOutside\`; a gesture those turn off is not a dismissal and reports nothing
+- **onDismissAttempt**: (details: OpenChangeDetails) => void - Called for each dismissal \`dismissible={false}\` refused, with \`details.reason\` (\`'escape-key'\`, \`'outside-press'\`, \`'close-watcher'\`, \`'swipe'\` or \`'focus-out'\`), so the app can ask "Discard changes?" and close it itself
 - **closeOnMouseLeave**: boolean (default: false) - Close a popover that hovering opened when the pointer leaves the hover safe area (\`reason: 'trigger-hover'\`). The safe area is the trigger, the panel, and a prediction cone toward the panel, so a diagonal move to the panel keeps it open. A popover opened by a press, the keyboard or code stays open.
 - **closeDelay**: number (default: 120) - Milliseconds the pointer may spend outside the hover safe area before \`closeOnMouseLeave\` closes the popover; a longer delay forgives a pointer that overshoots on its way to the panel
 - **debugSafeArea**: boolean (default: false) - Show hover safe-area overlays. Trigger/panel rectangles render in blue; the prediction cone toward the panel renders in orange.
 
 ### Focus & ARIA Props
 - **focusOnOpen**: 'first' | 'container' | false (default: false) - Where focus goes when the panel opens: \`'first'\` moves it to an \`[autofocus]\` / \`[data-autofocus]\` target or the first tabbable control, \`'container'\` focuses the panel itself, \`false\` keeps it on the trigger. When the popover closes with focus inside it, focus returns to the trigger that opened it (or the control pressed inside a wrapper trigger), and after a programmatic open to the element that had focus when it opened
-- **focusOnClose**: boolean | HTMLElement | ((details) => HTMLElement | boolean | void) (default: true) - Where focus goes when the popover closes with focus inside it or after a trigger opened it. \`true\` returns it to the trigger (a visible focus ring after Escape or another keyboard close), else to the most recent element still on the page; \`false\` leaves focus alone; an element receives it; a function gets the change details and returns one of these, or nothing to restore as usual. A close because focus moved on (\`'focus-out'\`) or because a pointer pressed outside a non-modal popover never moves it
+- **focusOnClose**: boolean | HTMLElement | ((details) => HTMLElement | boolean | void) (default: true) - Where focus goes when the popover closes with focus inside it or after a trigger opened it. \`true\` returns it to the trigger (a visible focus ring after Escape or another keyboard close); when the trigger left the page (a row its menu deleted), to the nearest control that survived where it was (the next one, else the one before); else to the most recent element still on the page; \`false\` leaves focus alone; an element receives it; a function gets the change details and returns one of these, or nothing to restore as usual. A close because focus moved on (\`'focus-out'\`) or because a pointer pressed outside a non-modal popover never moves it
 - **label**: string - The popup's accessible name, written as \`aria-label\` on the \`<dialog>\` (on the element with the menu, listbox, tree or grid role inside a non-dialog popup unless it has a name of its own, and on the mobile sheet's dialog). A popover that holds a form or a picker is announced as a dialog: name it
 - **labelledBy**: string - The id of an element that names the popup, written as \`aria-labelledby\` where \`label\` goes
 - **modal**: boolean (default: false) - Makes a floating popover modal: Tab stays inside the panel (wrapping from the last control to the first), the rest of the page becomes \`inert\`, the panel opens with focus inside it (\`focusOnOpen\` defaults to \`'first'\`), the layer counts as modal for Android Back and touch dismissal, and a visually hidden Close button at the end of the panel (out of the Tab order, \`reason: 'close-press'\`) gives screen reader users a control that closes it. A modal popover does not open on hover, and an \`inline\` panel ignores it. The mobile sheet is always modal
@@ -114,6 +116,7 @@ A floating panel is placed before it shows: it stays hidden until its first plac
 - \`data-side\`: On the panel: the side of the trigger it sits on after flipping, \`top\`, \`right\`, \`bottom\` or \`left\`; \`inline-start\` / \`inline-end\` when a logical side was requested; \`none\` when \`positionPanel\` placed it. On the arrow: the physical side of the panel it sits on.
 - \`data-align\`: On the panel: \`start\`, \`center\` or \`end\`, how it lines up with the trigger (absent with \`data-side="none"\`).
 - \`data-anchor-hidden\`: On the panel: present while the trigger is scrolled out of view; the panel is hidden meanwhile.
+- \`data-modality\`: On the panel: \`keyboard\` or \`pointer\`, the last input that drove the popup: a key pressed while focus is in the panel, on its trigger or in a combobox input, or a press or a real move of the pointer over the panel. Written on the element without re-rendering. \`:focus-visible\` never matches an option under virtual focus (\`aria-activedescendant\`), so pair it with \`data-highlighted\` to show a keyboard ring only while the keyboard drives the list: \`[data-modality=keyboard] [data-highlighted]\`.
 - \`data-uncentered\`: On the arrow: present while the trigger is not under the middle of the panel (a shift moved the panel).
 - \`data-popup-open\`: On the element the panel is anchored to (the trigger that opened it, or the \`ref\` element): present while the popover is open.
 - \`data-popup-side\`: On the element the panel is anchored to: the panel's \`data-side\` while it is placed, so a theme can flatten the corner the panel attaches to.
@@ -169,10 +172,11 @@ The typed maps \`popoverDataAttributes\` and \`popoverCssVariables\` (from \`ent
 </script>
 
 <!-- {@attach popover.trigger} anchors the panel to the element, toggles it on click and keeps
-     aria-haspopup / aria-expanded / aria-controls in sync on it -->
+     aria-haspopup / aria-expanded / aria-controls in sync on it; the spread props put the popup
+     state in the server markup too -->
 <Popover>
 	{#snippet trigger(popover)}
-		<Button {@attach popover.trigger}>Open</Button>
+		<Button {...popover.triggerProps} {@attach popover.trigger}>Open</Button>
 	{/snippet}
 	
 	<p>This is a popover!</p>
@@ -180,7 +184,8 @@ The typed maps \`popoverDataAttributes\` and \`popoverCssVariables\` (from \`ent
 \`\`\`
 
 Any element works. One that is not a control gets \`role="button"\`, \`tabindex="0"\` and Enter/Space
-activation:
+activation; write \`role="button"\` yourself and spread \`triggerAttributes\` (\`aria-haspopup\` and
+\`aria-expanded\`) so the server markup announces the popup before the page hydrates:
 
 \`\`\`svelte
 <script lang="ts">
@@ -190,7 +195,12 @@ activation:
 
 <Popover>
 	{#snippet trigger(popover: PopoverApi)}
-		<div class="flex items-center gap-sm" {@attach popover.trigger}>
+		<div
+			class="flex items-center gap-sm"
+			role="button"
+			{...popover.triggerAttributes}
+			{@attach popover.trigger}
+		>
 			<Avatar name="Ada Lovelace" />
 			<span>Ada Lovelace</span>
 		</div>
@@ -497,6 +507,7 @@ Every slot snippet (\`trigger\`, \`children\`), \`onAfterOpen\` and \`onAfterClo
 - **openReason**: 'hover' | 'press' | 'keyboard' | 'programmatic' | null - How the open popover was opened (\`programmatic\` covers \`open()\` from code, the \`open\` prop and \`defaultOpen\`)
 - **activeTrigger**: HTMLElement | null - The trigger that opened it: the panel anchors to it and focus returns to it
 - **triggerProps**: { haspopup, expanded, controls } - The trigger state in the library's semantic vocabulary, to spread on a Button; \`trigger\` and \`reference\` already write it as ARIA attributes
+- **triggerAttributes**: { 'aria-haspopup', 'aria-expanded' } - The same state as attributes, to spread on a native element in a snippet trigger (\`<button {...popover.triggerAttributes} {@attach popover.trigger}>\`) so the server markup carries it before hydration; the attachment keeps it in sync afterwards and adds \`aria-controls\` while open (the panel is not part of the server render, so the server markup never points at it). With several triggers only the one the panel is anchored to reads as expanded on the client. A non-control element needs \`role="button"\` in the markup too
 - **payload**: Payload | undefined - The data of the trigger the panel is anchored to (see \`triggerFor\`)
 - **trigger**: attachment that makes any element the trigger (\`{@attach popover.trigger}\`): \`reference\` plus a click toggle (when \`openOnClick\`), and on a non-control \`role="button"\`, \`tabindex="0"\` and Enter/Space activation. The element's own handler runs first: when it calls \`event.preventDefault()\`, or \`open\`, \`close\`, \`toggle\` or \`setOpen\` during the click, the default toggle stands down, so a kept \`onclick={popover.toggle}\` does not toggle twice. Several elements may carry it: the one pressed opens the popover and anchors it
 - **triggerFor(() => payload)**: \`trigger\` plus a payload getter, read back as \`payload\` while that trigger anchors the panel
@@ -506,7 +517,7 @@ Every slot snippet (\`trigger\`, \`children\`), \`onAfterOpen\` and \`onAfterClo
 
 ## Accessibility
 
-- The trigger carries \`aria-haspopup\` (from \`haspopup\`), \`aria-expanded\`, and \`aria-controls\` — automatically for the built-in Button and for a snippet trigger using \`{@attach popover.trigger}\` or \`{@attach popover.reference}\`
+- The trigger carries \`aria-haspopup\` (from \`haspopup\`), \`aria-expanded\`, and \`aria-controls\` — automatically for the built-in Button and for a snippet trigger using \`{@attach popover.trigger}\` or \`{@attach popover.reference}\`. The built-in Button has \`aria-haspopup\` and \`aria-expanded\` in its server markup; a snippet trigger gets them there by spreading \`triggerProps\` (on a Button) or \`triggerAttributes\` (on a native element)
 - \`focusOnOpen\` decides where focus lands on open; when the popover closes with focus inside it, focus returns to the trigger that opened it (after a programmatic open, to the element that had focus then)
 - Menus, listboxes, trees and grids (\`haspopup\` other than \`'dialog'\`) render a plain wrapper instead of an unnamed \`<dialog>\`; the trigger's \`aria-controls\` points at the role owner, which is labelled by the trigger
 - Non-modal: Tab is not contained and the page is not made inert (use Dialog for that)

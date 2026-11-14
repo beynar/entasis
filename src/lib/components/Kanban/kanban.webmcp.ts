@@ -7,6 +7,8 @@ import type { KanbanCard, KanbanColumnData } from './kanban.props.js';
 
 export type KanbanToolSource = {
 	readonly tool: WebMCPToolProp | undefined;
+	/** The element it renders into: the tools go while it sits in a `data-webmcp-off` zone. */
+	readonly root?: HTMLElement | null;
 	readonly label: string;
 	readonly columns: readonly KanbanColumnData[];
 	readonly disabled: boolean;
@@ -30,14 +32,24 @@ function moveCard(source: KanbanToolSource, { cardId, columnId, index }: MoveInp
 	const to = source.columns.find((column) => column.id === columnId);
 	const from = source.columns.find((column) => column.cards.some((card) => card.id === cardId));
 	const card = from?.cards.find((candidate) => candidate.id === cardId);
-	if (!to || !from || !card) return { status: 'invalid', message: 'Unknown card or column.' };
+	if (!to || !from || !card) {
+		return {
+			status: 'invalid',
+			message: `${card ? `No column "${String(columnId)}"` : `No card "${String(cardId)}"`} on the board: call read_board for the current ids.`
+		};
+	}
 	if (source.disabled || source.canDrag?.({ card, column: from }) === false) {
 		return { status: 'refused', message: 'This card cannot be moved.' };
 	}
 	if (from !== to) {
 		const full = to.limit !== undefined && to.cards.length >= to.limit;
 		if (full || source.accepts?.({ card, from, to }) === false) {
-			return { status: 'refused', message: 'This column does not take this card.' };
+			return {
+				status: 'refused',
+				message: full
+					? 'This column is full: it holds as many cards as it takes.'
+					: 'This column does not take this card.'
+			};
 		}
 	}
 	const size = from === to ? to.cards.length - 1 : to.cards.length;

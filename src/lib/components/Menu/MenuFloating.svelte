@@ -516,6 +516,7 @@
 						attrs={{
 							...attrs,
 							...valueAttrs(item),
+							...popover.triggerAttributes,
 							'data-menu-keep-open': 'true'
 						}}
 						onclick={(event) => {

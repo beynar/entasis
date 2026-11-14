@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { RadioOption, RadioInputProps } from './radioInput.props.js';
 	import { useRadioInputTheme } from './radioInput.theme.js';
@@ -29,11 +30,13 @@
 		onValueChange,
 		fieldAttrs,
 		size = 'normal',
+		id: idProp,
 		...rest
 	}: RadioInputProps<Option, Value> = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue)) as Value | null;
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 
 	const field = createFieldState({
 		id,
@@ -94,11 +97,6 @@
 	const isOptionDisabled = (option: RadioOption) => Boolean(field.disabled || option.disabled);
 
 	const checkedIndex = $derived(items.findIndex((option) => option.value === field.value));
-	const firstEnabledIndex = $derived(items.findIndex((option) => !isOptionDisabled(option)));
-	// The one Tab stop: the checked option, else the first one that can take focus.
-	const tabStopIndex = $derived(
-		checkedIndex >= 0 && !isOptionDisabled(items[checkedIndex]) ? checkedIndex : firstEnabledIndex
-	);
 
 	const select = (index: number) => {
 		const option = items[index];
@@ -118,7 +116,13 @@
 		// Space are still cancelled by the navigation itself.
 		preventKeyboardDefault: false,
 		enabled: () => !field.disabled,
-		defaultFocusedIndex: () => (tabStopIndex >= 0 ? tabStopIndex : null),
+		// The one Tab stop: the checked option, else the first one that can take focus. Described
+		// here so `tabIndexAt` renders it in the server markup, before the options attach.
+		defaultFocusedIndex: () => (checkedIndex >= 0 ? checkedIndex : null),
+		renderedItems: () => ({
+			count: items.length,
+			isUnfocusable: (index) => !items[index] || isOptionDisabled(items[index])
+		}),
 		// Selection follows the keyboard, but only a deliberate key move (an arrow, Home or End)
 		// selects: tabbing in, a programmatic focus or a click never changes the value, and Alt,
 		// Ctrl or Meta with an arrow is left to the browser. A read-only group moves focus only.
@@ -171,10 +175,7 @@
 			aria-label={option.label ? undefined : option.value}
 			aria-describedby={option.description ? `${itemId}-description` : undefined}
 			disabled={optionDisabled}
-			tabindex={navigation.focusedIndex === index ||
-			(navigation.focusedIndex === null && tabStopIndex === index)
-				? 0
-				: -1}
+			tabindex={navigation.tabIndexAt(index)}
 			data-readonly={field.readOnly ? '' : undefined}
 			class={componentTheme.radiosInputItem({
 				mode,

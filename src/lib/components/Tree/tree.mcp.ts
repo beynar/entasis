@@ -184,6 +184,15 @@ renaming, drag interactions, and virtualized focus handling. This wrapper preser
 the server-rendered tree host during hydration and surfaces rendering errors through
 a role=alert error region.
 
+- \`aria-label\` names the \`role="tree"\` element inside the shadow root, in the server
+markup too; \`aria-labelledby\` is linked through \`ariaLabelledByElements\` (an engine
+without it gets the labels' text as \`aria-label\`).
+- Right to left (\`dir="rtl"\` on the tree or an ancestor), ArrowLeft expands and moves
+to the first child, ArrowRight collapses and moves to the parent.
+- Typing a character moves to the next visible row whose name starts with it, as in
+Menu and Select. With built-in \`search\` enabled, letters and digits open the search
+instead.
+
 ## Notes
 
 - Pass exactly one data source: \`paths\` or \`preparedInput\`.

@@ -3,6 +3,7 @@
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Slot from '$lib/components/Slot/Slot.svelte';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState, type FieldState } from '../Field/field.state.svelte.js';
 	import SliderTrack from './SliderTrack.svelte';
 	import SliderValueLabels from './SliderValueLabels.svelte';
@@ -50,6 +51,7 @@
 		i18n,
 		label,
 		fieldAttrs,
+		id: idProp,
 		...rest
 	}: SliderProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
@@ -62,7 +64,8 @@
 	const directionAttributes = $derived(contextualDirection ? { dir: contextualDirection } : {});
 	const resolvedColor = $derived(useDefaultColor(color));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 
 	const slider: SliderState = new SliderState({
 		get value() {

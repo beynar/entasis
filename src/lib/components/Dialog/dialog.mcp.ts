@@ -59,8 +59,37 @@ The Dialog component (also known as Modal) displays content in a layer above the
 - **closeOnEscape**: boolean (default: true) - Close when Escape key is pressed (and, for a modal dialog on Android, on the Back gesture)
 - **closeOnClickOutside**: boolean (default: true, false for \`type="alert"\` and for \`modal={false}\`) - Close when pressing outside dialog. A press that began before the dialog opened does not count
 - **closable**: boolean (default: true) - Whether dialog can be closed
+- **dismissible**: boolean (default: true) - \`false\` refuses every dismissal by the user's gesture: Escape, a press outside (the backdrop included), the Android Back gesture (\`close-watcher\`) and a drawer's swipe, which snaps back. The close button, buttons inside the dialog and code (\`dialog.close()\`, the \`open\` prop) still close it. A refused gesture is not a change request: \`onOpenChange\` is not called and the event is left untouched (as for a cancelled change). It wins over \`closeOnEscape\`, \`closeOnClickOutside\` and \`swipeToDismiss\`; a gesture those turn off is not a dismissal and reports nothing
+- **onDismissAttempt**: (details: OpenChangeDetails) => void - Called for each dismissal \`dismissible={false}\` refused, with \`details.reason\` (\`'escape-key'\`, \`'outside-press'\`, \`'close-watcher'\` or \`'swipe'\`), \`details.event\` and \`details.interaction\`, so the app can ask "Discard changes?" and close the dialog itself:
+
+\`\`\`svelte
+<script>
+	import { Dialog } from 'entasis/dialog';
+	import { confirmation } from 'entasis/confirmation';
+	let open = $state(false);
+	let dirty = $state(false);
+</script>
+
+<Dialog
+	bind:open
+	title="Edit profile"
+	dismissible={!dirty}
+	onDismissAttempt={async () => {
+		const { confirmed } = await confirmation({
+			title: 'Discard changes?',
+			description: 'Your edits will be lost.',
+			confirm: { text: 'Discard', color: 'danger' },
+			cancel: 'Keep editing'
+		});
+		if (confirmed) open = false;
+	}}
+	trigger={{ content: 'Edit' }}
+>
+	<input aria-label="Name" oninput={() => (dirty = true)} />
+</Dialog>
+\`\`\`
 - **tool**: boolean - \`false\` keeps the close button from AI agents under \`<Theme webmcp>\`
-- **focusOnClose**: boolean | HTMLElement | ((details) => HTMLElement | boolean | void) (default: true) - Where focus goes when the dialog closes. \`true\` returns it to the control that opened the dialog, else to the most recent element still on the page; \`false\` leaves focus alone; an element receives it; a function gets the change details (\`reason\`, \`interaction\`…) and returns one of these, or nothing to restore as usual
+- **focusOnClose**: boolean | HTMLElement | ((details) => HTMLElement | boolean | void) (default: true) - Where focus goes when the dialog closes. \`true\` returns it to the control that opened the dialog; when that control left the page (a row the dialog deleted), to the nearest control that survived where it was (the next one, else the one before); else to the most recent element still on the page; \`false\` leaves focus alone; an element receives it; a function gets the change details (\`reason\`, \`interaction\`…) and returns one of these, or nothing to restore as usual
 - **swipeToDismiss**: boolean (default: true for drawer types) - Drag the drawer toward its edge to dismiss. Direction-aware (drawerRight drags right, drawerBottom drags down, etc.) and never hijacks inner scrolling (including a horizontal scroller in a right-to-left layout) or a mostly sideways drag (a press that travels more across the dismiss axis than along it is spent); a quick flick dismisses even when the last move before release is nearly stationary; opt elements out with \`data-no-swipe\`. A mouse or pen drags a drawer only from its handles (thumb and header), so dragging over the body selects text; a finger drags from anywhere unless text is selected in the panel, buttons and links included (a field, a select or a media element keeps its own gesture, and a tap stays a tap). A dialog above another one keeps the one beneath moving with it: its scale and fade follow the swipe's progress
 - **thumb**: boolean (default: true) - Drag thumb bar shown on swipe-dismissable drawers (inner edge, orientation follows the drawer side, oversized hitbox); set false to hide. Themeable via the \`thumb\` theme part
 - **inset**: a spacing step or \`'none'\` — how far a drawer stands off the screen edge for this dialog. Defaults to the theme's \`designTokens.drawerInset\` (\`'layout-md'\`). At \`'none'\` the drawer is edge to edge, its edge corners square off and only the corners facing the page stay rounded
@@ -114,9 +143,10 @@ The Dialog component (also known as Modal) displays content in a layer above the
 	<p>This is a basic dialog.</p>
 	
 	<!-- {@attach dialog.trigger} opens the dialog on click (Enter/Space on a non-control) and
-	     keeps aria-haspopup / aria-expanded / aria-controls in sync; focus returns to it -->
+	     keeps aria-haspopup / aria-expanded / aria-controls in sync; focus returns to it. The
+	     spread props put the popup state in the server markup too -->
 	{#snippet trigger(dialog)}
-		<Button {@attach dialog.trigger}>Open</Button>
+		<Button {...dialog.triggerProps} {@attach dialog.trigger}>Open</Button>
 	{/snippet}
 </Dialog>
 \`\`\`
@@ -388,6 +418,7 @@ The \`trigger\` and \`children\` snippets, \`onAfterOpen\` and \`onAfterClose\` 
 - **setSnapPoint(point, details?)**: boolean - Moves a snap-point drawer to one of its \`snapPoints\` (or the nearest to \`point\`) through \`onSnapPointChange\`; returns \`false\` when it did not move
 - **currentSnapPoint**: number | string | undefined - The point the drawer rests at, as written in \`snapPoints\`
 - **triggerProps**: { haspopup, expanded, controls } - The trigger state in the library's semantic vocabulary, to spread on a Button; \`trigger\` and \`reference\` already write it as ARIA attributes
+- **triggerAttributes**: { 'aria-haspopup', 'aria-expanded' } - The same state as attributes, to spread on a native element in a snippet trigger (\`<button {...dialog.triggerAttributes} {@attach dialog.trigger}>\`) so the server markup carries it before hydration; the attachment keeps it in sync afterwards and adds \`aria-controls\` while open. A non-control element needs \`role="button"\` in the markup too
 - **trigger**: attachment that makes any element the dialog's trigger (\`{@attach dialog.trigger}\`): \`reference\`, plus a click that opens the dialog and, on a non-control, \`role="button"\`, \`tabindex="0"\` and Enter/Space activation. The element's own handler runs first; \`event.preventDefault()\` there stops it
 - **reference**: attachment that keeps a custom trigger's \`aria-haspopup\`, \`aria-expanded\` and \`aria-controls\` in sync and makes it the element focus returns to, leaving clicks to the element
 
@@ -428,7 +459,7 @@ The typed maps \`dialogDataAttributes\` and \`dialogCssVariables\` (from \`entas
 
 - Initial focus goes to an \`[autofocus]\` / \`[data-autofocus]\` element inside the dialog, else the first tabbable control (the close button is skipped), else the panel itself
 - Tab and Shift+Tab are contained inside the dialog, and the rest of the page is \`inert\` while a modal is open
-- Focus is restored to the opener after the close transition finishes, just before \`onAfterClose\`: the trigger that opened it, else the element focused when it opened. When that element is gone or disabled (a menu item that opened the dialog), focus goes to the last element that had it inside the dialog beneath this one, else to the most recent element still on the page. A close by Escape or from the keyboard returns focus with a visible focus ring, and in Safari a focused text field is blurred before it unmounts so the page does not jump. \`focusOnClose\` overrides all of this
+- Focus is restored to the opener after the close transition finishes, just before \`onAfterClose\`: the trigger that opened it, else the element focused when it opened. When that element has left the page, focus goes to the nearest tabbable element that survived where it was (the next row's control after a row was deleted, else the previous one's), looked for in the element's own surroundings only (never across the portal container, so a menu item that opened the dialog and left with its menu skips this step). When it is disabled or nothing survived, focus goes to the last element that had it inside the dialog beneath this one, else to the most recent element still on the page. A close by Escape or from the keyboard returns focus with a visible focus ring, and in Safari a focused text field is blurred before it unmounts so the page does not jump. \`focusOnClose\` overrides all of this
 - When a dialog (a Confirmation, say) closes over another dialog, the one beneath keeps focus where it was and receives it back from the closing one; it does not move focus to its first field again
 - Tab moves focus inside the dialog itself instead of leaving it to the browser, so it wraps in Safari too, where Tab skips buttons by default
 - The trigger (built-in, or a snippet element with \`{@attach dialog.trigger}\`) carries \`aria-haspopup="dialog"\`, \`aria-expanded\` and \`aria-controls\` pointing at the open dialog

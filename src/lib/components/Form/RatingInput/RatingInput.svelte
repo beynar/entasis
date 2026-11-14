@@ -3,6 +3,7 @@
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Rating from '../../Rating/Rating.svelte';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import type { RatingInputProps } from './ratingInput.props.js';
@@ -30,11 +31,13 @@
 		star,
 		i18n,
 		label,
+		id: idProp,
 		...rest
 	}: RatingInputProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 
 	const field = createFieldState({
 		id,
@@ -202,6 +205,7 @@
 		onpointermove={handlePointerMove}
 		onclick={handleClick}
 		{id}
+		{...field.ariaAttrs({ role: 'slider', label: label ? undefined : resolvedLabel })}
 		role="slider"
 		tabindex={field.disabled ? -1 : 0}
 		aria-label={label ? undefined : resolvedLabel}

@@ -1,26 +1,14 @@
 <script lang="ts" module>
-	interface CustomEventMap {
-		'network:indicator': CustomEvent<boolean>;
-	}
-	declare global {
-		interface Document {
-			addEventListener<K extends keyof CustomEventMap>(
-				type: K,
-				listener: (this: Document, ev: CustomEventMap[K]) => void
-			): void;
-			dispatchEvent<K extends keyof CustomEventMap>(ev: CustomEventMap[K]): void;
-			removeEventListener<K extends keyof CustomEventMap>(
-				type: K,
-				listener: (this: Document, ev: CustomEventMap[K]) => void
-			): void;
-		}
-	}
+	// The event is typed locally rather than by augmenting the global Document: a declaration
+	// merged into Document ships with the package, and its void dispatchEvent overload breaks
+	// lib.dom for every consumer that typechecks library declarations.
+	const NETWORK_INDICATOR_EVENT = 'network:indicator';
 
 	const dispatchNetworkIndicator = (loading: boolean) => {
 		if (typeof document === 'undefined') return;
 
 		document.dispatchEvent(
-			new CustomEvent('network:indicator', {
+			new CustomEvent<boolean>(NETWORK_INDICATOR_EVENT, {
 				detail: loading
 			})
 		);
@@ -154,8 +142,10 @@
 		}
 	});
 
-	const onNetworkIndicator = ({ detail }: CustomEvent<boolean>) => {
-		if (detail) {
+	// The DOM types the listener of an unknown event name with a plain Event; this component is the
+	// only dispatcher, and it always sends a CustomEvent carrying a boolean.
+	const onNetworkIndicator = (event: Event) => {
+		if ((event as CustomEvent<boolean>).detail) {
 			show = true;
 		} else {
 			show = false;
@@ -163,9 +153,9 @@
 	};
 
 	onMount(() => {
-		document.addEventListener('network:indicator', onNetworkIndicator);
+		document.addEventListener(NETWORK_INDICATOR_EVENT, onNetworkIndicator);
 		return () => {
-			document.removeEventListener('network:indicator', onNetworkIndicator);
+			document.removeEventListener(NETWORK_INDICATOR_EVENT, onNetworkIndicator);
 			stopNetworkIndicatorAnimation(animationState);
 		};
 	});

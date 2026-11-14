@@ -14,6 +14,12 @@ import { isEmptyValue, valuesEqual } from '$lib/utils/values.js';
 import { isAddressEmpty, type Address } from '../../Address/address.js';
 import { useI18nResolver } from '$lib/i18n/context.svelte.js';
 import {
+	fieldAriaAttributes,
+	type FieldAriaAttributes,
+	type FieldAriaTarget,
+	type FieldLayout
+} from './field.aria.js';
+import {
 	describeFieldIssue,
 	resolveFieldMessages,
 	type FieldMessageOverrides,
@@ -173,8 +179,14 @@ export const createFieldState = <T extends FieldType>(
 	let destroyed = false;
 	// The value a reset wrote: the change it causes is a restore, not an edit to validate.
 	let restored: { value: unknown } | null = null;
-	let hasDescription = $state(false);
-	let hasHelper = $state(false);
+	// What the Field component renders around the control. Field declares it while it renders, so
+	// the ids the control references are known on the server too, not only once it mounted.
+	let readLayout = $state.raw<(() => FieldLayout) | null>(null);
+	const layout = (): FieldLayout =>
+		readLayout?.() ?? { labelledBy: false, description: false, helper: false };
+	// A control that renders `ariaAttrs` keeps them current itself; Field then leaves its element
+	// alone instead of writing the same attributes from an effect.
+	let rendersAria = false;
 
 	class FieldState extends createBindableStateClass<
 		FieldStateBindableOptions<T> & FieldStateStaticOptions<T>
@@ -210,8 +222,8 @@ export const createFieldState = <T extends FieldType>(
 		/** Description, helper and error ids for the control's `aria-describedby`, errors last. */
 		describedBy = $derived(
 			[
-				hasDescription ? this.descriptionId : undefined,
-				hasHelper ? this.helperId : undefined,
+				layout().description ? this.descriptionId : undefined,
+				layout().helper ? this.helperId : undefined,
 				this.hasError ? this.errorId : undefined
 			].filter((id): id is string => id !== undefined)
 		);
@@ -222,21 +234,27 @@ export const createFieldState = <T extends FieldType>(
 			};
 		};
 
-		/** @internal Field attaches this to the rendered description. */
-		descriptionPart: Attachment<HTMLElement> = () => {
-			hasDescription = true;
-			return () => {
-				hasDescription = false;
-			};
+		/** @internal Field declares, while it renders, which parts it shows around the control. */
+		declareLayout = (read: () => FieldLayout) => {
+			readLayout = read;
 		};
 
-		/** @internal Field attaches this to the rendered helper text. */
-		helperPart: Attachment<HTMLElement> = () => {
-			hasHelper = true;
-			return () => {
-				hasHelper = false;
-			};
+		/**
+		 * The attributes Field wires onto the control element, computed during render so the
+		 * server markup carries them: `aria-invalid`, `aria-describedby` (the target's own ids
+		 * first), `aria-labelledby` for a label that is not a `<label for>`, and the required and
+		 * read-only state the element's role announces. A control spreads them on its focusable
+		 * element after its own attributes; Field then stops writing them from an effect.
+		 */
+		ariaAttrs = (target: FieldAriaTarget = {}): FieldAriaAttributes => {
+			rendersAria = true;
+			return fieldAriaAttributes(this, layout(), target);
 		};
+
+		/** @internal True once the control renders `ariaAttrs` itself. */
+		get rendersAria(): boolean {
+			return rendersAria;
+		}
 
 		get controlAttrs(): FieldControlAttributes {
 			return {

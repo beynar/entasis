@@ -1,7 +1,7 @@
 export const slotDescription = `
 # Slot Component
 
-The Slot component is a utility for rendering dynamic content - it can render snippets, strings, numbers, or other components with proper handling and props passing.
+The Slot component is a utility for rendering dynamic content - it renders a string as text or a snippet with its payload.
 
 ## Basic Usage
 
@@ -12,27 +12,20 @@ The Slot component is a utility for rendering dynamic content - it can render sn
 ## Props
 
 ### Core Props
-- **render**: Slot - Content to render (can be string, number, Snippet, or component)
+- **render**: Slot - Content to render: a string or a Snippet
 - **class**: string - CSS class to apply to the wrapper
 
 ## Slot Type
 
 The Slot type accepts:
 - **string** - Rendered as text
-- **number** - Rendered as text
 - **Snippet** - Rendered as a Svelte snippet with props
-- **Component** - Rendered as a Svelte component
 
 ## Examples
 
 ### Render String
 \`\`\`svelte
 <Slot render="Hello World" />
-\`\`\`
-
-### Render Number
-\`\`\`svelte
-<Slot render={42} />
 \`\`\`
 
 ### Render Snippet

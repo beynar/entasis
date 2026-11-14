@@ -2,11 +2,13 @@
 	import { disclosurePanel } from '$lib/attachments/disclosurePanel.svelte.js';
 	import { openStateAttributes } from '$lib/utils/stateAttributes.js';
 	import type { DisclosureIndicator } from '$lib/types/theme.js';
+	// Aliased: the declaration emitted for this component declares `SidebarGroup`, and an
+	// import of the same name would conflict with it in a consumer that type-checks the package.
 	import type {
 		SidebarActiveVariant,
 		SidebarApi,
 		SidebarDensity,
-		SidebarGroup,
+		SidebarGroup as SidebarGroupData,
 		SidebarMenuActionDescriptor,
 		SidebarSize,
 		SidebarTooltipMode
@@ -28,7 +30,7 @@
 		density,
 		theme
 	}: {
-		group: SidebarGroup;
+		group: SidebarGroupData;
 		api: SidebarApi;
 		collapseIcon: DisclosureIndicator;
 		tooltips: SidebarTooltipMode;

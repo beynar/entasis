@@ -6,6 +6,7 @@
 	import { maskitoDateOptionsGenerator, maskitoDateTime } from '@maskito/kit';
 	import DateSelector from '../DateSelector/DateSelector.svelte';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldActionButton from '../Field/FieldActionButton.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import { calendarBlankIcon } from '../../Icons/calendarBlank.js';
@@ -49,12 +50,14 @@
 		onSelect,
 		visible,
 		type = 'date',
+		id: idProp,
 		...rest
 	}: DateInputProps = $props();
 	const t = $derived(useI18n());
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const dateSeparator = $derived(separator || '/');
 	// `datetime` edits the day and the hour unless a format says otherwise.
 	const format = $derived(formatProp ?? (type === 'datetime' ? 'dd/mm/yyyy HH:MM' : 'dd/mm/yyyy'));
@@ -230,6 +233,7 @@
 		>
 			<input
 				data-1p-ignore
+				{...field.ariaAttrs({ role: 'textbox', native: 'text' })}
 				type="text"
 				inputmode="decimal"
 				{id}

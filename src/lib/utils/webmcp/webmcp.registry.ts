@@ -4,6 +4,7 @@
 
 import { DEV } from 'esm-env';
 import { getContext, setContext } from 'svelte';
+import { actAsAgent } from './webmcp.agent.js';
 import type {
 	ModelContextLike,
 	WebMCPOptions,
@@ -150,9 +151,10 @@ function register(context: ModelContextLike, entry: Entry): void {
 				description: tool.description,
 				inputSchema: tool.inputSchema ?? { type: 'object', properties: {} },
 				...(tool.annotations ? { annotations: tool.annotations } : {}),
-				// Read at call time: a form's handlers change without the agent seeing a new tool.
+				// Read at call time: a form's handlers change without the agent seeing a new tool. What
+				// the call does synchronously reports the agent as its source (`isAgentAction`).
 				execute: (input: unknown, runOptions?: { signal?: AbortSignal }) =>
-					entry.tool.execute(input ?? {}, runOptions ?? {})
+					actAsAgent(() => entry.tool.execute(input ?? {}, runOptions ?? {}))
 			},
 			{
 				signal: controller.signal,

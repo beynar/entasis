@@ -18,7 +18,8 @@
 		overflowed,
 		unitClass,
 		unitReference,
-		buttonReference
+		buttonReference,
+		tabIndexAt
 	}: {
 		item: ToggleMenuMenuItem;
 		menuItems: MenuItem[];
@@ -30,6 +31,8 @@
 		unitClass: string;
 		unitReference: Attachment<HTMLElement>;
 		buttonReference?: Attachment<HTMLElement>;
+		/** The roving `tabindex` of this unit's button at `offset`, from the toolbar's navigation. */
+		tabIndexAt?: (offset: number) => 0 | -1;
 	} = $props();
 
 	let open = $state(false);
@@ -66,8 +69,8 @@
 			<button
 				type="button"
 				aria-label={item.label}
-				aria-haspopup="menu"
-				aria-expanded={popover.isOpen}
+				{...popover.triggerAttributes}
+				tabindex={tabIndexAt?.(0)}
 				data-color={resolvedColor}
 				data-checked="false"
 				aria-disabled={isDisabled || undefined}

@@ -3252,6 +3252,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'WebMCPToolHandle',
 		'WebMCPToolOptions',
 		'WebMCPToolProp',
+		'isAgentAction',
 		'registerWebMCPTool',
 		'useWebMCPTool',
 		'webmcpSupported'

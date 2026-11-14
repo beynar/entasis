@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { ComboboxProps, ComboboxOption } from './combobox.props.js';
@@ -61,11 +62,13 @@
 		suffix,
 		clearColor = 'danger',
 		description,
+		id: idProp,
 		...rest
 	}: ComboboxProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const t = $derived(useI18n(i18n));
 	const openState = createBindableValue(
 		() => open,
@@ -267,6 +270,7 @@
 		>
 			<input
 				data-1p-ignore
+				{...field.ariaAttrs({ role: 'combobox', native: 'text' })}
 				type="text"
 				{id}
 				bind:value={searchValue}
@@ -280,7 +284,7 @@
 				aria-autocomplete="list"
 				aria-activedescendant={controller.activeDescendant}
 				aria-haspopup="listbox"
-				aria-invalid={controller.error !== null}
+				aria-invalid={controller.error !== null || field.hasError}
 				data-disabled={presence(field.disabled)}
 				{@attach popupOpenClaim(controller.visible)}
 				autocomplete="off"

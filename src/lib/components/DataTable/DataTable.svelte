@@ -16,7 +16,8 @@
 	import DataTableHeader from './DataTableHeader.svelte';
 	import DataTableRow from './DataTableRow.svelte';
 	import DataTableToolbar from './DataTableToolbar.svelte';
-	import { dataTableGridNavigation } from './dataTableGridNavigation.js';
+	import { dataTableGridNavigation, isDocumentJump } from './dataTableGridNavigation.js';
+	import { useDirection } from '$lib/utils/useDirection.svelte.js';
 	import { createDataTableState, DataTableModel } from './dataTable.model.svelte.js';
 	import { dataTableRowFlip } from './dataTableRowFlip.js';
 	import type { DataTableRowInstance } from './dataTable.table.js';
@@ -474,20 +475,25 @@
 		});
 	};
 
+	const direction = useDirection(() => ref);
+
 	const navigateGrid = (rowIndex: number, columnIndex: number, event: KeyboardEvent) => {
 		event.preventDefault();
 		let nextRow = rowIndex;
 		let nextColumn = columnIndex;
 		const pageJump = Math.max(1, Math.floor((viewportRef?.clientHeight ?? rowHeight) / rowHeight));
+		// Columns run from the inline start, so in right-to-left text ArrowLeft moves to the next one,
+		// as the header's column moves already do. Tab, Home and End follow the column order.
+		const inlineStep = direction() === 'rtl' ? -1 : 1;
 		switch (event.key) {
 			case 'Tab':
 				nextColumn += event.shiftKey ? -1 : 1;
 				break;
 			case 'ArrowLeft':
-				nextColumn -= 1;
+				nextColumn -= inlineStep;
 				break;
 			case 'ArrowRight':
-				nextColumn += 1;
+				nextColumn += inlineStep;
 				break;
 			case 'ArrowUp':
 				nextRow -= 1;
@@ -497,11 +503,11 @@
 				break;
 			case 'Home':
 				nextColumn = 0;
-				if (event.ctrlKey) nextRow = 0;
+				if (isDocumentJump(event)) nextRow = 0;
 				break;
 			case 'End':
 				nextColumn = allColumns.length - 1;
-				if (event.ctrlKey) nextRow = rows.length - 1;
+				if (isDocumentJump(event)) nextRow = rows.length - 1;
 				break;
 			case 'PageUp':
 				nextRow -= pageJump;

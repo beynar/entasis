@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import ColorPicker from './ColorPicker.svelte';
 	import type { ColorPickerInputProps } from './colorPicker.props.js';
@@ -23,11 +24,13 @@
 		format,
 		size,
 		i18n,
+		id: idProp,
 		...rest
 	}: ColorPickerInputProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 
 	const field = createFieldState<'color'>({
 		id,

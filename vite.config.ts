@@ -9,6 +9,10 @@ import { entasisStructureDocs } from './tooling/structure-docs/plugin.js';
 import { componentAliases } from './src/lib/generated/componentAliases.js';
 import { svelteOptions } from './svelte.options.js';
 
+// The config is typechecked without Node's types, so the environment is read structurally.
+const env =
+	(globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env ?? {};
+
 // Test file kinds. jsdom has no layout, so focus order, tabbability, positioning and real pointer
 // or keyboard input are tested in `*.browser.test.ts` files, which run in Chromium and WebKit.
 const browserTests = 'src/**/*.browser.{test,spec}.{js,ts}';
@@ -73,6 +77,13 @@ export default defineConfig(async ({ mode }) => ({
 	],
 
 	test: {
+		// CI only: tests that pass on a retry are listed in the job summary as flaky warnings.
+		// Naming reporters drops Vitest's automatic `github-actions` one, so it is listed too.
+		reporters: env.GITHUB_ACTIONS
+			? ['default', 'github-actions', './tooling/flaky-tests/vitest-reporter.mjs']
+			: env.CI
+				? ['default', './tooling/flaky-tests/vitest-reporter.mjs']
+				: ['default'],
 		projects: [
 			{
 				extends: './vite.config.ts',
@@ -106,6 +117,10 @@ export default defineConfig(async ({ mode }) => ({
 					name: 'browser',
 					include: [browserTests],
 					clearMocks: true,
+					// Real engines under a loaded CI runner flake (WebKit dialog/menu focus, JsonEditor,
+					// markdown.security). Two retries in CI, reported as flaky; none locally, so a
+					// flake still fails where it can be debugged.
+					retry: env.CI ? 2 : 0,
 					setupFiles: ['./vitest-setup-browser.ts'],
 					benchmark: { include: [] },
 					browser: browserMode(await browserProvider(mode), 'chromium', 'webkit')

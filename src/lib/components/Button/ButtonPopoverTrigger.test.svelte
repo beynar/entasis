@@ -6,11 +6,15 @@
 	import type { PopoverApi } from '../Popover/popover.api.js';
 	import Button from './Button.svelte';
 
-	let { loading = false, disabled = false }: { loading?: boolean; disabled?: boolean } = $props();
+	let {
+		loading = false,
+		disabled = false,
+		href
+	}: { loading?: boolean; disabled?: boolean; href?: string } = $props();
 </script>
 
 {#snippet trigger(popover: PopoverApi)}
-	<Button {loading} {disabled} {@attach popover.trigger}>Export</Button>
+	<Button {loading} {disabled} {href} {@attach popover.trigger}>Export</Button>
 {/snippet}
 
 <Theme>

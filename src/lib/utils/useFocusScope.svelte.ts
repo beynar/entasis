@@ -6,18 +6,22 @@ import { tick, untrack } from 'svelte';
 import {
 	composedContains,
 	getDeepActiveElement,
+	focusableSelector,
 	getTabbableElements,
 	isFocusable,
+	isTabbable,
 	isTextField,
 	isWebKit,
 	resolveInitialFocus
 } from './focus.js';
 import { findFocusFallback, installFocusHistory } from './focusHistory.js';
 import type { OpenChangeDetails } from './openChange.js';
+import { resolvePortalContainer } from '../attachments/portal.js';
 
 /**
- * Where focus goes when an overlay closes. `true` (or nothing) restores it to the opener, else the
- * most recent element still on the page; `false` leaves focus alone; an element receives it. A
+ * Where focus goes when an overlay closes. `true` (or nothing) restores it to the opener; when the
+ * opener left the page, to the nearest tabbable element that survived where it was; else to the
+ * most recent element still on the page. `false` leaves focus alone; an element receives it. A
  * function is called with the details of the change that closed the overlay (`null` when it
  * closed without one) and returns any of these; returning nothing restores as usual.
  */
@@ -132,9 +136,84 @@ export const isRestoringFocus = () => restoringFocus > 0;
 const usable = (element: HTMLElement | null): element is HTMLElement =>
 	!!element && element.isConnected && !element.closest('[inert]') && isFocusable(element);
 
+/** One ancestor of an element, with the siblings on either side of the branch leading to it. */
+interface PlaceLevel {
+	parent: Element | ShadowRoot;
+	previous: Node | null;
+	next: Node | null;
+}
+
+/**
+ * Where `element` sits in the page, nearest ancestor first, up to (not including) the container
+ * overlays portal into: past that point the neighbours are other popups or the whole page, not
+ * the element's surroundings. Shadow roots are crossed through their host.
+ */
+const recordPlace = (element: HTMLElement): PlaceLevel[] => {
+	const doc = element.ownerDocument;
+	const stop = resolvePortalContainer(element);
+	const levels: PlaceLevel[] = [];
+	let branch: Node = element;
+	for (;;) {
+		const parent: Node | null = branch.parentNode;
+		if (!parent || parent === stop || parent === doc.body || parent === doc.documentElement) break;
+		if (!(parent instanceof Element) && !(parent instanceof ShadowRoot)) break;
+		levels.push({ parent, previous: branch.previousSibling, next: branch.nextSibling });
+		branch = parent instanceof ShadowRoot ? parent.host : parent;
+	}
+	return levels;
+};
+
+/**
+ * The tabbable element nearest to where a removed element was: inside its closest ancestor that
+ * is still on the page, the first one after it, else the last one before it. A row's "Delete"
+ * menu that deleted the row hands focus to the next row's control, or the previous row's when it
+ * was the last. Ancestors with nothing tabbable left are passed for the next one up.
+ */
+const nearestSurvivor = (
+	place: PlaceLevel[],
+	accept: (element: HTMLElement) => boolean
+): HTMLElement | null => {
+	const ok = (element: HTMLElement) => isTabbable(element) && accept(element);
+	for (const { parent, previous, next } of place) {
+		if (!parent.isConnected) continue;
+		const all = Array.from(parent.querySelectorAll<HTMLElement>(focusableSelector));
+		if (all.length === 0) continue;
+		// A sibling that was removed with the element no longer says where it was.
+		const after = next?.parentNode === parent ? next : null;
+		const before = previous?.parentNode === parent ? previous : null;
+		if (after) {
+			const start = all.findIndex(
+				(element) =>
+					after === element ||
+					after.contains(element) ||
+					!!(after.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING)
+			);
+			if (start >= 0) {
+				const found = all.slice(start).find(ok);
+				if (found) return found;
+			}
+		}
+		if (before) {
+			for (let index = all.length - 1; index >= 0; index -= 1) {
+				const element = all[index];
+				const precedes =
+					before === element ||
+					before.contains(element) ||
+					!!(before.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_PRECEDING);
+				if (precedes && ok(element)) return element;
+			}
+		}
+		const any = all.find(ok);
+		if (any) return any;
+	}
+	return null;
+};
+
 export function useFocusScope(options: FocusScopeOptions) {
 	let node: HTMLElement | null = null;
 	let returnTarget: HTMLElement | null = null;
+	/** The element focus was to return to when the scope mounted, and where it sat then. */
+	let returnPlace: { element: HTMLElement; place: PlaceLevel[] } | null = null;
 	let restored = false;
 	/** Initial focus is applied once per mount: a later re-activation leaves focus where it is. */
 	let initialFocusDone = false;
@@ -179,6 +258,19 @@ export function useFocusScope(options: FocusScopeOptions) {
 	};
 
 	/**
+	 * When the element focus was to return to has left the page (the row a menu deleted), the
+	 * tabbable element nearest to where it was. Only for an element that is gone: one that is still
+	 * there but disabled says nothing about its neighbours, and the focus history serves it better.
+	 */
+	const survivorTarget = (scope: HTMLElement): HTMLElement | null => {
+		if (!returnPlace || returnPlace.element.isConnected) return null;
+		return nearestSurvivor(
+			returnPlace.place,
+			(element) => usable(element) && !composedContains(scope, element)
+		);
+	};
+
+	/**
 	 * Idempotent; only moves focus when it is still on `<body>` or inside the scope. The page
 	 * behind is released first: an `inert` opener cannot take focus, and a close that is
 	 * reported once its transition ends runs this before the node is torn down.
@@ -202,8 +294,11 @@ export function useFocusScope(options: FocusScopeOptions) {
 		const target =
 			choice !== 'default'
 				? choice
-				: [options.returnTo?.() ?? null, returnTarget].find(usable) || fallbackTarget(scope);
+				: [options.returnTo?.() ?? null, returnTarget].find(usable) ||
+					survivorTarget(scope) ||
+					fallbackTarget(scope);
 		returnTarget = null;
+		returnPlace = null;
 		if (usable(target)) focusElement(target, focusVisibleOnClose());
 	};
 
@@ -270,6 +365,15 @@ export function useFocusScope(options: FocusScopeOptions) {
 			const doc = target.ownerDocument;
 			const active = getDeepActiveElement(doc);
 			returnTarget = active instanceof HTMLElement && active !== doc.body ? active : null;
+			// Remembered now, while the element is still on the page: by the time the scope closes,
+			// the action that closed it may have removed it with its surroundings.
+			const returning = [options.returnTo?.() ?? null, returnTarget].find(
+				(element): element is HTMLElement => !!element?.isConnected
+			);
+			returnPlace =
+				returning && !composedContains(target, returning)
+					? { element: returning, place: recordPlace(returning) }
+					: null;
 			lastFocusedInside =
 				active instanceof HTMLElement && composedContains(target, active) ? active : null;
 			if (target.tabIndex < 0) target.tabIndex = -1;
@@ -303,6 +407,10 @@ export function useFocusScope(options: FocusScopeOptions) {
 			$effect(() => {
 				const active = options.isActive();
 				if (!active) return;
+				// An owner may restore as its close begins (a Popover does, before its outro makes the
+				// panel inert). Reopened before the outro ended, the same mounted scope must restore
+				// again when it next closes.
+				restored = false;
 				// The newest active scope is the last one: a scope that becomes active again after the
 				// one above it closed is the next to receive focus.
 				const position = scopes.indexOf(record);
@@ -316,17 +424,22 @@ export function useFocusScope(options: FocusScopeOptions) {
 					if (!current || !composedContains(node, current)) applyInitialFocus(node);
 				});
 				if (options.inertSiblings?.()) {
+					// Up to <body>, through the host of every shadow root on the way: a dialog portaled
+					// into a shadow root has the rest of that root and the light DOM around its host to
+					// make inert, and a direct child of a shadow root has no `parentElement`.
 					let current: Element | null = target;
 					while (current && current !== target.ownerDocument.body) {
-						const parent: Element | null = current.parentElement;
-						if (!parent) break;
-						for (const sibling of parent.children) {
+						const root = current.getRootNode();
+						const container: Element | ShadowRoot | null =
+							current.parentElement ?? (root instanceof ShadowRoot ? root : null);
+						if (!container) break;
+						for (const sibling of container.children) {
 							if (sibling === current || sibling.hasAttribute('data-live-region')) continue;
 							if (sibling.tagName === 'SCRIPT' || sibling.tagName === 'STYLE') continue;
 							makeInert(sibling);
 							inerted.push(sibling);
 						}
-						current = parent;
+						current = container instanceof ShadowRoot ? container.host : container;
 					}
 				}
 				return () => {

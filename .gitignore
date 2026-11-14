@@ -30,3 +30,8 @@ vite.config.ts.timestamp-*
 .playwright-cli
 .playwright-mcp
 /output
+
+# Package docs for agents, written at pack time by tooling/component-contract/agent-docs.mjs.
+/docs/llms.txt
+/docs/components/
+/skills/

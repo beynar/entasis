@@ -31,6 +31,8 @@
 		tool,
 		closeOnClickOutside,
 		closable = true,
+		dismissible = true,
+		onDismissAttempt,
 		focusOnClose,
 		swipeToDismiss,
 		swipeFrom,
@@ -109,6 +111,12 @@
 		},
 		get closable() {
 			return closable;
+		},
+		get dismissible() {
+			return dismissible;
+		},
+		get onDismissAttempt() {
+			return onDismissAttempt;
 		},
 		get focusOnClose() {
 			return focusOnClose;

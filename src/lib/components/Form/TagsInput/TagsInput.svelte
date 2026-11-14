@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { TagsInputProps } from './tagsInput.props.js';
@@ -68,11 +69,13 @@
 		prefix,
 		suffix,
 		description,
+		id: idProp,
 		...rest
 	}: TagsInputProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const t = $derived(useI18n(i18n));
 	const openState = createBindableValue(
 		() => open,
@@ -244,7 +247,10 @@
 		enabled: () => removable,
 		orientation: 'horizontal',
 		loop: false,
-		focusableContainer: false
+		focusableContainer: false,
+		// The remove buttons as the list renders them, so `tabIndexAt` puts the one Tab stop on the
+		// first of them in the server markup.
+		renderedItems: () => ({ count: removable ? tags.length : 0 })
 	});
 
 	// Backspace and Delete remove the focused tag and hand focus to its neighbour (the next
@@ -345,7 +351,7 @@
 		{@attach navigation.containerReference}
 		{@attach toolbarKeys}
 	>
-		{#each tags as tag (tag)}
+		{#each tags as tag, index (tag)}
 			<span
 				role={removable ? undefined : 'listitem'}
 				class={classes.tag({ size })}
@@ -360,6 +366,7 @@
 								type="button"
 								data-tag={tag}
 								aria-label={t.remove(labelFor(tag))}
+								tabindex={navigation.tabIndexAt(index)}
 								onclick={(event) => removeFocusedTag(event.currentTarget)}
 								onmousedown={(e) => {
 									e.stopPropagation();
@@ -405,6 +412,7 @@
 		{@render tagsList()}
 		<input
 			data-1p-ignore
+			{...field.ariaAttrs({ role: hasItems ? 'combobox' : 'textbox', native: 'text' })}
 			type="text"
 			{id}
 			bind:value={searchValue}
@@ -418,7 +426,9 @@
 			aria-autocomplete={hasItems ? 'list' : undefined}
 			aria-activedescendant={hasItems ? controller.activeDescendant : undefined}
 			aria-haspopup={hasItems ? 'listbox' : undefined}
-			aria-invalid={hasItems ? controller.error !== null : undefined}
+			aria-invalid={hasItems
+				? controller.error !== null || field.hasError
+				: field.hasError || undefined}
 			autocomplete="off"
 			class={classes.input({ size, disabled: field.disabled })}
 			oninput={(event) => controller.onInput(event)}

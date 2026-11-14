@@ -10,6 +10,8 @@ import type { DocumentSearchMatch } from './documentViewer.props.js';
 
 export type DocumentViewerToolSource = {
 	readonly tool: WebMCPToolProp | undefined;
+	/** The element it renders into: the tools go while it sits in a `data-webmcp-off` zone. */
+	readonly root?: HTMLElement | null;
 	readonly unitCount: number;
 	readonly loaded: boolean;
 	readonly search: (query: string) => Promise<DocumentSearchMatch[]>;
@@ -42,9 +44,20 @@ export const expose: WebMCPExpose<DocumentViewerToolSource> = (source, config) =
 				},
 				annotations: { untrustedContentHint: true },
 				execute: async ({ query }: { query: unknown }) => {
-					if (typeof query !== 'string' || !query.trim()) return { status: 'invalid' };
+					if (typeof query !== 'string' || !query.trim()) {
+						return { status: 'invalid', message: 'Send the text to look for.' };
+					}
 					const matches = await source.search(query);
-					return { status: 'done', total: matches.length, matches: matches.slice(0, MAX_MATCHES) };
+					return {
+						status: 'done',
+						total: matches.length,
+						matches: matches.slice(0, MAX_MATCHES),
+						...(matches.length > MAX_MATCHES
+							? {
+									message: `The first ${MAX_MATCHES} matches of ${matches.length} are here: search for a longer phrase to narrow them down.`
+								}
+							: {})
+					};
 				}
 			};
 		}, exposure),
@@ -63,7 +76,10 @@ export const expose: WebMCPExpose<DocumentViewerToolSource> = (source, config) =
 				annotations: { readOnlyHint: true, untrustedContentHint: true },
 				execute: async ({ unit }: { unit: unknown }) => {
 					if (typeof unit !== 'number' || unit < 1 || unit > source.unitCount) {
-						return { status: 'invalid' };
+						return {
+							status: 'invalid',
+							message: `Units go from 1 to ${source.unitCount}.`
+						};
 					}
 					const text = await source.readUnit(unit);
 					if (text === null) {
@@ -73,7 +89,12 @@ export const expose: WebMCPExpose<DocumentViewerToolSource> = (source, config) =
 						status: 'done',
 						unit,
 						text: text.slice(0, MAX_TEXT),
-						truncated: text.length > MAX_TEXT
+						truncated: text.length > MAX_TEXT,
+						...(text.length > MAX_TEXT
+							? {
+									message: `The first ${MAX_TEXT} characters of ${text.length} are here: search_document finds what comes after.`
+								}
+							: {})
 					};
 				}
 			};

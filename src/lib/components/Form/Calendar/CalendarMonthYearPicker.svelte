@@ -123,7 +123,13 @@
 		loop: false,
 		enableHoverFocus: false,
 		enabled: () => !disabled,
-		defaultFocusedIndex: getDefaultMonthIndex
+		defaultFocusedIndex: getDefaultMonthIndex,
+		// The options as the column renders them, so `tabIndexAt` puts its one Tab stop in the
+		// markup before they attach.
+		renderedItems: () => ({
+			count: months.length,
+			isUnfocusable: (month) => isMonthDisabled(currentYear, month)
+		})
 	});
 	const yearNavigation = useNavigation({
 		id: `${componentId}-year-navigation`,
@@ -131,7 +137,11 @@
 		loop: false,
 		enableHoverFocus: false,
 		enabled: () => !disabled,
-		defaultFocusedIndex: getDefaultYearIndex
+		defaultFocusedIndex: getDefaultYearIndex,
+		renderedItems: () => ({
+			count: years.length,
+			isUnfocusable: (index) => isYearDisabled(years[index])
+		})
 	});
 
 	const centerSelectedOption: Attachment<HTMLElement> = (node) => {
@@ -227,6 +237,7 @@
 						role="option"
 						aria-selected={selected}
 						disabled={optionDisabled}
+						tabindex={monthNavigation.tabIndexAt(month)}
 						data-picker-column="month"
 						class={classes.pickerOption({ selected, disabled: optionDisabled })}
 						onclick={() => selectMonth(month)}
@@ -250,7 +261,7 @@
 				class={classes.pickerOptions()}
 				{@attach yearNavigation.containerReference}
 			>
-				{#each years as year (year)}
+				{#each years as year, index (year)}
 					{@const selected = year === currentYear}
 					{@const optionDisabled = isYearDisabled(year)}
 					<button
@@ -258,6 +269,7 @@
 						role="option"
 						aria-selected={selected}
 						disabled={optionDisabled}
+						tabindex={yearNavigation.tabIndexAt(index)}
 						data-picker-column="year"
 						class={classes.pickerOption({ selected, disabled: optionDisabled })}
 						onclick={() => selectYear(year)}

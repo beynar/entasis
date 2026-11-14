@@ -25,30 +25,33 @@
 </script>
 
 <I18n {dir} manageDocument={false}>
-	<Theme>
-		<input aria-label="Search" />
-		<button type="button">Before</button>
-		{#if snippetTrigger}
-			<PopupMenu
-				bind:open
-				menu={{ items, ...menu }}
-				transition={{ in: { duration: 0 }, out: { duration: 0 } }}
-				{...props}
-			>
-				{#snippet trigger(popover)}
-					<Button {@attach popover.reference} onclick={() => popover.toggle()}>File</Button>
-				{/snippet}
-			</PopupMenu>
-		{:else}
-			<PopupMenu
-				bind:open
-				trigger={{ content: 'File' }}
-				menu={{ items, ...menu }}
-				transition={{ in: { duration: 0 }, out: { duration: 0 } }}
-				{...props}
-			/>
-		{/if}
-		<button type="button" onclick={() => (open = false)}>Close from code</button>
-		<button type="button">After</button>
-	</Theme>
+	<!-- The subtree is laid out in `dir`, as a page in that locale would be: arrow keys follow layout. -->
+	<div {dir}>
+		<Theme>
+			<input aria-label="Search" />
+			<button type="button">Before</button>
+			{#if snippetTrigger}
+				<PopupMenu
+					bind:open
+					menu={{ items, ...menu }}
+					transition={{ in: { duration: 0 }, out: { duration: 0 } }}
+					{...props}
+				>
+					{#snippet trigger(popover)}
+						<Button {@attach popover.reference} onclick={() => popover.toggle()}>File</Button>
+					{/snippet}
+				</PopupMenu>
+			{:else}
+				<PopupMenu
+					bind:open
+					trigger={{ content: 'File' }}
+					menu={{ items, ...menu }}
+					transition={{ in: { duration: 0 }, out: { duration: 0 } }}
+					{...props}
+				/>
+			{/if}
+			<button type="button" onclick={() => (open = false)}>Close from code</button>
+			<button type="button">After</button>
+		</Theme>
+	</div>
 </I18n>

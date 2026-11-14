@@ -9,6 +9,7 @@
 	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import Popover from '../../Popover/Popover.svelte';
 	import type { PopoverApi } from '../../Popover/popover.api.js';
@@ -62,11 +63,13 @@
 		prefix,
 		suffix,
 		description,
+		id: idProp,
 		...rest
 	}: AutocompleteProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, inputAttrs, generatedId));
 	const t = $derived(useI18n(i18n));
 	const openState = createBindableValue(
 		() => open,
@@ -368,6 +371,7 @@
 			<input
 				data-1p-ignore={autocomplete === 'off' ? '' : undefined}
 				{...inputAttrs}
+				{...field.ariaAttrs({ role: 'combobox', native: 'text', attrs: inputAttrs })}
 				type="text"
 				{id}
 				name={submittedName}
@@ -385,7 +389,7 @@
 				aria-autocomplete={mode}
 				aria-activedescendant={controller.activeDescendant}
 				aria-haspopup="listbox"
-				aria-invalid={controller.error !== null || undefined}
+				aria-invalid={controller.error !== null || field.hasError || undefined}
 				class={classes.input({ size, hasValue: text !== '', disabled: field.disabled })}
 				{oninput}
 				{onkeydown}

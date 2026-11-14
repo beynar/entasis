@@ -5,6 +5,8 @@
 import { tick } from 'svelte';
 import { jsonToolSchema, type JsonSchema } from '../JsonEditor/jsonEditor.schema.js';
 import { validateJson } from '../JsonEditor/jsonEditor.validate.js';
+import { actAsAgent } from '$lib/utils/webmcp/webmcp.agent.js';
+import { isAgentOff } from '$lib/utils/webmcp/webmcp.dom.js';
 import type { WebMCPExpose } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 import { watchWebMCPTool } from '$lib/utils/webmcp/webmcp.exposure.svelte.js';
 import {
@@ -51,13 +53,30 @@ type TimeSegments = { hours?: number; minutes?: number; seconds?: number };
 const flattenChoices = (items: readonly Choice[]): Choice[] =>
 	items.flatMap((item) => (Array.isArray(item.items) ? flattenChoices(item.items) : [item]));
 
+const heldValues = (current: unknown): unknown[] =>
+	Array.isArray(current) ? current : current == null ? [] : [current];
+
+const choiceTitle = ({ value, label }: Choice): string => toolText(label) || value;
+
+/** The disabled options of an entry, by value. Empty when its options load on demand. */
+function disabledChoices(props: EntryProps): Map<string, Choice> {
+	if (!Array.isArray(props.items)) return new Map();
+	const choices = flattenChoices(props.items as Choice[]).filter((item) => item.disabled);
+	return new Map(choices.map((choice) => [choice.value, choice]));
+}
+
 /**
- * The options an agent may pick. `null` when they load on demand (an `items` function): nothing
- * here can tell an offered option from any other string, so the choice stays with the user.
+ * The options an agent may pick: the enabled ones, and a disabled one the value already holds,
+ * which stays valid as it does for a person, who can neither pick it nor clear it from a list.
+ * `null` when they load on demand (an `items` function): nothing here can tell an offered option
+ * from any other string, so the choice stays with the user.
  */
-function choiceSchema(props: EntryProps): WebMCPJsonSchema | null {
+function choiceSchema(props: EntryProps, current: unknown): WebMCPJsonSchema | null {
 	if (!Array.isArray(props.items)) return null;
-	const choices = flattenChoices(props.items as Choice[]).filter((item) => !item.disabled);
+	const held = heldValues(current);
+	const choices = flattenChoices(props.items as Choice[]).filter(
+		(item) => !item.disabled || held.includes(item.value)
+	);
 	const labelled = choices.filter(
 		({ value, label }) => typeof label === 'string' && label !== value
 	);
@@ -65,13 +84,26 @@ function choiceSchema(props: EntryProps): WebMCPJsonSchema | null {
 		type: 'string',
 		enum: choices.map(({ value }) => value),
 		oneOf: labelled.length
-			? choices.map(({ value, label }) => ({
-					const: value,
-					title: typeof label === 'string' ? label : value
-				}))
+			? choices.map((choice) => ({ const: choice.value, title: choiceTitle(choice) }))
 			: undefined
 	});
 }
+
+/** Tells the agent which held options it has to leave as they are. */
+function lockedNote(props: EntryProps, current: unknown, multiple: boolean): string | undefined {
+	const disabled = disabledChoices(props);
+	const locked = heldValues(current).flatMap((value) => {
+		const choice = disabled.get(value as string);
+		return choice ? [`"${choiceTitle(choice)}"`] : [];
+	});
+	if (locked.length === 0) return undefined;
+	return multiple
+		? `${locked.join(', ')} ${locked.length === 1 ? 'is' : 'are'} disabled: keep ${locked.length === 1 ? 'it' : 'them'} in the list, as the user cannot remove ${locked.length === 1 ? 'it' : 'them'} either.`
+		: `${locked[0]} is disabled: keep it or pick another option.`;
+}
+
+const multipleChoices = (choice: WebMCPJsonSchema | null, note: string | undefined) =>
+	choice && defined({ type: 'array', uniqueItems: true, items: choice, description: note });
 
 const TIME_PATTERN = '^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$';
 
@@ -81,9 +113,12 @@ const dateTimeSchema = { type: 'string', format: 'date-time' };
 /**
  * The JSON Schema of one entry's value, or `null` for a value JSON cannot carry (a file, a voice
  * recording, a drawn signature) and an app-defined type that declares no `toolSchema`: those stay
- * for the user to fill in.
+ * for the user to fill in. `current` is the value the field holds, for the options it keeps.
  */
-export function fieldToolSchema(input: FormValueInput): WebMCPJsonSchema | null {
+export function fieldToolSchema(
+	input: FormValueInput,
+	current: unknown = null
+): WebMCPJsonSchema | null {
 	const type = (input.type === 'field' ? input.fieldType : input.type) as FieldType;
 	const props = input as unknown as EntryProps;
 	const own = input.tool ? input.tool.schema : undefined;
@@ -146,18 +181,18 @@ export function fieldToolSchema(input: FormValueInput): WebMCPJsonSchema | null 
 			return { type: 'boolean' };
 		case 'select':
 		case 'radio':
-		case 'combobox':
-			return choiceSchema(props);
-		case 'select-multiple':
-		case 'checkboxes': {
-			const choice = choiceSchema(props);
-			return choice && { type: 'array', uniqueItems: true, items: choice };
+		case 'combobox': {
+			const choice = choiceSchema(props, current);
+			return choice && defined({ ...choice, description: lockedNote(props, current, false) });
 		}
+		case 'select-multiple':
+		case 'checkboxes':
+			return multipleChoices(choiceSchema(props, current), lockedNote(props, current, true));
 		case 'tag-group': {
-			const choice = choiceSchema(props);
-			return choice && props.multiple
-				? { type: 'array', uniqueItems: true, items: choice }
-				: choice;
+			const choice = choiceSchema(props, current);
+			return props.multiple
+				? multipleChoices(choice, lockedNote(props, current, true))
+				: choice && defined({ ...choice, description: lockedNote(props, current, false) });
 		}
 		case 'tag':
 			return defined({
@@ -199,51 +234,91 @@ export function fieldToolSchema(input: FormValueInput): WebMCPJsonSchema | null 
 	}
 }
 
-/**
- * Whether a value fits its schema. A person is held to these limits by the control itself (a
- * disabled option cannot be picked, `maxLength` stops the typing) and validation does not repeat
- * them, so a written value has to pass here first. `null` clears a field.
- */
-export function fitsToolSchema(schema: WebMCPJsonSchema, value: unknown): boolean {
-	if (value === null) return true;
-	const { type, minimum, maximum, minLength, maxLength, minItems, maxItems, items } = schema;
-	if (schema.enum && !(schema.enum as unknown[]).includes(value)) return false;
-	if (type === 'boolean') return typeof value === 'boolean';
-	if (type === 'object') return fitsObject(schema, value);
-	if (type === 'number') {
-		if (typeof value !== 'number' || Number.isNaN(value)) return false;
-		return (
-			value >= ((minimum as number) ?? -Infinity) && value <= ((maximum as number) ?? Infinity)
-		);
-	}
-	if (type === 'string') {
-		if (typeof value !== 'string') return false;
-		if (typeof schema.pattern === 'string' && !new RegExp(schema.pattern).test(value)) return false;
-		return (
-			value.length >= ((minLength as number) ?? 0) &&
-			value.length <= ((maxLength as number) ?? Infinity)
-		);
-	}
-	if (type === 'array') {
-		if (!Array.isArray(value)) return false;
-		if (value.length < ((minItems as number) ?? 0)) return false;
-		if (value.length > ((maxItems as number) ?? Infinity)) return false;
-		if (schema.uniqueItems && new Set(value).size !== value.length) return false;
-		return value.every((item) => !items || fitsToolSchema(items as WebMCPJsonSchema, item));
-	}
-	return true;
+const MAX_LISTED_OPTIONS = 20;
+
+/** Options as the agent sent them, quoted; a long list ends with how many it leaves out. */
+function listOptions(values: unknown[]): string {
+	const quoted = values.slice(0, MAX_LISTED_OPTIONS).map((value) => JSON.stringify(value));
+	const rest = values.length - quoted.length;
+	return rest > 0 ? `${quoted.join(', ')} and ${rest} more` : quoted.join(', ');
 }
 
-function fitsObject(schema: WebMCPJsonSchema, value: unknown): boolean {
-	if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+/**
+ * Why a value does not fit its schema, in a sentence for the agent, or `null` when it does. A
+ * person is held to these limits by the control itself (a disabled option cannot be picked,
+ * `maxLength` stops the typing) and validation does not repeat them, so a written value has to
+ * pass here first. `null` clears a field.
+ */
+export function toolSchemaProblem(schema: WebMCPJsonSchema, value: unknown): string | null {
+	if (value === null) return null;
+	const { type, minimum, maximum, minLength, maxLength, minItems, maxItems, items } = schema;
+	if (schema.enum && !(schema.enum as unknown[]).includes(value)) {
+		return `Not one of the options: ${listOptions(schema.enum as unknown[])}.`;
+	}
+	if (type === 'boolean') return typeof value === 'boolean' ? null : 'Expected true or false.';
+	if (type === 'object') return objectProblem(schema, value);
+	if (type === 'number') {
+		if (typeof value !== 'number' || Number.isNaN(value)) return 'Expected a number.';
+		if (typeof minimum === 'number' && value < minimum) return `The least is ${minimum}.`;
+		if (typeof maximum === 'number' && value > maximum) return `The most is ${maximum}.`;
+		return null;
+	}
+	if (type === 'string') {
+		if (typeof value !== 'string') return 'Expected text.';
+		if (typeof schema.pattern === 'string' && !new RegExp(schema.pattern).test(value)) {
+			return `Not in the expected format${typeof schema.description === 'string' ? `, ${schema.description}` : '.'}`;
+		}
+		if (typeof minLength === 'number' && value.length < minLength) {
+			return `At least ${minLength} characters.`;
+		}
+		if (typeof maxLength === 'number' && value.length > maxLength) {
+			return `At most ${maxLength} characters.`;
+		}
+		return null;
+	}
+	if (type === 'array') {
+		if (!Array.isArray(value)) return 'Expected a list.';
+		if (typeof minItems === 'number' && value.length < minItems) {
+			return `At least ${minItems} items.`;
+		}
+		if (typeof maxItems === 'number' && value.length > maxItems) {
+			return `At most ${maxItems} items.`;
+		}
+		if (schema.uniqueItems && new Set(value).size !== value.length) {
+			return 'The same item is in the list twice.';
+		}
+		if (!items) return null;
+		for (const [index, item] of value.entries()) {
+			const problem = toolSchemaProblem(items as WebMCPJsonSchema, item);
+			if (problem) return `Item ${index + 1}: ${problem}`;
+		}
+	}
+	return null;
+}
+
+/** Whether a value fits its schema: see `toolSchemaProblem`. */
+export const fitsToolSchema = (schema: WebMCPJsonSchema, value: unknown): boolean =>
+	toolSchemaProblem(schema, value) === null;
+
+function objectProblem(schema: WebMCPJsonSchema, value: unknown): string | null {
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+		return 'Expected an object.';
+	}
 	const properties = (schema.properties ?? {}) as Record<string, WebMCPJsonSchema>;
 	const record = value as Record<string, unknown>;
-	if (((schema.required ?? []) as string[]).some((key) => record[key] === undefined)) return false;
-	return Object.entries(record).every(([key, item]) =>
-		key in properties
-			? fitsToolSchema(properties[key], item)
-			: schema.additionalProperties !== false
-	);
+	const missing = ((schema.required ?? []) as string[]).filter((key) => record[key] === undefined);
+	if (missing.length) return `Missing ${listOptions(missing)}.`;
+	for (const [key, item] of Object.entries(record)) {
+		if (!(key in properties)) {
+			if (schema.additionalProperties === false) {
+				return `No property ${JSON.stringify(key)}: use ${listOptions(Object.keys(properties))}.`;
+			}
+			continue;
+		}
+		const problem = toolSchemaProblem(properties[key], item);
+		if (problem) return `${JSON.stringify(key)}: ${problem}`;
+	}
+	return null;
 }
 
 function timeWithinLimits(props: EntryProps, value: unknown): boolean {
@@ -267,18 +342,75 @@ function thumbsStayPut(props: EntryProps, value: unknown, current: unknown): boo
 	return disabled.every((locked, index) => !locked || next[index] === previous[index]);
 }
 
-/** Limits a control holds a person to that its schema cannot express. */
-export function controlAccepts(input: FormValueInput, value: unknown, current: unknown): boolean {
-	if (value === null) return true;
+const CHOICE_TYPES = new Set(['select', 'radio', 'combobox', 'select-multiple', 'checkboxes']);
+
+/**
+ * A disabled option stays as it is: a person can neither pick it nor take it out of a list that
+ * holds it. A single choice may still move off it to another option, as a person can.
+ */
+function disabledStayPut(
+	props: EntryProps,
+	multiple: boolean,
+	value: unknown,
+	current: unknown
+): string | null {
+	const disabled = disabledChoices(props);
+	if (disabled.size === 0) return null;
+	const held = heldValues(current);
+	const next = heldValues(value);
+	const added = next.find((item) => disabled.has(item as string) && !held.includes(item));
+	if (added !== undefined) {
+		return `"${choiceTitle(disabled.get(added as string) as Choice)}" is disabled: it cannot be picked, by the user either.`;
+	}
+	const removed = multiple
+		? held.find((item) => disabled.has(item as string) && !next.includes(item))
+		: undefined;
+	if (removed !== undefined) {
+		return `"${choiceTitle(disabled.get(removed as string) as Choice)}" is disabled and already selected: keep it in the list, as the user cannot remove it either.`;
+	}
+	return null;
+}
+
+/**
+ * Why a control would not produce this value, for limits its schema cannot express, in a
+ * sentence for the agent; `null` when it would.
+ */
+export function controlRefusal(
+	input: FormValueInput,
+	value: unknown,
+	current: unknown
+): string | null {
 	const props = input as unknown as EntryProps;
 	const type = input.type === 'field' ? input.fieldType : input.type;
-	if (type === 'json')
-		return validateJson(value, (props.schema ?? true) as JsonSchema).length === 0;
-	if (type === 'time') return timeWithinLimits(props, value);
-	if (type === 'rating') return (value as number) % (props.halfSteps ? 0.5 : 1) === 0;
-	if (type === 'slider' || type === 'slider-range') return thumbsStayPut(props, value, current);
-	return true;
+	if (CHOICE_TYPES.has(type) || type === 'tag-group') {
+		const multiple =
+			type === 'select-multiple' ||
+			type === 'checkboxes' ||
+			(type === 'tag-group' && Boolean(props.multiple));
+		const refusal = disabledStayPut(props, multiple, value, current);
+		if (refusal) return refusal;
+	}
+	if (value === null) return null;
+	if (type === 'json') {
+		return validateJson(value, (props.schema ?? true) as JsonSchema).length === 0
+			? null
+			: 'Does not match the JSON schema of this field.';
+	}
+	if (type === 'time' && !timeWithinLimits(props, value)) {
+		return 'Outside the times this field allows.';
+	}
+	if (type === 'rating' && (value as number) % (props.halfSteps ? 0.5 : 1) !== 0) {
+		return props.halfSteps ? 'Ratings go by halves.' : 'Ratings are whole numbers.';
+	}
+	if ((type === 'slider' || type === 'slider-range') && !thumbsStayPut(props, value, current)) {
+		return 'A disabled thumb keeps its value, as the user cannot move it either.';
+	}
+	return null;
 }
+
+/** Whether the control could produce this value: see `controlRefusal`. */
+export const controlAccepts = (input: FormValueInput, value: unknown, current: unknown): boolean =>
+	controlRefusal(input, value, current) === null;
 
 // A bare date is that day where the user is: `new Date('2026-11-03')` would be UTC midnight, the
 // day before in the Americas.
@@ -358,18 +490,31 @@ function fieldDescription(
 
 const sentence = (text: string): string => (/[.!?…:]$/.test(text) ? text : `${text}.`);
 
+/**
+ * A field the agent may not see: one set to `tool: false`, or one the app placed in a
+ * `data-webmcp-off` zone. It is left out of the schema and stays unnamed in errors.
+ */
+const keptFromAgent = (input: { tool?: unknown }, field: { rootNode: HTMLElement | null }) =>
+	input.tool === false || isAgentOff(field.rootNode);
+
 /** What the agent sees of the form right now. Reads the form's state, so it tracks it. */
-function buildTool(source: FormToolSource): Omit<WebMCPTool<FormToolInput>, 'execute'> {
+function buildTool(source: FormToolSource): Omit<WebMCPTool<FormToolInput>, 'execute'> | null {
 	const options = toolOptions(source.tool);
 	const properties: Record<string, unknown> = {};
 	const required: string[] = [];
 	const labels: string[] = [];
 	const forTheUser: string[] = [];
+	const fields = source.form.toolFields();
+	// A form the app placed whole in an off zone has no tool: every field of it is out of reach.
+	if (fields.length > 0 && fields.every(({ field }) => isAgentOff(field.rootNode))) return null;
 
-	for (const { name, input, group, field } of source.form.toolFields()) {
-		if (input.tool === false || field.disabled || field.readOnly) continue;
+	for (const { name, input, group, field } of fields) {
+		if (keptFromAgent(input, field) || field.disabled || field.readOnly) continue;
 		const label = fieldLabel(name, input);
-		const schema = fieldToolSchema(input);
+		// Only an entry with disabled options depends on the value: the others do not rebuild the
+		// tool on each keystroke.
+		const holds = disabledChoices(input as unknown as EntryProps).size > 0;
+		const schema = fieldToolSchema(input, holds ? field.value : null);
 		if (!schema) {
 			forTheUser.push(label);
 			continue;
@@ -426,7 +571,7 @@ function collectErrors(form: FormState<FormInputs>) {
 	let hidden = false;
 	for (const { name, input, field } of form.toolFields()) {
 		if (field.errorMessages.length === 0) continue;
-		if (input.tool === false) hidden = true;
+		if (keptFromAgent(input, field)) hidden = true;
 		else if (getFormValueInputType(input) === 'password') errors[name] = [field.messages.invalid];
 		else errors[name] = [...field.errorMessages];
 	}
@@ -436,41 +581,56 @@ function collectErrors(form: FormState<FormInputs>) {
 /**
  * Fills the fields the agent may write, as a user editing them would. A field that a value just
  * revealed gets its value too, hence the loop. Whatever is left was not writable: hidden,
- * disabled, read-only, or unknown. A value no control could produce is refused, not written.
+ * disabled, read-only, or unknown. A value no control could produce is refused, not written, and
+ * `reasons` says why. Each write runs as the agent's, after an `await` as well.
  */
 async function fill(form: FormState<FormInputs>, values: FormToolInput) {
 	const remaining = new Map(Object.entries(values));
 	const filled: string[] = [];
 	const refused: Record<string, string[]> = {};
+	const reasons: Record<string, string> = {};
 	let progressed = true;
 	while (progressed && remaining.size > 0) {
 		progressed = false;
 		for (const { name, input, field } of form.toolFields()) {
-			if (!remaining.has(name) || input.tool === false) continue;
-			const schema = fieldToolSchema(input);
+			if (!remaining.has(name) || keptFromAgent(input, field)) continue;
+			const schema = fieldToolSchema(input, field.value);
 			if (field.disabled || field.readOnly || !schema) continue;
 			const value = remaining.get(name);
 			remaining.delete(name);
 			progressed = true;
 			// The editor holds a value to the whole of its schema, which this short check does not read.
 			const isJson = (input.type === 'field' ? input.fieldType : input.type) === 'json';
-			if ((isJson || fitsToolSchema(schema, value)) && controlAccepts(input, value, field.value)) {
-				field.setValue(toFieldValue(input, value) as never);
+			const problem =
+				controlRefusal(input, value, field.value) ??
+				(isJson ? null : toolSchemaProblem(schema, value));
+			if (problem === null) {
+				actAsAgent(() => field.setValue(toFieldValue(input, value) as never));
 				filled.push(name);
 			} else {
 				refused[name] = [field.messages.invalid];
+				reasons[name] = problem;
 			}
 		}
 		await tick();
 	}
-	return { filled, refused, ignored: [...remaining.keys()] };
+	return { filled, refused, reasons, ignored: [...remaining.keys()] };
 }
 
 /** Runs the tool. Answers with field names and catalog messages, never with a value. */
 async function execute(source: FormToolSource, input: FormToolInput, cancelled: () => boolean) {
 	const { form } = source;
-	const { filled, refused, ignored } = await fill(form, input);
-	const report = { filled, ...(ignored.length ? { ignored } : {}) };
+	const { filled, refused, reasons, ignored } = await fill(form, input);
+	const report = {
+		filled,
+		...(ignored.length
+			? {
+					ignored,
+					ignoredBecause:
+						'Not in the tool: hidden, disabled, read-only, kept for the user, or unknown. Call the tool again with the fields its schema lists now.'
+				}
+			: {})
+	};
 	if (cancelled()) return { status: 'cancelled', ...report };
 
 	const anyRefused = Object.keys(refused).length > 0;
@@ -481,7 +641,12 @@ async function execute(source: FormToolSource, input: FormToolInput, cancelled: 
 		else accepted = await form.validateAsync();
 	} catch {
 		// The app's handler threw. Its message is not written for a model and may quote the value.
-		return { status: 'failed', ...report, message: 'The form could not be submitted.' };
+		return {
+			status: 'failed',
+			...report,
+			message:
+				"The form could not be submitted: the app's own submit handler failed. Check the page before trying again, and tell the user if it keeps failing."
+		};
 	}
 	if (accepted === false && cancelled()) return { status: 'cancelled', ...report };
 	await tick();
@@ -491,9 +656,15 @@ async function execute(source: FormToolSource, input: FormToolInput, cancelled: 
 			status: 'invalid',
 			...report,
 			errors: { ...errors, ...refused },
-			message: hidden
-				? 'Nothing was submitted. Correct these fields; the user must correct other ones.'
-				: 'Nothing was submitted. Correct these fields and call the tool again.'
+			...(anyRefused ? { refused: reasons } : {}),
+			message: [
+				hidden
+					? 'Nothing was submitted. Correct these fields; the user must correct other ones.'
+					: 'Nothing was submitted. Correct these fields and call the tool again.',
+				anyRefused ? '`refused` says why a value was not written.' : ''
+			]
+				.filter(Boolean)
+				.join(' ')
 		};
 	}
 	// Errors left now came from the handler, which ran: submitting again would repeat it.
@@ -521,7 +692,10 @@ export const expose: WebMCPExpose<FormToolSource> = (source, config) => {
 		}
 	};
 	const stop = watchWebMCPTool(
-		() => ({ ...buildTool(source), execute: run }),
+		() => {
+			const tool = buildTool(source);
+			return tool && { ...tool, execute: run };
+		},
 		() => ({ exposedTo: exposureOf(source.tool, config), modal: config.surface })
 	);
 	return () => {

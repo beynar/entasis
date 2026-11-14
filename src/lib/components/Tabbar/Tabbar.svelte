@@ -15,7 +15,10 @@
 	import { useTabbarTheme } from './tabbar.theme.js';
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
 	import { useOverflowObserver } from '$lib/utils/useOverflowObserver.svelte.js';
-	import { useSlidingIndicator } from '$lib/utils/useSlidingIndicator.svelte.js';
+	import {
+		measureIndicatorBox,
+		useSlidingIndicator
+	} from '$lib/utils/useSlidingIndicator.svelte.js';
 	import { untrack, type Snippet } from 'svelte';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
@@ -162,7 +165,11 @@
 				select(index);
 			}
 		},
-		defaultFocusedIndex: () => (selectedIndex >= 0 ? selectedIndex : null)
+		defaultFocusedIndex: () => (selectedIndex >= 0 ? selectedIndex : null),
+		renderedItems: () => ({
+			count: normalizedTabs.length,
+			isUnfocusable: (index) => normalizedTabs[index]?.disabled ?? true
+		})
 	});
 
 	function handleTabClick(event: MouseEvent, index: number, tab: NormalizedTab) {
@@ -200,10 +207,7 @@
 			Object.values(menuSelections)
 		],
 		getStyle: (element) => {
-			const x = element.offsetLeft;
-			const y = element.offsetTop;
-			const width = element.offsetWidth;
-			const height = element.offsetHeight;
+			const { x, y, width, height } = measureIndicatorBox(element);
 
 			if (variant === 'pill') {
 				return `transform:translate(${x}px, ${y}px);width:${width}px;height:${height}px`;
@@ -283,7 +287,8 @@
 						aria-controls={panelId(index)}
 						aria-disabled={tab.disabled}
 						disabled={tab.disabled}
-						tabindex={isFocused ? 0 : -1}
+						{...popover.triggerAttributes}
+						tabindex={navigation.tabIndexAt(index)}
 						data-color={resolvedColor}
 						data-active={isActive ? 'true' : 'false'}
 						data-focused={isFocused ? 'true' : 'false'}
@@ -340,7 +345,7 @@
 				disabled={!tab.href && tab.disabled ? true : undefined}
 				href={tab.disabled ? undefined : tab.href}
 				target={tab.target}
-				tabindex={!tab.disabled && isFocused ? 0 : -1}
+				tabindex={navigation.tabIndexAt(index)}
 				rel={tab.rel}
 				data-color={resolvedColor}
 				data-active={isActive ? 'true' : 'false'}

@@ -32,7 +32,16 @@
 
 	const navigation = useNavigation({
 		orientation: 'horizontal',
-		loop: true
+		loop: true,
+		// The crumbs as the trail renders them, so `tabIndexAt` puts its one Tab stop in the server
+		// markup: the first crumb that is neither disabled nor the current page.
+		renderedItems: () => ({
+			count: navigationItems.length,
+			isUnfocusable: (index) => {
+				const item = navigationItems[index];
+				return !item || !!item.disabled || !!item.active;
+			}
+		})
 	});
 
 	// Build the items array with ellipsis if needed
@@ -76,6 +85,13 @@
 			: [ellipsisItem, ...visibleItems];
 	});
 
+	// The crumbs that join the arrow-key order, in order: an ellipsis drawn by the `ellipsis`
+	// snippet is the consumer's own element and never attaches to the navigation.
+	const joinsNavigation = (item: BreadcrumbItem) =>
+		!(item.menu && item.menu.length > 0 && ellipsis);
+	const navigationItems = $derived(displayItems.filter(joinsNavigation));
+	const navigationIndex = (item: BreadcrumbItem) => navigationItems.indexOf(item);
+
 	useWebMCPExposure(() => import('./breadcrumbs.webmcp.js'), {
 		get tool() {
 			return tool;
@@ -109,6 +125,7 @@
 								<button
 									type="button"
 									disabled={item.disabled || item.active}
+									tabindex={navigation.tabIndexAt(navigationIndex(item))}
 									class={classes.link()}
 									{@attach navigation.itemReference}
 									{@attach popover.reference}
@@ -150,7 +167,9 @@
 						href={item.disabled || item.active ? undefined : link}
 						type={!item.active && !link ? 'button' : undefined}
 						disabled={!item.active && !link && item.disabled ? true : undefined}
-						tabindex={item.disabled || item.active ? -1 : undefined}
+						tabindex={item.disabled || item.active
+							? -1
+							: navigation.tabIndexAt(navigationIndex(item))}
 						aria-disabled={item.disabled || item.active}
 						aria-current={item.active ? 'page' : undefined}
 						data-disabled={item.disabled || item.active ? true : undefined}

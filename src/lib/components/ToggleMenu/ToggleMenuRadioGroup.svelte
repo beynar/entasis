@@ -18,6 +18,7 @@
 		unitClass,
 		unitReference,
 		buttonReference,
+		tabIndexAt,
 		onValueChange
 	}: {
 		item: ToggleMenuRadioGroupItem;
@@ -29,6 +30,8 @@
 		unitClass: string;
 		unitReference: Attachment<HTMLElement>;
 		buttonReference?: Attachment<HTMLElement>;
+		/** The roving `tabindex` of this unit's button at `offset`, from the toolbar's navigation. */
+		tabIndexAt?: (offset: number) => 0 | -1;
 		onValueChange: (value: string) => void;
 	} = $props();
 
@@ -56,7 +59,7 @@
 	})}
 	{@attach unitReference}
 >
-	{#each item.items as button (button.value)}
+	{#each item.items as button, offset (button.value)}
 		{@const resolvedSize = item.size ?? size ?? 'normal'}
 		{@const resolvedColor = item.color ?? color ?? 'neutral'}
 		{@const resolvedVariant = item.variant ?? variant ?? 'ghost'}
@@ -67,6 +70,7 @@
 			role="radio"
 			aria-label={button.label}
 			aria-checked={isChecked}
+			tabindex={tabIndexAt?.(offset)}
 			data-color={resolvedColor}
 			data-checked={isChecked}
 			aria-disabled={isDisabled || undefined}

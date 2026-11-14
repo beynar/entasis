@@ -3,7 +3,7 @@
 // it can change without breaking a consumer.
 import type { Attachment } from 'svelte/attachments';
 import type { OpenTransitionStatus } from '$lib/utils/stateAttributes.js';
-import type { PopupTriggerProps } from '$lib/utils/trigger.js';
+import type { PopupTriggerAttributes, PopupTriggerProps } from '$lib/utils/trigger.js';
 import type { PopoverOpenReason, PopoverProps } from './popover.props.js';
 import type { PopoverOpenChangeInput, PopoverPlacementState } from './popover.state.svelte.js';
 
@@ -40,6 +40,14 @@ export interface PopoverApi<Payload = unknown> {
 	 * spread on a Button. `trigger` and `reference` already write it as ARIA attributes.
 	 */
 	readonly triggerProps: PopupTriggerProps;
+	/**
+	 * `aria-haspopup` and `aria-expanded` as attributes to spread on a snippet trigger
+	 * (`<button {...popover.triggerAttributes} {@attach popover.trigger}>`), so the server markup
+	 * announces the popup before the page hydrates. The attachment keeps them in sync afterwards
+	 * and adds `aria-controls` while open. An element that is not a control also needs
+	 * `role="button"` in the markup for these to be valid there.
+	 */
+	readonly triggerAttributes: PopupTriggerAttributes;
 	/**
 	 * The payload of the trigger the panel is anchored to (see `triggerFor`); `undefined` for a
 	 * trigger made without one.

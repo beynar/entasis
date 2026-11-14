@@ -4,7 +4,10 @@
 >
 	import Slot from '../Slot/Slot.svelte';
 	import { useNavigation } from '$lib/utils/useNavigation.svelte.js';
-	import { useSlidingIndicator } from '$lib/utils/useSlidingIndicator.svelte.js';
+	import {
+		measureIndicatorBox,
+		useSlidingIndicator
+	} from '$lib/utils/useSlidingIndicator.svelte.js';
 	import type { SegmentedControlItem, SegmentedControlProps } from './segmentedControl.props.js';
 	import { useSegmentedControlTheme } from './segmentedControl.theme.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
@@ -39,10 +42,6 @@
 	const classes = $derived(useSegmentedControlTheme(theme));
 	const resolvedColor = $derived(useDefaultColor(color));
 	const selectedIndex = $derived(items.findIndex((item) => item.value === valueState.value));
-	const firstEnabledIndex = $derived(items.findIndex((item) => !item.disabled));
-	const tabStopIndex = $derived(
-		selectedIndex >= 0 && !items[selectedIndex]?.disabled ? selectedIndex : firstEnabledIndex
-	);
 
 	// A painted snippet label names its own segment; a string label is painted and spoken, and an
 	// icon-only segment borrows its value.
@@ -73,7 +72,11 @@
 		enableHoverFocus: false,
 		// Escape belongs to the layer holding the control.
 		preventKeyboardDefault: false,
-		defaultFocusedIndex: () => (tabStopIndex >= 0 ? tabStopIndex : null),
+		defaultFocusedIndex: () => (selectedIndex >= 0 ? selectedIndex : null),
+		renderedItems: () => ({
+			count: items.length,
+			isUnfocusable: (index) => disabled || !!items[index]?.disabled
+		}),
 		// Selection follows the keyboard, but only a deliberate key move (an arrow, Home or End)
 		// selects. Tabbing in, a programmatic focus or the restore after a removal never changes
 		// the value, and Alt, Ctrl or Meta with an arrow is left to the browser.
@@ -83,8 +86,10 @@
 	const indicator = useSlidingIndicator({
 		activeIndex: () => selectedIndex,
 		observe: () => [items, size],
-		getStyle: (element) =>
-			`transform:translate(${element.offsetLeft}px, ${element.offsetTop}px);width:${element.offsetWidth}px;height:${element.offsetHeight}px`
+		getStyle: (element) => {
+			const { x, y, width, height } = measureIndicatorBox(element);
+			return `transform:translate(${x}px, ${y}px);width:${width}px;height:${height}px`;
+		}
 	});
 </script>
 
@@ -111,7 +116,6 @@
 
 	{#each items as controlItem, index (controlItem.value)}
 		{@const isSelected = selectedIndex === index}
-		{@const isFocused = navigation.focusedIndex === index}
 		{@const isDisabled = disabled || !!controlItem.disabled}
 		<button
 			type="button"
@@ -119,7 +123,7 @@
 			aria-checked={isSelected}
 			aria-label={itemLabel(controlItem)}
 			disabled={isDisabled}
-			tabindex={isFocused || (navigation.focusedIndex === null && tabStopIndex === index) ? 0 : -1}
+			tabindex={navigation.tabIndexAt(index)}
 			data-value={controlItem.value}
 			data-selected={isSelected ? 'true' : 'false'}
 			class={classes.item({

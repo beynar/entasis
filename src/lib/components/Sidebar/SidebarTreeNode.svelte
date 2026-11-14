@@ -6,13 +6,15 @@
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
 	import { fileIcon } from '$lib/components/Icons/file.js';
 	import { folderIcon } from '$lib/components/Icons/folder.js';
+	// Aliased: the declaration emitted for this component declares `SidebarTreeNode`, and an
+	// import of the same name would conflict with it in a consumer that type-checks the package.
 	import type {
 		SidebarActiveVariant,
 		SidebarApi,
 		SidebarDensity,
 		SidebarSize,
 		SidebarTooltipMode,
-		SidebarTreeNode
+		SidebarTreeNode as SidebarTreeNodeData
 	} from './sidebar.props.js';
 	import { useDirection } from '$lib/utils/useDirection.svelte.js';
 	import { sidebarInwardPhysicalSide, sidebarTooltip } from './sidebar-position.js';
@@ -31,7 +33,7 @@
 		depth = 0,
 		theme
 	}: {
-		node: SidebarTreeNode;
+		node: SidebarTreeNodeData;
 		api: SidebarApi;
 		tooltips: SidebarTooltipMode;
 		size: SidebarSize;

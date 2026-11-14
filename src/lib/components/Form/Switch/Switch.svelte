@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import FieldHiddenInputs from '../Field/FieldHiddenInputs.svelte';
 	import { useFieldTheme } from '../Field/field.theme.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
@@ -28,11 +29,13 @@
 		onValueChange,
 		inputValue = 'true',
 		inputAttrs,
+		id: idProp,
 		...rest
 	}: SwitchProps = $props();
 	if (value === undefined) value = untrack(() => boundDefault(defaultValue));
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, inputAttrs, generatedId));
 	// Field falls back to a generated name so Form wiring stays unique. Only a name the app gave,
 	// directly or through Form, is submitted: an unnamed switch submits nothing, like a checkbox.
 	let generatedName: string | undefined;
@@ -122,6 +125,7 @@
 	     from the label, or from an `aria-label` in inputAttrs. -->
 	<button
 		{...inputAttrs}
+		{...field.ariaAttrs({ role: 'switch', attrs: inputAttrs })}
 		bind:this={field.node}
 		id={field.id}
 		type="button"

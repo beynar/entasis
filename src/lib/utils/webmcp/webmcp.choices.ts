@@ -55,6 +55,8 @@ export type WebMCPChoiceToolOptions = {
 	doneStatus: string;
 	/** More options than this cost more than they give: the schema is sent on every turn. */
 	limit: number;
+	/** Tells the agent how to reach the options past `limit`, in a sentence. */
+	beyondLimit?: string;
 	/** The tool that tells apart options that read the same, present while there are some. */
 	read?: {
 		name: string;
@@ -79,9 +81,19 @@ type Group = {
 	consequential: boolean;
 	exposedTo: string[] | undefined;
 	choices: Option[];
+	/** How many options of this kind were past the limit. */
+	omitted: number;
 };
 
 const REFRESH_DELAY = 50;
+
+/** The ids an answer quotes so the agent can try again without reading the tool once more. */
+const MAX_QUOTED_IDS = 30;
+
+const quoteIds = (ids: string[]): string[] =>
+	ids.length > MAX_QUOTED_IDS
+		? [...ids.slice(0, MAX_QUOTED_IDS), `…and ${ids.length - MAX_QUOTED_IDS} more`]
+		: ids;
 
 const titleOf = ({ label, description }: WebMCPChoice): string =>
 	[toolText(label), toolText(description)].filter(Boolean).join(': ');
@@ -167,7 +179,7 @@ export function createChoiceTool(options: WebMCPChoiceToolOptions) {
 				`[WebMCP] ${choices.length} options for ${options.name}; agents see ${options.limit}.`
 			);
 		}
-		for (const { choice, source } of choices.slice(0, options.limit)) {
+		choices.forEach(({ choice, source }, index) => {
 			const consequential = Boolean(choice.consequential);
 			// One tool has one exposure: options for different origins cannot share it.
 			const exposure = JSON.stringify(choice.exposedTo ?? null);
@@ -176,17 +188,21 @@ export function createChoiceTool(options: WebMCPChoiceToolOptions) {
 				surface: choice.surface,
 				consequential,
 				exposedTo: choice.exposedTo,
-				choices: []
+				choices: [],
+				omitted: 0
 			};
+			groups.set(key, entry);
+			// Past the limit, an option is only counted: the tool says how many it leaves out.
+			if (index >= options.limit) {
+				entry.omitted += 1;
+				return;
+			}
 			const id = idFor(choice, source, new Set(entry.choices.map((item) => item.id)));
 			if (id) entry.choices.push({ id, choice });
-			groups.set(key, entry);
-		}
-		if (options.read) {
-			for (const [key, entry] of groups) {
-				separateHomonyms(entry);
-				if (entry.choices.length === 0) groups.delete(key);
-			}
+		});
+		for (const [key, entry] of groups) {
+			if (options.read) separateHomonyms(entry);
+			if (entry.choices.length === 0) groups.delete(key);
 		}
 		return groups;
 	}
@@ -198,15 +214,19 @@ export function createChoiceTool(options: WebMCPChoiceToolOptions) {
 
 	function buildTool(key: string, entry: Group) {
 		const { param } = options;
-		const description = entry.consequential
-			? options.consequentialDescription
-			: options.description;
+		const description = [
+			entry.consequential ? options.consequentialDescription : options.description,
+			mustBeRead(entry) &&
+				`Options numbered like "(2 of 3)" read the same: call ${readName(entry)} first to tell them apart.`,
+			entry.omitted > 0 &&
+				`${entry.omitted} more ${entry.omitted === 1 ? 'is' : 'are'} on the page but not listed, as the list holds only the first ${options.limit}.${options.beyondLimit ? ` ${options.beyondLimit}` : ''}`
+		]
+			.filter(Boolean)
+			.join(' ');
 		return {
 			name: entry.consequential ? options.consequentialName : options.name,
 			title: options.title,
-			description: mustBeRead(entry)
-				? `${description} Options numbered like "(2 of 3)" read the same: call ${readName(entry)} first to tell them apart.`
-				: description,
+			description,
 			inputSchema: {
 				type: 'object',
 				properties: {
@@ -228,9 +248,24 @@ export function createChoiceTool(options: WebMCPChoiceToolOptions) {
 				const fresh = group().get(key);
 				const option = fresh?.choices.find(({ id }) => id === input[param]);
 				const picked = option?.choice;
-				if (!option || !fresh || !picked || picked.available?.() === false) {
+				const current = quoteIds(fresh?.choices.map(({ id }) => id) ?? []);
+				if (!option || !fresh || !picked) {
 					refresh();
-					return { status: 'unavailable', message: 'This cannot be used right now.' };
+					return {
+						status: 'unavailable',
+						[param]: input[param],
+						message: `"${String(input[param])}" is not on the page any more: the list changed. Pick one of the current ids, which the tool now lists as well.`,
+						current
+					};
+				}
+				if (picked.available?.() === false) {
+					refresh();
+					return {
+						status: 'unavailable',
+						[param]: input[param],
+						message: `"${titleOf(picked)}" cannot be used right now: it is disabled, hidden or covered by a dialog, as it would be for the user. Try again once the page allows it, or pick another id.`,
+						current
+					};
 				}
 				// Unread, or it now belongs to another row: the agent cannot know what it would hit.
 				if (option.context && reads.get(key)?.get(picked.key) !== option.context) {
@@ -242,8 +277,13 @@ export function createChoiceTool(options: WebMCPChoiceToolOptions) {
 				try {
 					await picked.run();
 				} catch {
-					// The app's handler threw; its message is not written for a model.
-					return { status: 'failed', [param]: input[param] };
+					// The app's handler threw; its message is not written for a model, so say only that.
+					schedule();
+					return {
+						status: 'failed',
+						[param]: input[param],
+						message: `The app's own handler for "${titleOf(picked)}" failed, so the action may not have happened. Check the page before trying again, and tell the user if it keeps failing.`
+					};
 				}
 				// Acting often changes what is on screen, including what the options say.
 				schedule();

@@ -15,6 +15,7 @@
 	// What the Field wrapper and the field controller consume from an entry; everything else on
 	// a registered entry belongs to its component.
 	const FIELD_ENTRY_KEYS = new Set([
+		'id',
 		'type',
 		'visible',
 		'tool',
@@ -67,8 +68,10 @@
 		itemClass?: string;
 	} = $props();
 
-	const id = $props.id();
+	const generatedId = $props.id();
 	const initialInput = untrack(() => input);
+	// An entry's `id` names its control: `field.controlAttrs` and the label `for` carry it.
+	const id = initialInput.id || generatedId;
 	let value = $state<FieldValue<FieldType> | null>(
 		(initialInput.value === undefined
 			? (initialInput.defaultValue ?? null)

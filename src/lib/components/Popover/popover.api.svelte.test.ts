@@ -51,6 +51,7 @@ describe('PopoverApi types (CX-9)', () => {
 			| 'activeTrigger'
 			| 'placement'
 			| 'triggerProps'
+			| 'triggerAttributes'
 			| 'payload'
 			| 'open'
 			| 'close'

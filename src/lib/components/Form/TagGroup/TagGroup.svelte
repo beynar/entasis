@@ -1,6 +1,8 @@
 <script lang="ts" generics="Option extends TagGroupOption">
+	import { untrack } from 'svelte';
 	import Chip from '../../Chip/Chip.svelte';
 	import Field from '../Field/Field.svelte';
+	import { resolveControlId } from '../Field/field.aria.js';
 	import { createFieldState } from '../Field/field.state.svelte.js';
 	import type { TagGroupOption, TagGroupProps, TagGroupValue } from './tagGroup.props.js';
 	import { useTagGroupTheme } from './tagGroup.theme.js';
@@ -32,6 +34,7 @@
 		visible,
 		fieldAttrs,
 		class: className,
+		id: idProp,
 		...rest
 	}: TagGroupProps<Option> = $props();
 	const valueState = createBindableValue<TagGroupValue>(
@@ -42,7 +45,8 @@
 		() => defaultValue
 	);
 
-	const id = $props.id();
+	const generatedId = $props.id();
+	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const resolvedColor = $derived(useDefaultColor(color));
 
 	const toValues = (nextValue: TagGroupValue | undefined) => {

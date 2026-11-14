@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'vitest';
-import { controlAccepts, fieldToolSchema, fitsToolSchema, toFieldValue } from './form.webmcp.js';
+import {
+	controlAccepts,
+	controlRefusal,
+	fieldToolSchema,
+	fitsToolSchema,
+	toFieldValue,
+	toolSchemaProblem
+} from './form.webmcp.js';
 import type { FormValueInput } from './form.js';
 import type { WebMCPJsonSchema } from '$lib/utils/webmcp/webmcp.types.js';
 
@@ -167,5 +174,68 @@ describe('toFieldValue', () => {
 		expect(
 			toFieldValue({ type: 'time', as: 'minuteSinceMidnight' } as FormValueInput, '01:30')
 		).toBe(90);
+	});
+});
+
+describe('a disabled option the value already holds', () => {
+	const tags = {
+		type: 'checkboxes',
+		items: [
+			{ value: 'a', label: 'A' },
+			{ value: 'legacy', label: 'Legacy', disabled: true },
+			{ value: 'gone', label: 'Gone', disabled: true }
+		]
+	} as unknown as FormValueInput;
+	const plan = { type: 'select', items: plans } as unknown as FormValueInput;
+
+	test('stays in the schema, which tells the agent to keep it', () => {
+		const schema = fieldToolSchema(tags, ['legacy']);
+		expect((schema?.items as WebMCPJsonSchema).enum).toEqual(['a', 'legacy']);
+		expect(schema?.description).toBe(
+			'"Legacy" is disabled: keep it in the list, as the user cannot remove it either.'
+		);
+		expect(fieldToolSchema(plan, 'corp')?.enum).toEqual(['free', 'team', 'corp']);
+		expect(fieldToolSchema(plan, 'corp')?.description).toBe(
+			'"Corporate" is disabled: keep it or pick another option.'
+		);
+	});
+
+	test('cannot be removed from a list, nor added, and the refusal says why', () => {
+		expect(controlRefusal(tags, ['legacy', 'a'], ['legacy'])).toBeNull();
+		expect(controlRefusal(tags, ['a'], ['legacy'])).toBe(
+			'"Legacy" is disabled and already selected: keep it in the list, as the user cannot remove it either.'
+		);
+		expect(controlRefusal(tags, null, ['legacy'])).toMatch(/"Legacy" is disabled/);
+		expect(controlRefusal(tags, ['legacy', 'gone'], ['legacy'])).toBe(
+			'"Gone" is disabled: it cannot be picked, by the user either.'
+		);
+	});
+
+	test('a single choice may move off it, as a person can, but not onto one', () => {
+		expect(controlRefusal(plan, 'free', 'corp')).toBeNull();
+		expect(controlRefusal(plan, 'corp', 'corp')).toBeNull();
+		expect(controlRefusal(plan, 'corp', 'free')).toMatch(/"Corporate" is disabled/);
+	});
+});
+
+describe('toolSchemaProblem', () => {
+	test('says what is wrong and what fits', () => {
+		expect(toolSchemaProblem({ type: 'string', enum: ['free', 'team'] }, 'corp')).toBe(
+			'Not one of the options: "free", "team".'
+		);
+		expect(toolSchemaProblem({ type: 'string', maxLength: 3 }, 'long')).toBe(
+			'At most 3 characters.'
+		);
+		expect(toolSchemaProblem({ type: 'number', minimum: 1 }, 0)).toBe('The least is 1.');
+		expect(
+			toolSchemaProblem({ type: 'array', items: { type: 'string', enum: ['a'] } }, ['a', 'b'])
+		).toBe('Item 2: Not one of the options: "a".');
+		expect(
+			toolSchemaProblem(
+				{ type: 'object', properties: { amount: {} }, additionalProperties: false },
+				{ admin: true }
+			)
+		).toBe('No property "admin": use "amount".');
+		expect(toolSchemaProblem({ type: 'string' }, 'ok')).toBeNull();
 	});
 });

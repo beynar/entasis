@@ -43,6 +43,7 @@ describe('DialogApi types (CX-9)', () => {
 			| 'computedType'
 			| 'currentSnapPoint'
 			| 'triggerProps'
+			| 'triggerAttributes'
 			| 'open'
 			| 'close'
 			| 'toggle'
