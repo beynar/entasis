@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.21.0 — 2026-11-14
+
 ### Changed
 
 - `AIComposer` steps its text up to 16px and its footer buttons up to 36px on a touch screen
