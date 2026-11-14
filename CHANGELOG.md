@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.20.0 — 2026-11-14
+
 ### Added
 
 - `AIComposer`: `onSubmit` may answer `false` to hold a message back without an error. The draft
