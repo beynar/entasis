@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.23.0 — 2026-11-14
+
 ### Added
 
 - `Dialog` (drawers included) and `Popover` take `dismissible={false}`: Escape, an outside press,
