@@ -6,6 +6,19 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `AIComposer`: `onSubmit` may answer `false` to hold a message back without an error. The draft
+  and its files stay in the composer and no alert shows, for an app that asks a question before
+  sending and lets the person go back to their message. Before, only a throw kept the draft, and it
+  showed as a failure.
+- `Chip` takes `label` (its `aria-label`) and `title`, so a chip that acts can say what it does
+  when its text does not: « Léa écoute ce fil » that stops listening on a click is named « Ne plus
+  écouter ce fil ». A static chip, which has no role to name, ignores `label`.
+- `Card` has a `media` slot: a face, an icon or a thumbnail before the title, with the title and
+  description lined up beside it and the action kept at the far end. A theme part of the same name
+  styles it.
+
 ## 0.19.5 — 2026-11-12
 
 ### Fixed

@@ -30,7 +30,7 @@
 		voiceInput?: boolean;
 		maxTokens?: number;
 		queue?: AIComposerQueuedMessage[];
-		onSubmit?: (payload: AIComposerSubmitPayload) => void;
+		onSubmit?: (payload: AIComposerSubmitPayload) => unknown;
 	} = $props();
 
 	let composer: AIComposerHandle | undefined = $state();
@@ -45,10 +45,11 @@
 		{ id: 'fast', label: 'Fast', provider: 'Entasis', contextWindow: 128_000 }
 	];
 
-	async function submit(payload: AIComposerSubmitPayload): Promise<void> {
-		onSubmit?.(payload);
+	async function submit(payload: AIComposerSubmitPayload): Promise<void | boolean> {
+		const answer = await onSubmit?.(payload);
 		await new Promise((resolve) => setTimeout(resolve, 20));
 		if (fail) throw new Error('The endpoint is unavailable.');
+		if (answer === false) return false;
 	}
 </script>
 

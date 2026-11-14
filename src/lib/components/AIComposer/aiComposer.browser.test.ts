@@ -75,6 +75,23 @@ describe('sending', () => {
 		await expect.poll(editorFocused).toBe(true);
 	});
 
+	test('an onSubmit that answers false keeps the draft without an alert', async () => {
+		const onSubmit = vi.fn(async () => false);
+		mount({ onSubmit });
+		await typeInEditor('Not yet');
+		await userEvent.keyboard('{Enter}');
+		await expect.poll(() => onSubmit.mock.calls.length).toBe(1);
+		await expect.poll(editorFocused).toBe(true);
+		expect(editor().textContent).toBe('Not yet');
+		expect(composer().querySelector('[role="alert"]')).toBeNull();
+
+		// The same draft goes once onSubmit lets it.
+		onSubmit.mockImplementation(async () => true);
+		await userEvent.click(button('Send message'));
+		await expect.poll(() => onSubmit.mock.calls.length).toBe(2);
+		await expect.poll(() => editor().textContent).toBe('');
+	});
+
 	test('clicking Send keeps focus in the editor (WebKit does not focus a clicked button)', async () => {
 		const onSubmit = vi.fn();
 		mount({ onSubmit });

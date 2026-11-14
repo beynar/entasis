@@ -85,7 +85,7 @@ type CardBaseProps = {
 
 type CardSlotProps = WithSlot<
 	CardBaseProps,
-	'header' | 'title' | 'description' | 'content' | 'footer' | 'children'
+	'header' | 'media' | 'title' | 'description' | 'content' | 'footer' | 'children'
 >;
 
 export type CardProps = WithAttachments<

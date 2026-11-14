@@ -3,6 +3,7 @@
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { Card, type CardElevation } from '$lib/components/Card/index.js';
 	import Button from '$lib/components/Button/Button.svelte';
+	import Avatar from '$lib/components/Avatar/Avatar.svelte';
 	import { colors, densities, sizes } from '$lib/utils/tokens.js';
 	import { createComponentControls } from '../../componentControls.svelte.js';
 	import { Form } from '$lib/components/Form/Form/index.js';
@@ -100,6 +101,28 @@
 			description="Every rendering prop, live — variant, color, size, density, section borders and disabled."
 		>
 			<CardPlayground />
+		</ComponentCard>
+
+		<ComponentCard
+			title="Media"
+			description="A face, an icon or a thumbnail before the title: the title and description line up beside it, and the action keeps the far end."
+			code={`<Card title="Import" description="Relance des factures en retard">
+	{#snippet media()}
+		<Avatar name="Import" size="large" />
+	{/snippet}
+	{#snippet action()}
+		<Button size="small" variant="ghost">Open</Button>
+	{/snippet}
+</Card>`}
+		>
+			<Card class="w-full max-w-sm" title="Import" description="Relance des factures en retard">
+				{#snippet media()}
+					<Avatar name="Import" size="large" />
+				{/snippet}
+				{#snippet action()}
+					<Button size="small" variant="ghost">Open</Button>
+				{/snippet}
+			</Card>
 		</ComponentCard>
 
 		<ComponentCard

@@ -67,8 +67,9 @@ export class AIComposerSubmitController {
 		this.isSubmitting = true;
 		this.error = undefined;
 		try {
-			await this.dispatch(meta, event);
-			options.clearDraft();
+			// `false` from onSubmit: the app held the message back on purpose, so the draft stays
+			// and nothing failed.
+			if (await this.dispatch(meta, event)) options.clearDraft();
 		} catch (error) {
 			this.error = getErrorMessage(error, options.messages.submitFailed);
 		} finally {
@@ -97,16 +98,18 @@ export class AIComposerSubmitController {
 		return this.optionsSource();
 	}
 
-	/** Hands the draft to `onSubmit` or the conversation; a rejection keeps the draft. */
+	/**
+	 * Hands the draft to `onSubmit` or the conversation, and answers whether it went: a rejection
+	 * keeps the draft with an error, `false` from `onSubmit` keeps it without one.
+	 */
 	private async dispatch(
 		meta: AIComposerSubmitMeta,
 		event: AIComposerSubmitEvent | undefined
-	): Promise<void> {
+	): Promise<boolean> {
 		const options = this.options;
 		const detail: AIComposerSubmitPayload = { ...meta, event, steered: false };
 		if (options.onSubmit) {
-			await options.onSubmit(detail);
-			return;
+			return (await options.onSubmit(detail)) !== false;
 		}
 		if (!options.conversation) {
 			throw new Error('AIComposer requires onSubmit or a parent AIConversation.');
@@ -116,6 +119,7 @@ export class AIComposerSubmitController {
 			event,
 			meta
 		});
+		return true;
 	}
 }
 

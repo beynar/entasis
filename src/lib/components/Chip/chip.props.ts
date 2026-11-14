@@ -46,6 +46,15 @@ export type ChipProps = WithAttachments<
 			onpointerenter?: (event: PointerEvent) => void;
 			/** Native pointer leave handler. */
 			onpointerleave?: (event: PointerEvent) => void;
+			/**
+			 * Accessible name, applied as `aria-label`. It names what the chip does when its text
+			 * alone does not: a chip reading « Léa écoute ce fil » that stops listening on a click is
+			 * labelled « Ne plus écouter ce fil ». Only a chip that acts (`onclick` or `href`) takes
+			 * it: a static chip has no role to name.
+			 */
+			label?: string;
+			/** Tooltip text the browser shows on hover, applied as the native `title`. */
+			title?: string;
 			/** Theme overrides for the chip, prefix, and suffix parts. */
 			theme?: ChipThemeProps;
 		},

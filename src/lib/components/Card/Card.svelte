@@ -24,6 +24,7 @@
 		showBorders = false,
 		theme,
 		header,
+		media,
 		title,
 		description,
 		action,
@@ -35,7 +36,8 @@
 
 	const classes = $derived(useCardTheme(theme));
 
-	const hasHeader = $derived(!!(header || title || description || action));
+	const hasHeader = $derived(!!(header || media || title || description || action));
+	const hasMedia = $derived(!!media);
 	const hasContent = $derived(!!(content || children));
 	const hasFooter = $derived(!!footer);
 	const hasHeaderBorder = $derived(showBorders && hasHeader && hasContent);
@@ -131,18 +133,19 @@
 		attrs={{
 			'data-color': color
 		}}
-		class={classes.header({ density, hasAction, hasBorder: hasHeaderBorder, variant })}
+		class={classes.header({ density, hasAction, hasMedia, hasBorder: hasHeaderBorder, variant })}
 	>
-		<Slot render={title} class={classes.title({ size, variant })} />
-		<Slot render={description} class={classes.description({ size, variant })} />
+		<Slot render={media} class={classes.media({ twoLines: !!(title && description) })} />
+		<Slot render={title} class={classes.title({ size, variant, hasMedia })} />
+		<Slot render={description} class={classes.description({ size, variant, hasMedia })} />
 
 		{#if action}
 			{#if isButtonProps(action)}
-				{@const actionClass = classes.action({ class: action.class })}
+				{@const actionClass = classes.action({ hasMedia, class: action.class })}
 				{@const actionWithoutClass = { ...action, class: undefined }}
 				<Button size="small" variant="ghost" {...actionWithoutClass} class={actionClass} />
 			{:else}
-				<Slot render={action} class={classes.action()} />
+				<Slot render={action} class={classes.action({ hasMedia })} />
 			{/if}
 		{/if}
 	</Slot>

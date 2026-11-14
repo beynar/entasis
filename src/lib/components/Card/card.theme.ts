@@ -115,6 +115,10 @@ const defaultCardHeader = cva({
 			true: 'grid-cols-[1fr_auto]',
 			false: ''
 		},
+		hasMedia: {
+			true: 'gap-x-md grid-cols-[auto_1fr]',
+			false: ''
+		},
 		hasBorder: {
 			true: 'border-b border-neutral-muted',
 			false: ''
@@ -129,9 +133,11 @@ const defaultCardHeader = cva({
 	defaultVariants: {
 		density: 'normal',
 		hasAction: false,
+		hasMedia: false,
 		hasBorder: false
 	},
 	compoundVariants: [
+		{ hasMedia: true, hasAction: true, class: 'grid-cols-[auto_1fr_auto]' },
 		{ hasBorder: true, density: 'compact', class: 'pb-lg' },
 		{ hasBorder: true, density: 'normal', class: 'pb-xl' },
 		{ hasBorder: true, density: 'comfortable', class: 'pb-layout-md' }
@@ -151,10 +157,15 @@ const defaultCardTitle = cva({
 			outline: 'text-color-readable group-data-[color=neutral]/card:text-neutral',
 			soft: 'text-color-muted-readable',
 			ghost: 'text-color-readable group-data-[color=neutral]/card:text-neutral'
+		},
+		hasMedia: {
+			true: 'col-start-2 min-w-0 self-center',
+			false: ''
 		}
 	},
 	defaultVariants: {
-		size: 'normal'
+		size: 'normal',
+		hasMedia: false
 	}
 });
 
@@ -171,15 +182,43 @@ const defaultCardDescription = cva({
 			outline: '',
 			soft: 'text-color-muted-readable',
 			ghost: ''
+		},
+		hasMedia: {
+			true: 'col-start-2 min-w-0',
+			false: ''
 		}
 	},
 	defaultVariants: {
-		size: 'normal'
+		size: 'normal',
+		hasMedia: false
 	}
 });
 
 const defaultCardAction = cva({
-	base: 'col-start-2 row-span-2 row-start-1 self-start justify-self-end'
+	base: 'col-start-2 row-span-2 row-start-1 self-start justify-self-end',
+	variants: {
+		hasMedia: {
+			true: 'col-start-3',
+			false: ''
+		}
+	},
+	defaultVariants: {
+		hasMedia: false
+	}
+});
+
+// A face, an icon or a thumbnail before the title, centred on the title and description beside it.
+const defaultCardMedia = cva({
+	base: 'col-start-1 row-start-1 flex shrink-0 items-center self-center',
+	variants: {
+		twoLines: {
+			true: 'row-span-2',
+			false: ''
+		}
+	},
+	defaultVariants: {
+		twoLines: false
+	}
 });
 
 const defaultCardContent = cva({
@@ -232,6 +271,7 @@ const defaultCardFooter = cva({
 export const cardTheme = {
 	root: defaultCard,
 	header: defaultCardHeader,
+	media: defaultCardMedia,
 	title: defaultCardTitle,
 	description: defaultCardDescription,
 	action: defaultCardAction,

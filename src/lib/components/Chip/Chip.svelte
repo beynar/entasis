@@ -22,6 +22,8 @@
 		href,
 		type = 'button',
 		disabled,
+		label,
+		title,
 		theme,
 		...attachments
 	}: ChipProps = $props();
@@ -50,6 +52,8 @@
 	aria-pressed={as === 'button' ? selected : undefined}
 	aria-current={as === 'a' && selected ? true : undefined}
 	aria-disabled={as !== 'button' && disabled ? true : undefined}
+	aria-label={as === 'div' ? undefined : label}
+	{title}
 	{onclick}
 	{onpointerenter}
 	{onpointerleave}

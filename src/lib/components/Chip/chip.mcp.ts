@@ -51,6 +51,8 @@ The Chip component is a compact element for displaying tags, labels, categories,
 - **children**: Snippet - Main chip content
 - **prefix**: Snippet - Content before main text (typically icons)
 - **suffix**: Snippet - Content after main text (typically close buttons or icons)
+- **label**: string - Accessible name (\`aria-label\`) of a chip that acts (\`onclick\` or \`href\`), for when its text does not say what it does
+- **title**: string - Native hover hint
 
 ### Styling Props
 - **class**: string - Additional CSS classes

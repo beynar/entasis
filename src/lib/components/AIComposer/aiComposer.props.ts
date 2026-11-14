@@ -278,9 +278,11 @@ export type AIComposerProps = WithAttachments<
 		/**
 		 * Handles a submission, queued submission, or steering message. The draft clears once it
 		 * returns or its promise resolves; a throw or rejection keeps the draft and shows the error.
+		 * Returning (or resolving to) `false` holds the message back without an error: the draft and
+		 * its files stay, and no alert shows, as when the person chooses to go back to their message.
 		 * Focus returns to the editor either way.
 		 */
-		onSubmit?: (payload: AIComposerSubmitPayload) => void | Promise<void>;
+		onSubmit?: (payload: AIComposerSubmitPayload) => void | boolean | Promise<void | boolean>;
 		/** Requests that the active response stop. */
 		onStop?: () => void | Promise<void>;
 		/**
