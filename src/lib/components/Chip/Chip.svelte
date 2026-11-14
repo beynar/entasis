@@ -31,7 +31,9 @@
 	const classes = $derived(useChipTheme(theme));
 	const resolvedColor = $derived(useDefaultColor(color));
 	const link = $derived(safeHref(href));
-	const as = $derived(link ? 'a' : onclick || onpointerenter || onpointerleave ? 'button' : 'div');
+	// A static chip is a `<span>`, like its prefix and suffix wrappers: a chip sits in running text
+	// (a paragraph, a button, a link), where only phrasing content is valid.
+	const as = $derived(link ? 'a' : onclick || onpointerenter || onpointerleave ? 'button' : 'span');
 	const isEmpty = $derived(!children && !prefix && !suffix);
 </script>
 
@@ -52,7 +54,7 @@
 	aria-pressed={as === 'button' ? selected : undefined}
 	aria-current={as === 'a' && selected ? true : undefined}
 	aria-disabled={as !== 'button' && disabled ? true : undefined}
-	aria-label={as === 'div' ? undefined : label}
+	aria-label={as === 'span' ? undefined : label}
 	{title}
 	{onclick}
 	{onpointerenter}
@@ -69,7 +71,7 @@
 	})}
 	{...attachments}
 >
-	<Slot render={prefix} class={classes.prefix({ size })} />
+	<Slot as="span" render={prefix} class={classes.prefix({ size })} />
 	<Slot render={children} />
-	<Slot render={suffix} class={classes.suffix({ size })} />
+	<Slot as="span" render={suffix} class={classes.suffix({ size })} />
 </svelte:element>

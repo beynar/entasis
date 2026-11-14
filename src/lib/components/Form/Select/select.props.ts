@@ -1,4 +1,4 @@
-import type { Density } from '$lib/types/theme.js';
+import type { Colors, Density } from '$lib/types/theme.js';
 import type { Messages } from '$lib/i18n/en.js';
 import type { OpenChangeHandler } from '$lib/utils/openChange.js';
 import type { InputProps } from '../Field/field.js';
@@ -78,6 +78,12 @@ type SelectSharedProps = {
 	 * @default false
 	 */
 	clearable?: boolean;
+	/**
+	 * Semantic colour of the button that clears the selection. Clearing is not an error, so an
+	 * app whose red only means a failure can pass `'neutral'`.
+	 * @default 'danger'
+	 */
+	clearColor?: Colors;
 	/**
 	 * Autofill token, such as `country` or `address-level1`. The Select then renders a visually
 	 * hidden text input the browser can autofill; the filled text selects the option whose value

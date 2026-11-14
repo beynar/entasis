@@ -12,6 +12,8 @@ export const dialogDataAttributes = {
 	'data-type':
 		'On the root and the panel: the type actually shown (`modal`, `drawerBottom`, ...), after responsive records and the mobile-sheet fallback resolve.',
 	'data-modal': 'On the root: `true` or `false`, whether the dialog is modal.',
+	'data-covered':
+		'On the panel: present while a modal dialog is open above this one. The default theme dims the panel (a `brightness` filter that transitions), as the backdrop dims the page.',
 	'data-popup-open':
 		'On the trigger (the built-in button, or an element with `dialog.trigger` / `dialog.reference`): present while the dialog is open.',
 	'data-dialog-open': 'On `<html>`: present while at least one modal dialog is open.'

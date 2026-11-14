@@ -59,6 +59,7 @@
 		visible,
 		prefix,
 		suffix,
+		clearColor = 'danger',
 		description,
 		...rest
 	}: ComboboxProps = $props();
@@ -300,7 +301,7 @@
 			{#if showClear && !suffix}
 				<FieldActionButton
 					{size}
-					color="danger"
+					color={clearColor}
 					label={`${t.clear} ${t.selection}`}
 					disabled={field.disabled}
 					prefix={xIcon}

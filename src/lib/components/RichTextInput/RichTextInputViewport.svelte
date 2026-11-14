@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { on } from 'svelte/events';
 	import { untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { Edytor, type JSONDoc, type Plugin } from 'edytor';
@@ -205,13 +206,14 @@
 		if (readOnly && !disabled) root.setAttribute('tabindex', '0');
 		else root.removeAttribute('tabindex');
 		if (!onFocus && !onBlur) return;
-		const focus = (event: FocusEvent) => onFocus?.(event);
-		const blur = (event: FocusEvent) => onBlur?.(event);
-		root.addEventListener('focus', focus);
-		root.addEventListener('blur', blur);
+		// `on()` runs the handler outside any reaction: a browser can blur the editor while Svelte
+		// updates the block that removes it, and the handler writes `focused`
+		// (`state_unsafe_mutation` from a plain listener).
+		const stopFocus = on(root, 'focus', (event) => onFocus?.(event));
+		const stopBlur = on(root, 'blur', (event) => onBlur?.(event));
 		return () => {
-			root.removeEventListener('focus', focus);
-			root.removeEventListener('blur', blur);
+			stopFocus();
+			stopBlur();
 		};
 	});
 </script>

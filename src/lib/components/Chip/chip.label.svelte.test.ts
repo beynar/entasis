@@ -33,7 +33,7 @@ test('a static chip keeps its title but has no role to name', () => {
 	const { container } = render(Chip, {
 		props: { children: text('Draft'), label: 'ignored', title: 'Not sent yet' }
 	});
-	const chip = container.querySelector('[data-variant]')!;
+	const chip = container.querySelector('span[data-variant]')!;
 	expect(chip).not.toHaveAttribute('aria-label');
 	expect(chip).toHaveAttribute('title', 'Not sent yet');
 });

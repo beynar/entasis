@@ -58,7 +58,7 @@ const defaultNotice = cva({
 // the targets are reachable with a thumb. VoiceInput's buttons are excluded here: the footer gives
 // the VoiceInput its 36px `normal` size under the same conditions instead.
 const defaultFooter = cva({
-	base: 'flex min-w-0 items-center gap-md @max-md:[&_button:not([data-slot=ai-composer-voice-input]_button)]:h-control-lg pointer-coarse:[&_button:not([data-slot=ai-composer-voice-input]_button)]:h-control-lg'
+	base: 'flex min-w-0 items-center gap-md pointer-coarse:[&_button:not([data-slot=ai-composer-voice-input]_button)]:h-control-lg'
 });
 // The start group (attach, footerStart) may shrink; the end group (model, voice, queue,
 // stop/send) keeps priority so the send position never leaves the composer.

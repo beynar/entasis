@@ -230,19 +230,18 @@
 			})
 		)
 	);
+	// The template's top-level blocks are written back to back: whitespace between them would be
+	// text nodes beside the trigger, so a popover trigger in running text (a mention opening a
+	// HoverCard at the start of a message) would start a space to the right of the line.
 </script>
 
-{#snippet emptyCloseButton()}{/snippet}
-
-<!-- First in the template: what only an open popover needs (its layer, focus scope, safe area)
-     exists before the panel below reads it, and stays until the closing transition ends. -->
-{#if popover.sessionActive}
+{#snippet emptyCloseButton()}{/snippet}{#if popover.sessionActive}
+	<!-- First in the template: what only an open popover needs (its layer, focus scope, safe area)
+	     exists before the panel below reads it, and stays until the closing transition ends. -->
 	<PopoverSession {popover} />
-{/if}
-
-<!-- The panel is a child of the wrapper, so it is never re-parented mid-transition (which would
-     break the intro). It carries the visuals, transform-origin, and animation. -->
-{#snippet floatingPanel()}
+{/if}{#snippet floatingPanel()}
+	<!-- The panel is a child of the wrapper, so it is never re-parented mid-transition (which would
+	     break the intro). It carries the visuals, transform-origin, and animation. -->
 	<div
 		{@attach popover.panel}
 		{...popover.panelAttributes}
@@ -282,11 +281,9 @@
 			</button>
 		{/if}
 	</div>
-{/snippet}
-
-<!-- Trigger first: an inline panel then follows it in the document flow. Floating and
-     mobile-sheet panels portal out, so source order does not reach them. -->
-{#if trigger}
+{/snippet}{#if trigger}
+	<!-- Trigger first: an inline panel then follows it in the document flow. Floating and
+	     mobile-sheet panels portal out, so source order does not reach them. -->
 	{#if typeof trigger === 'function'}
 		{@render trigger?.(popover)}
 	{:else if typeof trigger !== 'boolean'}
@@ -301,15 +298,11 @@
 			{@attach popover.reference}
 		/>
 	{/if}
-{/if}
-
-<!-- A screen reader reads a portaled panel straight after its trigger when the trigger's
-     container owns it; the span is out of the layout and names no content of its own. -->
-{#if trigger && typeof trigger !== 'boolean' && popover.tabBridgeActive}
+{/if}{#if trigger && typeof trigger !== 'boolean' && popover.tabBridgeActive}
+	<!-- A screen reader reads a portaled panel straight after its trigger when the trigger's
+	     container owns it; the span is out of the layout and names no content of its own. -->
 	<span class="sr-only" aria-owns={popover.id}></span>
-{/if}
-
-{#if popover.isMobileSheet}
+{/if}{#if popover.isMobileSheet}
 	<Dialog
 		id={popover.id}
 		open={popover.isOpen}

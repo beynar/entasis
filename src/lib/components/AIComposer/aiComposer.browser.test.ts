@@ -254,15 +254,14 @@ describe('phone width', () => {
 		expect(rect(attach).right).toBeLessThanOrEqual(rect(trigger).left);
 		expect(rect(trigger).right).toBeLessThanOrEqual(rect(send).left);
 		expect(rect(send).right).toBeLessThanOrEqual(rect(composer()).right);
-		// Touch-sized controls and at least 16px editor text (no iOS focus zoom) on a narrow composer.
-		expect(rect(send).height).toBe(36);
-		expect(parseFloat(getComputedStyle(editor()).fontSize)).toBeGreaterThanOrEqual(16);
 	});
 
-	test('the mic grows to 36px with the other footer controls on a narrow composer', async () => {
+	test('a narrow composer with a mouse keeps the sizes of a wide one (a side panel)', async () => {
+		// Touch sizes (16px text, 36px controls) follow `pointer: coarse` only, not the width.
 		mount({ scenario: 'footer', width: 358, voiceInput: true });
-		await expect.poll(() => rect(button('Start voice recording')).height).toBe(36);
-		expect(rect(button('Send message')).height).toBe(36);
+		await expect.poll(() => rect(button('Start voice recording')).height).toBeLessThan(36);
+		expect(rect(button('Send message')).height).toBe(28);
+		expect(parseFloat(getComputedStyle(editor()).fontSize)).toBeLessThan(16);
 	});
 
 	test('a wide composer keeps 28px controls and the smaller text step', async () => {

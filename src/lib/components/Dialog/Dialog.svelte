@@ -226,6 +226,7 @@
 			<div
 				{@attach dialog.contentAttachment}
 				data-type={dialog.computedType}
+				data-covered={dialog.stackDepth > 0 ? '' : undefined}
 				{...dialog.stateAttributes}
 				style:transform={dialog.contentTransform}
 				style:transition={dialog.dragging || dialog.followsChild ? 'none' : undefined}

@@ -83,7 +83,8 @@ type Owner = keyof typeof owners;
 // echoes covered by each component's own tests. Each is still documented (checked below).
 const unobserved: Record<Owner, readonly string[]> = {
 	popover: ['data-anchor-hidden', 'data-uncentered'],
-	dialog: ['data-type', 'data-modal'],
+	// `data-covered` needs two stacked dialogs: dialog-swipe.svelte.test.ts checks it.
+	dialog: ['data-type', 'data-modal', 'data-covered'],
 	tooltip: ['data-anchor-hidden', 'data-instant', 'data-color', 'data-size', 'data-variant'],
 	hoverCard: ['data-anchor-hidden', 'data-state'],
 	menu: ['data-size', 'data-density'],

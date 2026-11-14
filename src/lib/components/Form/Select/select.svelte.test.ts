@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import SelectHarness from './SelectHarness.test.svelte';
 import type { SelectItems } from './select.props.js';
@@ -581,6 +581,15 @@ describe('Select id and clearable (SC-10)', () => {
 		expect(onValueChange).toHaveBeenCalledWith(null);
 		expect(trigger()).toHaveFocus();
 		expect(screen.queryByRole('button', { name: 'Clear selection' })).toBeNull();
+	});
+
+	test('the clear button is danger by default and takes clearColor', () => {
+		mount({ clearable: true, defaultValue: 'banana' });
+		const clear = () => screen.getByRole('button', { name: 'Clear selection' });
+		expect(clear()).toHaveAttribute('data-color', 'danger');
+		cleanup();
+		mount({ clearable: true, defaultValue: 'banana', clearColor: 'neutral' });
+		expect(clear()).toHaveAttribute('data-color', 'neutral');
 	});
 
 	test('shows no clear button until something is selected', () => {

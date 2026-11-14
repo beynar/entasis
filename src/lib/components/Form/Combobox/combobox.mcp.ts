@@ -69,6 +69,7 @@ A searchable dropdown component that supports both static arrays and async optio
   - Useful for async options with pre-selected values
 
 - **placeholder**: \`string\` (default: \`''\`)
+- **clearColor**: \`Colors\` (default: \`'danger'\`) - Semantic colour of the clear button shown while a value is selected; pass \`'neutral'\` where red only means an error
   - Input placeholder text
 
 - **loadingText**: \`string\` (default: \`'Loading...'\`)

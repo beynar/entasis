@@ -405,6 +405,7 @@ Attributes are presence attributes (set while the state holds, omitted otherwise
 - \`data-type\`: On the root and the panel: the type actually shown (\`modal\`, \`drawerBottom\`, ...), after responsive records and the mobile-sheet fallback resolve.
 - \`data-modal\`: On the root: \`true\` or \`false\`, whether the dialog is modal.
 - \`data-popup-open\`: On the trigger (the built-in button, or an element with \`dialog.trigger\` / \`dialog.reference\`): present while the dialog is open.
+- \`data-covered\`: On the panel: present while a modal dialog is open above this one; the default theme dims the panel with a \`brightness\` filter that transitions.
 - \`data-dialog-open\`: On \`<html>\`: present while at least one modal dialog is open.
 
 **CSS variables**
@@ -457,7 +458,7 @@ In a \`drawerBottom\` (or a modal collapsed into a mobile sheet), while a text f
 
 ## Notes
 
-- Multiple dialogs can be stacked
+- Multiple dialogs can be stacked: a dialog covered by a modal one above it shrinks back, its content fades, and its panel takes \`data-covered\`, which the default theme dims with a \`brightness\` filter that transitions with the dialog opening above, so only the top one reads as the dialog to answer
 - Last opened dialog receives focus
 - Background overlay prevents interaction with page
 - Scroll locking prevents background scroll

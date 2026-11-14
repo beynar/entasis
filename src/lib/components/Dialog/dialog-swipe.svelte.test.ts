@@ -8,7 +8,6 @@ import { fireEvent, render, screen } from '@testing-library/svelte';
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import Harness from './dialogSwipeHarness.test.svelte';
 import StackHarness from './dialogStackSwipeHarness.test.svelte';
-import { DIALOG_Z_BASE } from './dialog.state.svelte.js';
 import type { DialogProps } from './dialog.props.js';
 import type { OpenChangeDetails } from '$lib/utils/openChange.js';
 
@@ -86,9 +85,7 @@ const panel = () => {
 	return node;
 };
 const backdrop = () => {
-	const node = document.querySelector(
-		`div[style*="z-index: ${DIALOG_Z_BASE - 1}"]`
-	)?.firstElementChild;
+	const node = document.querySelector('[data-dialog-backdrop]')?.firstElementChild;
 	if (!(node instanceof HTMLElement)) throw new Error('dialog backdrop not rendered');
 	return node;
 };
@@ -574,6 +571,26 @@ describe('Dialog swipe in right-to-left scrollers (CX-14)', () => {
 });
 
 describe('Dialog stack follows a child swipe (OV-12)', () => {
+	test('a dialog covered by a modal one is marked covered, which the theme dims', async () => {
+		render(StackHarness);
+		const panelOf = (root: HTMLElement) => root.firstElementChild!.firstElementChild as HTMLElement;
+		const [parent] = await screen.findAllByRole('dialog');
+		expect(panelOf(parent)).not.toHaveAttribute('data-covered');
+
+		await fireEvent.click(await screen.findByRole('button', { name: 'Open child' }));
+		const [covered, top] = await screen.findAllByRole('dialog');
+		expect(panelOf(covered)).toHaveAttribute('data-covered');
+		expect(panelOf(top)).not.toHaveAttribute('data-covered');
+		expect(panelOf(covered).className).toContain('data-covered:brightness-60');
+	});
+
+	test('a non-modal dialog above does not cover the one beneath', async () => {
+		render(StackHarness, { props: { modal: false } });
+		await fireEvent.click(await screen.findByRole('button', { name: 'Open child' }));
+		const [parent] = await screen.findAllByRole('dialog');
+		expect(parent.firstElementChild!.firstElementChild).not.toHaveAttribute('data-covered');
+	});
+
 	test("the parent's scale and fade track the child's drag progress", async () => {
 		render(StackHarness);
 		await fireEvent.click(await screen.findByRole('button', { name: 'Open child' }));

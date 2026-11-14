@@ -63,7 +63,7 @@ export const defaultDialogBackdrop = cva({
 });
 
 export const defaultDialogContent = cva({
-	base: 'z-10 relative px-xl py-md raised-xl h-fit bg-surface-floating text-neutral rounded-xl flex flex-col z-50 will-change-transform transition-transform duration-normal ease-standard',
+	base: 'z-10 relative px-xl py-md raised-xl h-fit bg-surface-floating text-neutral rounded-xl flex flex-col z-50 will-change-transform transition-[transform,filter] duration-normal ease-standard data-covered:brightness-60 dark:data-covered:brightness-40',
 	variants: {
 		size: {
 			small: 'max-w-md w-full',

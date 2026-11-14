@@ -49,6 +49,7 @@
 		multiple = false as Multiple,
 		formatValue,
 		clearable = false,
+		clearColor = 'danger',
 		autocomplete,
 		separators = true,
 		alignItemWithTrigger = true,
@@ -396,7 +397,7 @@
 			{#if clearable && hasValue && !field.readOnly && !field.disabled}
 				<FieldActionButton
 					{size}
-					color="danger"
+					color={clearColor}
 					class="relative"
 					label={`${t.clear} ${t.selection}`}
 					prefix={xIcon}

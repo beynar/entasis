@@ -3,9 +3,10 @@ import type { RichTextInputThemeProps } from '../RichTextInput/richTextInput.the
 // Composer chrome around the editor. Inline tokens carry `data-ai-token="<kind>"`, so each kind
 // gets its own tint here without reaching into the editor's token node: commands read as
 // actions (primary), mentions as people (info), skills as tools (success); files and references
-// keep the neutral pill. On a narrow composer or a touch screen the text steps up to 16px, which
-// also stops iOS Safari from zooming the page when the editor takes focus.
-const touchText = '@max-md:text-base pointer-coarse:text-base';
+// keep the neutral pill. On a touch screen the text steps up to 16px, which stops iOS Safari from
+// zooming the page when the editor takes focus; a narrow composer on a desktop (a side panel)
+// keeps the text of the composers beside it.
+const touchText = 'pointer-coarse:text-base';
 const tokenTints = [
 	'[&_[data-ai-token=command]]:border-primary-muted [&_[data-ai-token=command]]:bg-primary-muted [&_[data-ai-token=command]]:text-primary-muted-readable',
 	'[&_[data-ai-token=mention]]:border-info-muted [&_[data-ai-token=mention]]:bg-info-muted [&_[data-ai-token=mention]]:text-info-muted-readable',

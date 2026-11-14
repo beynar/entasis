@@ -1,4 +1,4 @@
-import type { Density } from '$lib/types/theme.js';
+import type { Colors, Density } from '$lib/types/theme.js';
 import type { Messages } from '$lib/i18n/en.js';
 import type { InputProps } from '../Field/field.js';
 import type { ComboboxThemeProps } from './combobox.theme.js';
@@ -163,6 +163,12 @@ export type ComboboxProps = Omit<InputProps<'combobox'>, 'prefix' | 'onValueChan
 		onValueChange?: (payload: ComboboxValueChangePayload) => void;
 		/** Hint text shown in the search input when no option is selected. */
 		placeholder?: string;
+		/**
+		 * Semantic colour of the button that clears the selection. Clearing is not an error, so an
+		 * app whose red only means a failure can pass `'neutral'`.
+		 * @default 'danger'
+		 */
+		clearColor?: Colors;
 		/**
 		 * Prefix content. Set to `false` to hide the default magnifying glass icon.
 		 * If not provided, the magnifying glass icon is shown by default.

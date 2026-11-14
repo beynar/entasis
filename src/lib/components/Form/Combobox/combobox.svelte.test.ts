@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
 import ComboboxHarness from './ComboboxHarness.test.svelte';
 import type { ComboboxItems } from './combobox.props.js';
@@ -115,6 +115,15 @@ describe('Combobox open model', () => {
 		expect(document.activeElement).toBe(input());
 		expect(input().value).toBe('');
 		await waitFor(() => expect(input()).toHaveAttribute('aria-expanded', 'false'));
+	});
+
+	test('the clear button is danger by default and takes clearColor', () => {
+		mount({ defaultValue: 'apple' });
+		const clear = () => screen.getByRole('button', { name: 'Clear selection' });
+		expect(clear()).toHaveAttribute('data-color', 'danger');
+		cleanup();
+		mount({ defaultValue: 'apple', clearColor: 'neutral' });
+		expect(clear()).toHaveAttribute('data-color', 'neutral');
 	});
 
 	test('Clear empties the selection and keeps focus in the input', async () => {

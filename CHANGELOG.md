@@ -6,6 +6,35 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Changed
+
+- `AIComposer` steps its text up to 16px and its footer buttons up to 36px on a touch screen
+  (`pointer: coarse`) only. A narrow composer on a desktop, in a side panel, now keeps the 14px text
+  and 28px controls of a wide one, like the composers beside it; before, any composer under 28rem
+  grew.
+- A static `Chip` (no `href`, no `onclick`) renders a `<span>` instead of a `<div>`, and the prefix
+  and suffix wrappers of every chip are spans: a chip is valid inside a paragraph, a button or a
+  link, so a static chip in a Markdown message no longer breaks hydration
+  (`node_invalid_placement_ssr`). It looks the same.
+- Stacked dialogs: a dialog covered by a modal one above it now dims with the page. Its panel
+  takes `data-covered`, which the default theme turns into a `brightness` filter (0.6, 0.4 in dark
+  mode) that transitions as the dialog above opens, so only the top one reads as the dialog to
+  answer. Before, the covered panel stayed bright above the backdrop.
+
+### Added
+
+- `Select` and `Combobox` take `clearColor`, the semantic colour of their clear button (default
+  `'danger'`), for an app whose red only means an error.
+
+### Fixed
+
+- A `Popover` trigger in running text (a mention that opens a `HoverCard` at the start of a
+  message) no longer starts a space to the right of the line: whitespace between the Popover's
+  top-level blocks rendered as text nodes around the trigger.
+- Removing a focused `RichTextInput` or `AIComposer` from the page (changing room, closing a
+  thread) no longer throws `state_unsafe_mutation`: its blur handler wrote `focused` while Svelte
+  updated the block removing it.
+
 ## 0.20.0 — 2026-11-14
 
 ### Added

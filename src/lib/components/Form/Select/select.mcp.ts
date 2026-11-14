@@ -70,6 +70,7 @@ Extends all Field component props plus:
 - **multiple**: boolean (default: false) - Hold several values; the list stays open while options are toggled
 - **formatValue**: (options: SelectOption[]) => string - With \`multiple\`, the text the trigger shows for the selected options (default: two labels and \`+N\`)
 - **clearable**: boolean (default: false) - Adds a button that clears the selection (\`null\`, or \`[]\` with \`multiple\`) and returns focus to the trigger; hidden while empty, read-only or disabled
+- **clearColor**: Colors (default: 'danger') - Semantic colour of the clear button; pass \`'neutral'\` where red only means an error
 - **id**: string - Id of the trigger button, so an external \`<label for>\` can name it; without a \`label\` the trigger's placeholder fallback steps aside when such a label exists
 - **autocomplete**: string - Autofill token (\`country\`, \`address-level1\`...). Renders a visually hidden text input the browser can autofill; the filled text selects the option whose value matches, else whose label matches (ignoring case and accents). Autofill never opens the list and is ignored while disabled or read-only
 - **items**: readonly (SelectOption | SelectOptionGroup)[] - Flat \`{ value, label, disabled? }\` options and/or \`{ label, items }\` groups; readonly arrays and \`as const\` data are accepted

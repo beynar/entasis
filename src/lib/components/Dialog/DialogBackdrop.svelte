@@ -62,6 +62,7 @@
 	<div
 		{@attach portal()}
 		class="fixed inset-0"
+		data-dialog-backdrop
 		style:z-index={DIALOG_Z_BASE - 1}
 		aria-hidden="true"
 	>
