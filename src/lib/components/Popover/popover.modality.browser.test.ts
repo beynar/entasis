@@ -9,9 +9,9 @@ const panel = () => document.querySelector('[role="listbox"]')?.parentElement ??
 
 describe('data-modality', () => {
 	test('keys in the anchoring input mark the panel keyboard, a pointer move over it pointer', async () => {
-		let pointer = { screenX: 0, screenY: 0 };
+		let pointer = { clientX: 0, clientY: 0 };
 		const remember = (event: PointerEvent) =>
-			(pointer = { screenX: event.screenX, screenY: event.screenY });
+			(pointer = { clientX: event.clientX, clientY: event.clientY });
 		document.addEventListener('pointermove', remember, true);
 		render(PopoverModalityHarness);
 		const input = page.getByRole('combobox', { name: 'Fruit' });

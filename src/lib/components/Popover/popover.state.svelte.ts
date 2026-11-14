@@ -207,9 +207,11 @@ const watchPageInput = (doc: Document) => {
 	doc.addEventListener(
 		'pointermove',
 		(event) => {
-			input.moved = input.x !== event.screenX || input.y !== event.screenY;
-			input.x = event.screenX;
-			input.y = event.screenY;
+			// Viewport coordinates: WebKit on Linux reports `screenX`/`screenY` as 0 for every move,
+			// which would read every real move as one in place.
+			input.moved = input.x !== event.clientX || input.y !== event.clientY;
+			input.x = event.clientX;
+			input.y = event.clientY;
 		},
 		capture
 	);
