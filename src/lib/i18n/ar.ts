@@ -27,6 +27,10 @@ export const ar: Messages = {
 	dismiss: 'تجاهل',
 	notification: 'إشعار',
 	notifications: 'الإشعارات',
+	/** Default title, confirm and cancel labels of `confirmation()` and `popconfirm()`. */
+	confirmationTitle: 'هل أنت متأكد؟',
+	confirmationConfirm: 'تأكيد',
+	confirmationCancel: 'إلغاء',
 	more: 'المزيد',
 	back: 'رجوع',
 	sidebar: 'الشريط الجانبي',

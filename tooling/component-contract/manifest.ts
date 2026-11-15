@@ -2366,8 +2366,11 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'ConfirmationProps',
 		'ConfirmationTheme',
 		'ConfirmationThemeProps',
+		'PopconfirmHandler',
+		'PopconfirmOptions',
 		'confirmation',
 		'confirmationTheme',
+		'popconfirm',
 		'setConfirmationTheme',
 		'useConfirmationTheme'
 	],

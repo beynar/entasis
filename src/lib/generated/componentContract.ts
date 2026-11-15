@@ -3110,8 +3110,11 @@ export const componentInventory = [
 			'ConfirmationProps',
 			'ConfirmationTheme',
 			'ConfirmationThemeProps',
+			'PopconfirmHandler',
+			'PopconfirmOptions',
 			'confirmation',
 			'confirmationTheme',
+			'popconfirm',
 			'setConfirmationTheme',
 			'useConfirmationTheme'
 		],

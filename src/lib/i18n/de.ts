@@ -27,6 +27,10 @@ export const de: Messages = {
 	dismiss: 'Ausblenden',
 	notification: 'Benachrichtigung',
 	notifications: 'Benachrichtigungen',
+	/** Default title, confirm and cancel labels of `confirmation()` and `popconfirm()`. */
+	confirmationTitle: 'Sind Sie sicher?',
+	confirmationConfirm: 'Bestätigen',
+	confirmationCancel: 'Abbrechen',
 	more: 'Mehr',
 	back: 'Zurück',
 	sidebar: 'Seitenleiste',

@@ -27,6 +27,10 @@ export const pt: Messages = {
 	dismiss: 'Dispensar',
 	notification: 'notificação',
 	notifications: 'Notificações',
+	/** Default title, confirm and cancel labels of `confirmation()` and `popconfirm()`. */
+	confirmationTitle: 'Tem certeza?',
+	confirmationConfirm: 'Confirmar',
+	confirmationCancel: 'Cancelar',
 	more: 'Mais',
 	back: 'Voltar',
 	sidebar: 'Barra lateral',

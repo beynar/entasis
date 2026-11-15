@@ -27,6 +27,10 @@ export const zh: Messages = {
 	dismiss: '忽略',
 	notification: '通知',
 	notifications: '通知',
+	/** Default title, confirm and cancel labels of `confirmation()` and `popconfirm()`. */
+	confirmationTitle: '确定吗？',
+	confirmationConfirm: '确认',
+	confirmationCancel: '取消',
 	more: '更多',
 	back: '返回',
 	sidebar: '侧边栏',

@@ -44,6 +44,14 @@ Unreleased section under the new version.
   also a CSS variable on `html` (`--motion-exit-ratio`, `--motion-surface-scale`,
   `--motion-press-scale`, `--motion-stretch`). A `motion()` preset side takes `scale: 'surface'`
   for the `surfaceScale` token.
+- `popconfirm()` in `entasis/confirmation`: `onclick={popconfirm(handler, { title })}` asks in a small popover anchored to the clicked element instead of a
+  modal dialog. The click's own action waits for the answer: Confirm runs the handler with the
+  original event (an async handler keeps Confirm loading), or, with no handler, replays the click
+  so a link is followed or a form submitted. Cancel, Escape, a press outside or focus leaving drop
+  it. `confirmation()` takes the same `anchor` and `position` options.
+- `confirmation()` no longer requires `title`, `description`, `confirm` and `cancel`: the
+  title and the two buttons default to new I18n entries (`confirmationTitle`,
+  `confirmationConfirm`, `confirmationCancel`) in all 8 locales.
 
 ## 0.23.0 — 2026-11-14
 

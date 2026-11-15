@@ -34,6 +34,10 @@ export const en = {
 	dismiss: 'Dismiss',
 	notification: 'notification',
 	notifications: 'Notifications',
+	/** Default title, confirm and cancel labels of `confirmation()` and `popconfirm()`. */
+	confirmationTitle: 'Are you sure?',
+	confirmationConfirm: 'Confirm',
+	confirmationCancel: 'Cancel',
 	more: 'More',
 	back: 'Back',
 	sidebar: 'Sidebar',

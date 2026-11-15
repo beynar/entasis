@@ -3,23 +3,34 @@ import { createId } from '$lib/utils/id.js';
 import type { ButtonProps } from '../Button/index.js';
 import type { MaybePromise } from '../Form/Form/form.js';
 import type { ThemeState } from '../Theme/theme.state.svelte.js';
+import type { PopoverPlacement } from '../Popover/popover.props.js';
 
 type Callback = (() => MaybePromise<unknown>) | undefined;
 export type ConfirmationPayload<CB extends Callback = Callback> = {
 	id: string;
-	title: string;
-	description: string;
-	confirm:
+	/** Defaults to the I18n catalog's `confirmationTitle` ("Are you sure?"). */
+	title?: string;
+	description?: string;
+	/** Defaults to the I18n catalog's `confirmationConfirm` ("Confirm"). */
+	confirm?:
 		| string
 		| ({
 				text: string;
 		  } & ButtonProps);
-	cancel:
+	/** Defaults to the I18n catalog's `confirmationCancel` ("Cancel"). */
+	cancel?:
 		| string
 		| ({
 				text: string;
 		  } & ButtonProps);
 	onConfirm?: CB;
+	/**
+	 * Asks next to this element in a small popover instead of a dialog: Escape, a press outside it
+	 * and focus leaving it answer Cancel, and focus returns to the element.
+	 */
+	anchor?: HTMLElement;
+	/** Where the popover sits against `anchor`. Default `'top'`. */
+	position?: PopoverPlacement;
 };
 
 /** What the user chose, plus whatever `onConfirm` returned when they confirmed. */
@@ -122,3 +133,61 @@ export const confirmation = <CB extends Callback>(options: Omit<ConfirmationPayl
 		if (DEV) warnIfNothingMounts();
 	});
 };
+
+/** What `popconfirm()` asks: the confirmation's texts and buttons, and where it sits. */
+export type PopconfirmOptions = Omit<ConfirmationPayload, 'id' | 'onConfirm' | 'anchor'>;
+
+/** The action a `popconfirm()` guards: the original event, and the element the question sat on. */
+export type PopconfirmHandler<E extends Event = MouseEvent> = (
+	event: E,
+	anchor: HTMLElement
+) => unknown;
+
+// Elements whose next click is the replay of a confirmed one: it goes through untouched.
+const replaying = new WeakSet<EventTarget>();
+// Elements with a question open: a second click on them does not ask again.
+const asking = new WeakSet<EventTarget>();
+
+/**
+ * Guards a click with a small confirmation anchored to the element that was clicked:
+ * `onclick={popconfirm((event) => remove(item), { title: 'Delete it?' })}`. The click's own
+ * action (following a link, submitting a form) is held back; on Confirm the handler runs with the
+ * original event and the element, its promise keeping the Confirm button loading until it
+ * settles. Without a handler, Confirm replays the click, so the link is followed or the form
+ * submitted as if nothing had been in the way. Needs a mounted `<Confirmation />`.
+ */
+export function popconfirm<E extends Event = MouseEvent>(
+	handler?: PopconfirmHandler<E>,
+	options?: PopconfirmOptions
+): (event: E) => void;
+export function popconfirm<E extends Event = MouseEvent>(
+	options: PopconfirmOptions
+): (event: E) => void;
+export function popconfirm<E extends Event = MouseEvent>(
+	handlerOrOptions?: PopconfirmHandler<E> | PopconfirmOptions,
+	maybeOptions?: PopconfirmOptions
+): (event: E) => void {
+	const handler = typeof handlerOrOptions === 'function' ? handlerOrOptions : undefined;
+	const options = (typeof handlerOrOptions === 'function' ? maybeOptions : handlerOrOptions) ?? {};
+	return (event) => {
+		const anchor = (event.currentTarget ?? event.target) as HTMLElement | null;
+		if (!anchor) return;
+		if (replaying.has(anchor)) {
+			replaying.delete(anchor);
+			return;
+		}
+		event.preventDefault();
+		if (asking.has(anchor)) return;
+		asking.add(anchor);
+		confirmation({
+			...options,
+			anchor,
+			onConfirm: handler ? () => handler(event, anchor) : undefined
+		}).then(({ confirmed }) => {
+			asking.delete(anchor);
+			if (!confirmed || handler || !anchor.isConnected) return;
+			replaying.add(anchor);
+			anchor.click();
+		});
+	};
+}
