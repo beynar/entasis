@@ -6,6 +6,18 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- `popconfirm()` in `entasis/confirmation`: `onclick={popconfirm((event, anchor) => remove(item),
+{ title: 'Delete it?' })}` asks in a small popover anchored to the clicked element instead of a
+  modal dialog. The click's own action waits for the answer: Confirm runs the handler with the
+  original event (an async handler keeps Confirm loading), or, with no handler, replays the click
+  so a link is followed or a form submitted. Cancel, Escape, a press outside or focus leaving drop
+  it. `confirmation()` takes the same `anchor` and `position` options.
+- `confirmation()` no longer requires `title`, `description`, `confirm` and `cancel`: the
+  title and the two buttons default to new I18n entries (`confirmationTitle`,
+  `confirmationConfirm`, `confirmationCancel`) in all 8 locales.
+
 ## 0.23.0 — 2026-11-14
 
 ### Added

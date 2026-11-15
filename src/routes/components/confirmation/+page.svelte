@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { confirmation } from '$lib/components/Confirmation/confirmation.state.svelte.js';
+	import {
+		confirmation,
+		popconfirm
+	} from '$lib/components/Confirmation/confirmation.state.svelte.js';
 	import Button from '$lib/components/Button/Button.svelte';
 	import ComponentCard from '../../ComponentCard.svelte';
 	import { createComponentControls } from '../../componentControls.svelte.js';
@@ -71,6 +74,7 @@
 			label: 'role=alertdialog named by its title',
 			test: 'a11y:confirmation.alertdialog'
 		},
+		'popconfirm() asks beside the clicked element, in a small popover',
 		'Rendered by a single <Confirmation /> mounted at the app root'
 	]}
 >
@@ -100,6 +104,55 @@ const { confirmed } = await confirmation({
 	</ComponentCard>
 
 	{#snippet examples()}
+		<ComponentCard
+			description="popconfirm(): wrap a click handler. The question opens in a small popover anchored to the element that was clicked; Confirm runs the handler with the original event (an async handler keeps Confirm loading), while Cancel, Escape or a press outside drop it. Without a handler, Confirm replays the click, so a link is followed or a form submitted."
+			code={`import { popconfirm } from 'entasis/confirmation';
+
+<Button
+	color="danger"
+	onclick={popconfirm((event) => removeFile(file), {
+		title: 'Delete this file?',
+		description: 'It goes to the trash for 30 days.',
+		confirm: { text: 'Delete', color: 'danger' }
+	})}
+>
+	Delete
+</Button>
+
+<!-- No handler: Confirm follows the link -->
+<a href="/logout" onclick={popconfirm({ title: 'Sign out?' })}>Sign out</a>`}
+		>
+			<div class="flex flex-col items-center gap-4">
+				<div class="flex items-center gap-3">
+					<Button
+						color="danger"
+						variant="outline"
+						onclick={popconfirm(
+							async () => {
+								await new Promise((resolve) => setTimeout(resolve, 800));
+								lastResult = 'Deleted';
+							},
+							{
+								title: 'Delete this file?',
+								description: 'It goes to the trash for 30 days.',
+								confirm: { text: 'Delete', color: 'danger' }
+							}
+						)}
+					>
+						Delete
+					</Button>
+					<Button
+						variant="outline"
+						color="neutral"
+						onclick={popconfirm(() => (lastResult = 'Archived'))}
+					>
+						Archive
+					</Button>
+				</div>
+				<p class="text-neutral/70 text-sm">Last result: {lastResult}</p>
+			</div>
+		</ComponentCard>
+
 		<ComponentCard
 			description="Async onConfirm: the confirm button shows a loading state until the promise resolves, and its return value comes back as result. If it rejects, the loading state ends and the dialog stays open so the user can retry or cancel."
 			code={`const { confirmed, result } = await confirmation({

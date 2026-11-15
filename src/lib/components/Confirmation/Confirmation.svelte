@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Dialog from '../Dialog/Dialog.svelte';
+	import Popover from '../Popover/Popover.svelte';
+	import { useI18n } from '$lib/i18n/context.svelte.js';
 	import Button from '../Button/Button.svelte';
 	import type { ButtonProps } from '../Button/button.props.js';
 	import type { ConfirmationOutcome, ConfirmationState } from './confirmation.state.svelte.js';
@@ -16,6 +18,7 @@
 
 	const classes = $derived(useConfirmationTheme(theme));
 	const themeState = useTheme();
+	const t = $derived(useI18n());
 
 	// Requests the user has not answered yet. A plain set, not `$state`: the unmount teardown
 	// reads it, and a `$state` read in teardown can return the value from before the last change.
@@ -100,64 +103,123 @@
 	// from the SAME value the Dialog itself used to pick sheet-versus-floating, instead of a second
 	// hand-written `(max-width: 768px)` that can drift out of step with it.
 	const isMobile = $derived(themeState.isMobile);
+
+	// An anchored question answers Cancel however it closes (Escape, a press outside, focus moving
+	// on), unless its action is running: then it stays, like its buttons, until that finishes.
+	const cancelOnClose =
+		(confirmation: ConfirmationState) => (open: boolean, details: OpenChangeDetails) => {
+			if (open) return;
+			if (confirmation.loading) {
+				details.cancel();
+				return;
+			}
+			confirmation.settle({ confirmed: false });
+		};
+	const titleId = (confirmation: ConfirmationState) => `${confirmation.id}-title`;
 </script>
 
-{#each confirmations as confirmation (confirmation.id)}
-	<Dialog
-		type="alert"
-		class={classes.root()}
-		onAfterClose={() => {
-			confirmations = confirmations.filter((a) => a.id !== confirmation.id);
-		}}
-		closeButton={false}
-		closeOnClickOutside={false}
-		onOpenChange={cancelOnEscape(confirmation)}
-		bind:open={confirmation.isOpen}
-		title={confirmation.title}
-		description={confirmation.description}
-	>
-		{#snippet footer()}
-			<div class={classes.footer({ layout: isMobile ? 'stacked' : 'inline' })}>
-				{#if typeof confirmation.cancel === 'object'}
-					<Button
-						disabled={confirmation.loading}
-						color="neutral"
-						{...confirmation.cancel}
-						onclick={actionConfirmation(confirmation, false, confirmation.cancel.onclick)}
-						fullWidth={isMobile}
-					>
-						{confirmation.cancel.text}
-					</Button>
-				{:else}
-					<Button
-						disabled={confirmation.loading}
-						color="neutral"
-						onclick={actionConfirmation(confirmation, false)}
-						fullWidth={isMobile}
-					>
-						{confirmation.cancel}
-					</Button>
-				{/if}
+{#snippet actions(confirmation: ConfirmationState, layout: 'stacked' | 'inline' | 'compact')}
+	{@const cancel = confirmation.cancel ?? t.confirmationCancel}
+	{@const confirm = confirmation.confirm ?? t.confirmationConfirm}
+	{@const size = layout === 'compact' ? 'small' : undefined}
+	{@const fullWidth = layout === 'stacked'}
+	<!-- In the small anchored question, Cancel steps back so Confirm carries the weight. -->
+	{@const cancelVariant = layout === 'compact' ? 'ghost' : undefined}
+	<div class={classes.footer({ layout })}>
+		{#if typeof cancel === 'object'}
+			<Button
+				disabled={confirmation.loading}
+				color="neutral"
+				variant={cancelVariant}
+				{size}
+				{...cancel}
+				onclick={actionConfirmation(confirmation, false, cancel.onclick)}
+				{fullWidth}
+			>
+				{cancel.text}
+			</Button>
+		{:else}
+			<Button
+				disabled={confirmation.loading}
+				color="neutral"
+				variant={cancelVariant}
+				{size}
+				onclick={actionConfirmation(confirmation, false)}
+				{fullWidth}
+			>
+				{cancel}
+			</Button>
+		{/if}
+		{#if typeof confirm === 'object'}
+			<Button
+				loading={confirmation.loading}
+				{size}
+				{...confirm}
+				onclick={actionConfirmation(confirmation, true, confirm.onclick)}
+				{fullWidth}
+			>
+				{confirm.text}
+			</Button>
+		{:else}
+			<Button
+				loading={confirmation.loading}
+				{size}
+				onclick={actionConfirmation(confirmation, true)}
+				{fullWidth}
+			>
+				{confirm}
+			</Button>
+		{/if}
+	</div>
+{/snippet}
 
-				{#if typeof confirmation.confirm === 'object'}
-					<Button
-						loading={confirmation.loading}
-						{...confirmation.confirm}
-						onclick={actionConfirmation(confirmation, true, confirmation.confirm.onclick)}
-						fullWidth={isMobile}
-					>
-						{confirmation.confirm.text}
-					</Button>
-				{:else}
-					<Button
-						loading={confirmation.loading}
-						onclick={actionConfirmation(confirmation, true)}
-						fullWidth={isMobile}
-					>
-						{confirmation.confirm}
-					</Button>
+{#each confirmations as confirmation (confirmation.id)}
+	{#if confirmation.anchor}
+		<!-- Anchored: a small non-modal question beside the element that was clicked. -->
+		<Popover
+			trigger={false}
+			ref={confirmation.anchor}
+			bind:open={confirmation.isOpen}
+			position={confirmation.position ?? 'top'}
+			size="small"
+			arrow
+			focusOnOpen="first"
+			focusOnClose={confirmation.anchor}
+			labelledBy={titleId(confirmation)}
+			onOpenChange={cancelOnClose(confirmation)}
+			onAfterClose={() => {
+				confirmations = confirmations.filter((a) => a.id !== confirmation.id);
+			}}
+		>
+			<div class={classes.popover()}>
+				<p id={titleId(confirmation)} class={classes.title()}>
+					{confirmation.title ?? t.confirmationTitle}
+				</p>
+				{#if confirmation.description}
+					<p id={`${confirmation.id}-description`} class={classes.description()}>
+						{confirmation.description}
+					</p>
 				{/if}
+				{@render actions(confirmation, 'compact')}
 			</div>
-		{/snippet}
-	</Dialog>
+		</Popover>
+	{:else}
+		<Dialog
+			type="alert"
+			class={classes.root()}
+			onAfterClose={() => {
+				confirmations = confirmations.filter((a) => a.id !== confirmation.id);
+			}}
+			closeButton={false}
+			closeOnClickOutside={false}
+			onOpenChange={cancelOnEscape(confirmation)}
+			bind:open={confirmation.isOpen}
+			title={confirmation.title ?? t.confirmationTitle}
+			description={confirmation.description}
+		>
+			{#snippet footer()}
+				{@render actions(confirmation, isMobile ? 'stacked' : 'inline')}
+			{/snippet}
+		</Dialog>
+	{/if}
 {/each}

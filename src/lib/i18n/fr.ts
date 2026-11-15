@@ -27,6 +27,10 @@ export const fr: Messages = {
 	dismiss: 'Ignorer',
 	notification: 'notification',
 	notifications: 'Notifications',
+	/** Default title, confirm and cancel labels of `confirmation()` and `popconfirm()`. */
+	confirmationTitle: 'Confirmer cette action ?',
+	confirmationConfirm: 'Confirmer',
+	confirmationCancel: 'Annuler',
 	more: 'Plus',
 	back: 'Retour',
 	sidebar: 'Barre latérale',

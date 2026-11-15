@@ -27,6 +27,10 @@ export const ja: Messages = {
 	dismiss: '閉じる',
 	notification: '通知',
 	notifications: '通知',
+	/** Default title, confirm and cancel labels of `confirmation()` and `popconfirm()`. */
+	confirmationTitle: 'よろしいですか？',
+	confirmationConfirm: '確認',
+	confirmationCancel: 'キャンセル',
 	more: 'その他',
 	back: '戻る',
 	sidebar: 'サイドバー',

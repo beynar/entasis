@@ -1,10 +1,12 @@
 export { default as Confirmation } from './Confirmation.svelte';
 export type { ConfirmationProps } from './confirmation.props.js';
-export { confirmation } from './confirmation.state.svelte.js';
+export { confirmation, popconfirm } from './confirmation.state.svelte.js';
 export type {
 	ConfirmationPayload,
 	ConfirmationHost,
-	ConfirmationOutcome
+	ConfirmationOutcome,
+	PopconfirmHandler,
+	PopconfirmOptions
 } from './confirmation.state.svelte.js';
 export {
 	confirmationTheme,
