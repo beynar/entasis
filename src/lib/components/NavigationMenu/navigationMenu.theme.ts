@@ -226,8 +226,8 @@ const defaultNavigationMenuNestedTrigger = cva({
 // slides in from the side of the new trigger with the same duration and easing.
 export const defaultNavigationMenuMotion = motion({
 	base: {
-		in: { x: 0, y: -4, scale: 0.98, opacity: 0 },
-		out: { x: 0, y: -4, scale: 0.98, opacity: 0 },
+		in: { x: 0, y: -4, scale: 'surface', opacity: 0 },
+		out: { x: 0, y: -4, scale: 'surface', opacity: 0 },
 		duration: 'fast',
 		easing: 'enter'
 	}

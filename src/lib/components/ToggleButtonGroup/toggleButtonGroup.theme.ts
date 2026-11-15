@@ -11,7 +11,7 @@ const defaultToggleButtonGroup = cva({
 		joined: {
 			// Joined segments overlap by a pixel: a pressed segment sits above its neighbours so its
 			// border is not cut by theirs, and a focused one above that.
-			true: '[&>[data-checked=true]]:z-1 [&>*:focus-visible]:z-10 [&>*]:active:translate-y-0',
+			true: '[&>[data-checked=true]]:z-1 [&>*:focus-visible]:z-10 [&>*]:active:scale-none',
 			false: 'gap-xs'
 		}
 	},

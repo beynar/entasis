@@ -1,5 +1,6 @@
 <script lang="ts" generics="TMessage extends AIThreadItem = AIThreadItem">
 	import { getContext } from 'svelte';
+	import IconSwap from '$lib/transitions/IconSwap.svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { useClipboard } from '../../utils/useClipboard.svelte.js';
 	import Alert from '../Alert/Alert.svelte';
@@ -180,7 +181,10 @@
 					onclick={() => void handleCopy()}
 					{@attach withTooltip(actionState.copied ? t.copied : t.copy)}
 					class={classes.button({ size })}
-					>{@render (actionState.copied ? checkIcon : copyIcon)({ size: 14 })}</Button
+					><IconSwap swapped={actionState.copied} pulse>
+						{#snippet from()}{@render copyIcon({ size: 14 })}{/snippet}
+						{#snippet to()}{@render checkIcon({ size: 14 })}{/snippet}
+					</IconSwap></Button
 				>{/if}
 			{#if actionState.canEdit}<Button
 					type="button"

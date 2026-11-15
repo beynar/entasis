@@ -107,16 +107,29 @@ scale with it).
 
 ## Motion tokens
 
-Motion is a token scale like spacing and radius: five duration steps and four easing roles.
+Motion is a token scale like spacing and radius: six duration steps, four easing roles and four
+shape tokens.
 \`motion\` retunes them app-wide; an omitted token keeps its default.
 
 | Duration   | Default |     | Easing role  | Default       |
 | ---------- | ------- | --- | ------------ | ------------- |
 | \`instant\`  | 0ms     |     | \`standard\`   | \`cubicInOut\`  |
-| \`fast\`     | 100ms   |     | \`enter\`      | \`cubicOut\`    |
-| \`normal\`   | 200ms   |     | \`exit\`       | \`cubicIn\`     |
-| \`slow\`     | 300ms   |     | \`emphasized\` | \`backOut\`     |
+| \`fast\`     | 150ms   |     | \`enter\`      | \`cubicOut\`    |
+| \`normal\`   | 200ms   |     | \`exit\`       | \`cubicOut\`    |
+| \`moderate\` | 250ms   |     | \`emphasized\` | \`backOut\`     |
+| \`slow\`     | 300ms   |     |              |               |
 | \`slower\`   | 500ms   |     |              |               |
+
+Durations rank surfaces by size: tooltips \`fast\`, menus and popovers \`normal\`, dialogs, toasts
+and revealed content \`moderate\`, drawers and sheets \`slow\`. A surface takes \`enter\` on the way
+in and \`exit\` on the way out, and leaves in 80% of the time it took to arrive; something moving
+between two places takes \`standard\`.
+
+Four shape tokens sit beside them: \`exitRatio\` (0.8, an exit's share of its entrance),
+\`surfaceScale\` (0.95, what popovers, menus, tooltips, dialogs and floating windows grow from),
+\`pressScale\` (0.97, what a pressed Button or Pagination item shrinks to) and \`stretch\` (1.25, how
+far a Switch thumb stretches halfway across). Each is also a CSS variable on \`html\`
+(\`--motion-exit-ratio\`, \`--motion-surface-scale\`, \`--motion-press-scale\`, \`--motion-stretch\`).
 
 \`\`\`svelte
 <script lang="ts">

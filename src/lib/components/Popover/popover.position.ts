@@ -206,6 +206,37 @@ const lineReference = (
 		nearestLine(reference.getClientRects?.() ?? [], point) ?? reference.getBoundingClientRect()
 });
 
+/**
+ * The box of `element` without its own `scale`, around its centre (the default origin). A pressed
+ * button shrinks (the Theme's `pressScale`, 0.97) and eases back as its popup opens; measured with that scale, the panel
+ * would slide a few pixels while the trigger grows back, and again when it is pressed to close.
+ */
+export const unscaledRect = (element: Element): DOMRect => {
+	const rect = element.getBoundingClientRect();
+	const scale = getComputedStyle(element).scale;
+	if (!scale || scale === 'none') return rect;
+	const [scaleX, scaleY = scaleX] = scale.split(' ').map(Number);
+	if (!scaleX || !scaleY || (scaleX === 1 && scaleY === 1)) return rect;
+	const width = rect.width / scaleX;
+	const height = rect.height / scaleY;
+	return new DOMRect(
+		rect.x - (width - rect.width) / 2,
+		rect.y - (height - rect.height) / 2,
+		width,
+		height
+	);
+};
+
+/** An element reference measured without its own scale (see `unscaledRect`). */
+const unscaledReference = (reference: PopoverReference): PopoverReference =>
+	reference instanceof Element
+		? {
+				contextElement: reference,
+				getBoundingClientRect: () => unscaledRect(reference),
+				getClientRects: () => reference.getClientRects()
+			}
+		: reference;
+
 const OPPOSITE_SIDE: Record<Side, Side> = {
 	top: 'bottom',
 	bottom: 'top',
@@ -307,14 +338,18 @@ export const computePanelPosition = (
 	panel: HTMLElement,
 	{ placement, direction, ...middleware }: PanelPositionOptions
 ) =>
-	computePosition(middleware.line ? lineReference(reference, middleware.line) : reference, panel, {
-		strategy: 'fixed',
-		placement,
-		middleware: panelMiddleware({ ...middleware, placement }),
-		// The direction resolved for the reference, not the portaled wrapper's own: a trigger in
-		// a `dir="rtl"` subtree aligns like the subtree even though its panel sits under <body>.
-		...(direction ? { platform: { ...platform, isRTL: () => direction === 'rtl' } } : {})
-	});
+	computePosition(
+		middleware.line ? lineReference(reference, middleware.line) : unscaledReference(reference),
+		panel,
+		{
+			strategy: 'fixed',
+			placement,
+			middleware: panelMiddleware({ ...middleware, placement }),
+			// The direction resolved for the reference, not the portaled wrapper's own: a trigger in
+			// a `dir="rtl"` subtree aligns like the subtree even though its panel sits under <body>.
+			...(direction ? { platform: { ...platform, isRTL: () => direction === 'rtl' } } : {})
+		}
+	);
 
 /**
  * Puts the wrapper at viewport coordinates, rounded to the device pixel grid, and reveals it: a

@@ -169,7 +169,7 @@ const defaultFieldSuffix = cva({
 });
 
 const defaultFieldActionButton = cva({
-	base: 'h-auto min-h-0 w-auto self-stretch rounded-none border-0 bg-clip-border !px-0 active:translate-y-0',
+	base: 'h-auto min-h-0 w-auto self-stretch rounded-none border-0 bg-clip-border !px-0 active:scale-none',
 	variants: {
 		size: {
 			small: '[&_svg:not([class*=size-])]:size-icon-sm',
@@ -247,6 +247,7 @@ export const defaultFieldMotion = motion({
 	base: {
 		in: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0 },
 		out: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0 },
+		duration: 'moderate',
 		easing: 'enter'
 	}
 });

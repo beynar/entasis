@@ -71,12 +71,13 @@ const defaultCollapsibleIcon = cva({
 export const defaultCollapsibleMotion = motion({
 	base: {
 		in: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0 },
-		out: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0 }
+		out: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0 },
+		duration: 'moderate'
 	},
 	variants: {
 		variant: {
 			default: {},
-			peek: { duration: 'slow', easing: 'enter' }
+			peek: {}
 		}
 	},
 	defaultVariants: {

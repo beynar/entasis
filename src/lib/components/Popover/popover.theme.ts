@@ -77,8 +77,9 @@ const defaultPopoverArrow = cva({
 // `duration` / `easing` stay tokens, so `<Theme motion>` and reduced motion reach both.
 export const defaultPopoverMotion = motion({
 	base: {
-		in: { x: 0, y: 0, scale: 0.98, opacity: 0 },
-		out: { x: 0, y: 0, scale: 0.98, opacity: 0 }
+		in: { x: 0, y: 0, scale: 'surface', opacity: 0 },
+		out: { x: 0, y: 0, scale: 'surface', opacity: 0 },
+		duration: 'normal'
 	},
 	variants: {
 		mode: {
@@ -87,7 +88,8 @@ export const defaultPopoverMotion = motion({
 			inline: {},
 			mobileSheet: {
 				in: { y: '100%', scale: 1, opacity: 1 },
-				out: { y: '100%', scale: 1, opacity: 1 }
+				out: { y: '100%', scale: 1, opacity: 1 },
+				duration: 'slow'
 			}
 		}
 	},

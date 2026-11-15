@@ -17,11 +17,13 @@ import {
 import {
 	defaultMotionTokens,
 	motionDurationSteps,
+	motionShapeTokens,
 	presetFactor,
 	radiusFactors,
 	spacingFactors,
 	type DeepPartial,
 	type MotionEasingTokens,
+	type MotionShapeToken,
 	type MotionTokens
 } from '$lib/tailwind/scales.js';
 import {
@@ -132,6 +134,8 @@ class RuntimeThemePlayground {
 	/** Multiplier applied to every duration step, so the whole scale speeds up together. */
 	motionSpeed = $state(1);
 	motionEasing = $state<RuntimeMotionEasingPresetName>('standard');
+	/** The shape tokens: exit share, press scale, surface scale, switch stretch. */
+	motionShape = $state<Record<MotionShapeToken, number>>(defaultMotionShape());
 
 	get selectedPreset() {
 		return runtimeThemePresetNames.find((presetName) => {
@@ -183,12 +187,17 @@ class RuntimeThemePlayground {
 					Math.round(defaultMotionTokens.duration[step] * this.motionSpeed)
 				])
 			) as MotionTokens['duration'],
-			easing: runtimeMotionEasingPresets[this.motionEasing].easing
+			easing: runtimeMotionEasingPresets[this.motionEasing].easing,
+			...this.motionShape
 		};
 	}
 
 	get hasDefaultMotion() {
-		return this.motionSpeed === 1 && this.motionEasing === 'standard';
+		return (
+			this.motionSpeed === 1 &&
+			this.motionEasing === 'standard' &&
+			motionShapeTokens.every((token) => this.motionShape[token] === defaultMotionTokens[token])
+		);
 	}
 
 	get hasDefaultSpacingScale() {
@@ -227,6 +236,7 @@ class RuntimeThemePlayground {
 		this.palette = preset.palette;
 		this.motionSpeed = 1;
 		this.motionEasing = 'standard';
+		this.motionShape = defaultMotionShape();
 	}
 
 	reset() {
@@ -245,7 +255,8 @@ class RuntimeThemePlayground {
 			drawerInset: this.drawerInset,
 			palette: this.palette,
 			motionSpeed: this.motionSpeed,
-			motionEasing: this.motionEasing
+			motionEasing: this.motionEasing,
+			motionShape: { ...this.motionShape }
 		};
 	}
 
@@ -274,6 +285,15 @@ class RuntimeThemePlayground {
 		if (snapshot.motionEasing && snapshot.motionEasing in runtimeMotionEasingPresets) {
 			this.motionEasing = snapshot.motionEasing;
 		}
+		const shape = snapshot.motionShape;
+		if (shape && typeof shape === 'object') {
+			for (const token of motionShapeTokens) {
+				const value = shape[token];
+				if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+					this.motionShape[token] = value;
+				}
+			}
+		}
 	}
 }
 
@@ -291,7 +311,14 @@ export type RuntimeThemePlaygroundSnapshot = {
 	palette: RuntimeColorPaletteName;
 	motionSpeed: number;
 	motionEasing: RuntimeMotionEasingPresetName;
+	motionShape?: Partial<Record<MotionShapeToken, number>>;
 };
+
+function defaultMotionShape(): Record<MotionShapeToken, number> {
+	return Object.fromEntries(
+		motionShapeTokens.map((token) => [token, defaultMotionTokens[token]])
+	) as Record<MotionShapeToken, number>;
+}
 
 const [useRuntimeThemePlayground, setRuntimeThemePlayground] =
 	createContext<RuntimeThemePlayground>();

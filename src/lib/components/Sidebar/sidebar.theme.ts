@@ -1285,8 +1285,8 @@ export const defaultSidebarMotion = motion({
 	base: {
 		in: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0.2 },
 		out: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0.2 },
-		duration: 'normal',
-		easing: 'standard'
+		duration: 'moderate',
+		easing: 'enter'
 	},
 	variants: {
 		part: {

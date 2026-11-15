@@ -9,6 +9,7 @@
 	import type { SwitchProps } from './switch.props.js';
 	import { useSwitchTheme } from './switch.theme.js';
 	import Slot from '$lib/components/Slot/Slot.svelte';
+	import { useTheme } from '$lib/components/Theme/theme.state.svelte.js';
 
 	let {
 		defaultValue = null,
@@ -97,9 +98,29 @@
 
 	const classes = $derived(useSwitchTheme(theme));
 	const fieldClasses = $derived(useFieldTheme(theme));
+	const themeState = useTheme();
+	let thumb = $state<HTMLSpanElement>();
+
+	// As the thumb slides across it stretches along its path by the Theme's `stretch` token,
+	// longest halfway (where the slide, on the same duration and an ease-in-out, is fastest), and
+	// lands round. Nothing happens on press.
+	const stretchThumb = () => {
+		if (!thumb || themeState.preferReducesMotion || typeof thumb.animate !== 'function') return;
+		thumb.animate(
+			[
+				{ scale: '1 1', easing: 'ease-in-out' },
+				{ scale: `${themeState.motion.stretch} 1`, offset: 0.5, easing: 'ease-in-out' },
+				{ scale: '1 1' }
+			],
+			{ duration: themeState.motion.duration.normal }
+		);
+	};
+
 	// A read-only or disabled switch refuses the edit inside setValue.
 	const toggle = () => {
+		const before = field.value;
 		field.value = !field.value;
+		if (field.value !== before) stretchThumb();
 	};
 </script>
 
@@ -153,7 +174,13 @@
 			field.focused = false;
 		}}
 	>
-		<span class={classes.thumb({ checked: !!field.value, size })} data-checked={!!field.value}
+		<span
+			bind:this={thumb}
+			class={classes.thumb({
+				checked: !!field.value,
+				size
+			})}
+			data-checked={!!field.value}
 		></span>
 	</button>
 	<!-- Beside the button, not inside it: a button may not contain interactive content. -->

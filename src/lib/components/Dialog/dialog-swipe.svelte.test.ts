@@ -146,14 +146,23 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 		expect(backdrop().style.transition).toBe('none');
 		expect(node.style.transition).toBe('none');
 
-		// Dragging back past the open position is clamped: the panel never lifts off the edge.
+		// Dragged back past the open position it stretches, less and less, never far.
 		await firePointer(node, 'pointermove', { pos: 60, t: 900 });
-		expect(readout('offset')).toBe('0');
-		// Back at rest the transform drops off the node entirely rather than writing an identity.
-		expect(transform()).toBe('');
+		const stretched = Number(readout('offset'));
+		expect(stretched).toBeLessThan(0);
+		expect(stretched).toBeGreaterThan(-40);
+		expect(readout('progress')).toBe('0');
+		await firePointer(node, 'pointermove', { pos: -400, t: 1000 });
+		expect(Number(readout('offset'))).toBeLessThan(stretched);
+		expect(Number(readout('offset'))).toBeGreaterThan(-48);
 
-		await firePointer(node, 'pointerup', { pos: 60, t: 1200 });
+		await firePointer(node, 'pointerup', { pos: -400, t: 1200 });
 		expect(onOpenChange).not.toHaveBeenCalled();
+		// Released, it springs back to rest, and the transform drops off the node entirely rather
+		// than writing an identity.
+		await nextFrame();
+		expect(readout('offset')).toBe('0');
+		expect(transform()).toBe('');
 	});
 
 	test('releasing past a quarter of the panel dismisses the drawer', async () => {
@@ -394,6 +403,23 @@ describe('Dialog drawer swipe-to-dismiss', () => {
 		await firePointer(node, 'pointermove', { pos: 80, t: 700 });
 		expect(readout('dragging')).toBe('true');
 		expect(readout('offset')).toBe('80');
+	});
+
+	test('a handle pulled past fully open stretches the drawer and lets it spring back', async () => {
+		const node = setup();
+		const thumb = document.querySelector('[data-drag-handle][aria-hidden="true"]');
+		if (!(thumb instanceof HTMLElement)) throw new Error('drag thumb not rendered');
+
+		await firePointer(thumb, 'pointerdown', { pos: 100, t: 0 });
+		await firePointer(node, 'pointermove', { pos: 0, t: 100 });
+		expect(readout('dragging')).toBe('true');
+		const offset = Number(readout('offset'));
+		expect(offset).toBeLessThan(0);
+		expect(offset).toBeGreaterThan(-48);
+
+		await firePointer(node, 'pointerup', { pos: 0, t: 200 });
+		await nextFrame();
+		expect(readout('offset')).toBe('0');
 	});
 
 	test('a drag that starts on a button or a link swipes: they have no gesture of their own', async () => {

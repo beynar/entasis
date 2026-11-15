@@ -6,6 +6,45 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Changed
+
+- Motion follows one set of rules across the library. These change how components look by default;
+  `<Theme motion>`, a component's `theme.motion` and its `transition` prop still override them, and
+  reduced motion still turns them off.
+  - Durations rank surfaces by size: tooltips `fast` (now 150ms), menus, popovers and hover cards
+    `normal` (200ms), dialogs, toasts and revealed content `moderate` (a new 250ms step), drawers,
+    sheets and the Sidebar's views `slow` (300ms). HoverCard moves from `fast` to `normal`
+    (NavigationMenu stays on `fast`, whose panel switch runs twice its step); Collapsible's `peek`
+    variant from `slow` to `moderate`.
+  - Surfaces ease out as they arrive (Popover, Dialog, Toast, Tooltip, Accordion, Collapsible
+    used `cubicInOut`), and leave in 80% of the time they took to arrive. The `exit` easing role
+    now defaults to `cubicOut`, so a dismissal answers at once; point it at an `In` curve for an
+    accelerating exit. Things that move from place to place keep `standard` (`cubicInOut`).
+  - Popovers, menus, hover cards, tooltips, dialogs and floating windows scale in from 0.95
+    (0.98 before, 0.97 for floating windows), from the side facing their trigger.
+  - A pressed Button or Pagination item shrinks to 0.97 instead of moving down a pixel. A popover
+    is placed against its trigger's box without that scale, so it stays put while the trigger
+    shrinks and grows back.
+  - A Switch's thumb stretches along its path as it slides across, longest halfway.
+  - Copy buttons (Code, JsonEditor, AIMessageActions), the password visibility toggle and the
+    checkbox's check and dash swap their icons through a blurred crossfade; a copy confirmation
+    pops as it arrives.
+  - A drawer pulled past fully open by its handle stretches a little and springs back, and a
+    toast pulled away from its edge resists more the further it goes.
+  - A FloatingWindow flies to and from the dock along a curve instead of a straight line.
+
+### Added
+
+- A `moderate` motion duration step (250ms), with its `duration-moderate` utility.
+- Motion shape tokens, beside the durations and easings, in `<Theme motion>`,
+  `designTokens.<theme>.motion` and the Tailwind plugin's `motion` option: `exitRatio` (0.8, how
+  long an exit lasts against its entrance), `surfaceScale` (0.95, what popovers, menus, tooltips,
+  dialogs and floating windows grow from), `pressScale` (0.97, what a pressed Button or Pagination
+  item shrinks to) and `stretch` (1.25, how far a Switch thumb stretches halfway across). Each is
+  also a CSS variable on `html` (`--motion-exit-ratio`, `--motion-surface-scale`,
+  `--motion-press-scale`, `--motion-stretch`). A `motion()` preset side takes `scale: 'surface'`
+  for the `surfaceScale` token.
+
 ## 0.23.0 — 2026-11-14
 
 ### Added

@@ -238,7 +238,8 @@ const defaultToaster = cva({
 export const defaultToastMotion = motion({
 	base: {
 		in: { x: 0, y: 0, opacity: 0 },
-		out: { x: 0, y: 0, opacity: 0 }
+		out: { x: 0, y: 0, opacity: 0 },
+		duration: 'moderate'
 	},
 	variants: {
 		position: {

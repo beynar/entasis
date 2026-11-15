@@ -74,7 +74,7 @@ export const mergeConfig = {
 			'size-icon': [{ 'size-icon': ['xs', 'sm', 'md', 'lg', 'xl'] }],
 			'min-size-hit': [{ 'min-size-hit': ['sm', 'md', 'lg'] }],
 			'ps-indent': [{ 'ps-indent': ['sm', 'md', 'lg', 'xl'] }],
-			duration: [{ duration: ['instant', 'fast', 'normal', 'slow', 'slower'] }],
+			duration: [{ duration: ['instant', 'fast', 'normal', 'moderate', 'slow', 'slower'] }],
 			ease: [{ ease: ['standard', 'enter', 'exit', 'emphasized'] }],
 			h: [{ h: ['window'] }],
 			w: [{ w: ['window'] }],

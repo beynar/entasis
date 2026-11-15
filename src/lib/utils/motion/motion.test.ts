@@ -29,7 +29,33 @@ describe('motion()', () => {
 	it('resolves the base spec and its default variant against the Theme tokens', () => {
 		expect(drawer(undefined, { theme: theme() })).toEqual({
 			in: { x: 0, y: 0, scale: 0.98, opacity: 0, duration: 200, easing: 'cubicInOut' },
-			out: { x: 0, y: 0, scale: 0.98, opacity: 0, duration: 200, easing: 'cubicInOut' }
+			out: { x: 0, y: 0, scale: 0.98, opacity: 0, duration: 160, easing: 'cubicInOut' }
+		});
+	});
+
+	it('shortens the way out to the exitRatio share of the way in', () => {
+		expect(drawer({ type: 'swift' }, { theme: theme() }).out.duration).toBe(120);
+		const halved = theme({ motion: resolveMotionTokens({ exitRatio: 0.5 }) });
+		expect(drawer({ type: 'swift' }, { theme: halved }).out.duration).toBe(75);
+	});
+
+	it("resolves a 'surface' scale to the Theme's surfaceScale", () => {
+		const surface = motion({
+			base: { in: { scale: 'surface', opacity: 0 }, out: { scale: 'surface', opacity: 0 } }
+		});
+		expect(surface(undefined, { theme: theme() }).in.scale).toBe(0.95);
+		const retuned = theme({ motion: resolveMotionTokens({ surfaceScale: 0.8 }) });
+		expect(surface(undefined, { theme: retuned }).out.scale).toBe(0.8);
+	});
+
+	it('eases a surface out on both sides through the enter and exit roles', () => {
+		const surface = motion({ base: { in: { opacity: 0 }, out: { opacity: 0 } } });
+		const retuned = theme({
+			motion: resolveMotionTokens({ easing: { enter: 'expoOut', exit: 'quadIn' } })
+		});
+		expect(surface(undefined, { theme: retuned })).toEqual({
+			in: { opacity: 0, duration: 200, easing: 'expoOut' },
+			out: { opacity: 0, duration: 160, easing: 'quadIn' }
 		});
 	});
 
@@ -50,9 +76,10 @@ describe('motion()', () => {
 
 	it('resolves duration tokens to ms and easing roles to easing function names', () => {
 		const swift = drawer({ type: 'swift' }, { theme: theme() });
-		expect(swift.in.duration).toBe(100);
+		expect(swift.in.duration).toBe(150);
 		expect(swift.in.easing).toBe('cubicOut');
-		expect(swift.out.duration).toBe(100);
+		expect(swift.out.duration).toBe(120);
+		expect(swift.out.easing).toBe('cubicOut');
 	});
 
 	it('follows a retuned Theme motion scale', () => {
@@ -79,7 +106,7 @@ describe('motion()', () => {
 			overrides: { in: { duration: 12, easing: 'linear' } }
 		});
 		expect(perSide.in).toMatchObject({ duration: 12, easing: 'linear' });
-		expect(perSide.out).toMatchObject({ duration: 200, easing: 'cubicInOut' });
+		expect(perSide.out).toMatchObject({ duration: 160, easing: 'cubicInOut' });
 	});
 
 	it('applies overrides lowest priority first', () => {
@@ -96,7 +123,7 @@ describe('motion()', () => {
 			}
 		);
 		expect(laddered.in).toMatchObject({ x: '100%', scale: 0.25, duration: 500 });
-		expect(laddered.out).toMatchObject({ x: '100%', scale: 0.98, duration: 500 });
+		expect(laddered.out).toMatchObject({ x: '100%', scale: 0.98, duration: 400 });
 	});
 
 	it('lets a transition side replace the merged one, flat form replacing both', () => {
@@ -111,7 +138,7 @@ describe('motion()', () => {
 		// `ThemeState.splitTransition` gave the props it replaced.
 		const flat = drawer({ type: 'drawerRight' }, { theme: theme(), transition: { y: 24 } });
 		expect(flat.in).toEqual({ y: 24, duration: 200, easing: 'cubicInOut' });
-		expect(flat.out).toEqual({ y: 24, duration: 200, easing: 'cubicInOut' });
+		expect(flat.out).toEqual({ y: 24, duration: 160, easing: 'cubicInOut' });
 		const flatTiming = drawer(
 			{ type: 'drawerRight' },
 			{ theme: theme(), transition: { duration: 500 } }
@@ -148,8 +175,17 @@ describe('motion()', () => {
 describe('resolveMotionTokens()', () => {
 	it('fills omitted tokens with the defaults', () => {
 		expect(resolveMotionTokens({ duration: { fast: 42 } })).toEqual({
-			duration: { instant: 0, fast: 42, normal: 200, slow: 300, slower: 500 },
-			easing: { standard: 'cubicInOut', enter: 'cubicOut', exit: 'cubicIn', emphasized: 'backOut' }
+			duration: { instant: 0, fast: 42, normal: 200, moderate: 250, slow: 300, slower: 500 },
+			easing: {
+				standard: 'cubicInOut',
+				enter: 'cubicOut',
+				exit: 'cubicOut',
+				emphasized: 'backOut'
+			},
+			exitRatio: 0.8,
+			pressScale: 0.97,
+			surfaceScale: 0.95,
+			stretch: 1.25
 		});
 	});
 
@@ -158,5 +194,7 @@ describe('resolveMotionTokens()', () => {
 			/easing/
 		);
 		expect(() => resolveMotionTokens({ duration: { fast: -1 } })).toThrow(/duration/);
+		expect(() => resolveMotionTokens({ pressScale: 0 })).toThrow(/pressScale/);
+		expect(() => resolveMotionTokens({ stretch: Number.NaN })).toThrow(/stretch/);
 	});
 });

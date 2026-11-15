@@ -13,6 +13,7 @@
 		motionEasingRoles
 	} from '$lib/tailwind/scales.js';
 	import type { MotionDurationToken, MotionEasingToken } from '$lib/utils/motion/index.js';
+	import type { MotionShapeToken } from '$lib/tailwind/scales.js';
 	import type { DialogType } from '$lib/components/Dialog/index.js';
 	import {
 		runtimeMotionEasingPresetNames,
@@ -29,15 +30,57 @@
 
 	const durationRoles: Record<MotionDurationToken, string> = {
 		instant: 'No animation; the state change is immediate.',
-		fast: 'Hover and press feedback, small icon swaps.',
-		normal: 'The default: dialogs, popovers, list transitions.',
-		slow: 'Large surfaces travelling a long distance.',
-		slower: 'Deliberate, attention-carrying reveals.'
+		fast: 'Tooltips, hover and press feedback, icon swaps.',
+		normal: 'The default: menus, popovers, hover cards.',
+		moderate: 'Dialogs, toasts, and content a disclosure reveals.',
+		slow: 'Drawers, sheets, and surfaces travelling a long distance.',
+		slower: 'Deliberate, attention-carrying moments.'
 	};
+	const shapeSliders: {
+		token: MotionShapeToken;
+		label: string;
+		description: string;
+		min: number;
+		max: number;
+		step: number;
+	}[] = [
+		{
+			token: 'exitRatio',
+			label: 'Exit ratio',
+			description: 'How long an exit lasts, as a share of its entrance.',
+			min: 0.3,
+			max: 1,
+			step: 0.05
+		},
+		{
+			token: 'surfaceScale',
+			label: 'Surface scale',
+			description: 'What popovers, menus, tooltips and dialogs grow from.',
+			min: 0.5,
+			max: 1,
+			step: 0.01
+		},
+		{
+			token: 'pressScale',
+			label: 'Press scale',
+			description: 'What a pressed button shrinks to. Hold the Reset button to feel it.',
+			min: 0.8,
+			max: 1,
+			step: 0.01
+		},
+		{
+			token: 'stretch',
+			label: 'Stretch',
+			description: 'How far a switch thumb stretches halfway across.',
+			min: 1,
+			max: 1.6,
+			step: 0.05
+		}
+	];
 	const easingRoleUse: Record<MotionEasingToken, string> = {
 		standard: 'Symmetric moves that both enter and leave.',
 		enter: 'Elements arriving on screen; decelerates into place.',
-		exit: 'Elements leaving; accelerates away.',
+		exit: 'Elements leaving; eases out too by default, so a dismissal answers at once.',
 		emphasized: 'A touch of overshoot for playful, noticeable motion.'
 	};
 
@@ -73,6 +116,7 @@
 	const durationItems = [
 		{ value: 'fast', label: 'fast' },
 		{ value: 'normal', label: 'normal' },
+		{ value: 'moderate', label: 'moderate' },
 		{ value: 'slow', label: 'slow' },
 		{ value: 'slower', label: 'slower' }
 	] as const satisfies ReadonlyArray<{ value: MotionDurationToken; label: string }>;
@@ -110,7 +154,11 @@
 <Theme
 	motion={{
 		duration: { normal: ${playground.motion.duration?.normal}, slow: ${playground.motion.duration?.slow} },
-		easing: { standard: '${playground.motion.easing?.standard}', enter: '${playground.motion.easing?.enter}' }
+		easing: { standard: '${playground.motion.easing?.standard}', enter: '${playground.motion.easing?.enter}' },
+		exitRatio: ${playground.motionShape.exitRatio},
+		surfaceScale: ${playground.motionShape.surfaceScale},
+		pressScale: ${playground.motionShape.pressScale},
+		stretch: ${playground.motionShape.stretch}
 	}}
 >
 	{@render children()}
@@ -176,7 +224,7 @@ export const useDialogMotion = () => useComponentMotion('dialog', defaultDialogM
 	<header class="flex max-w-3xl flex-col gap-3">
 		<h1 class="text-3xl font-semibold">Motion</h1>
 		<p class="text-balance">
-			Motion is a token scale, not a pile of per-component magic numbers. Five duration steps and
+			Motion is a token scale, not a pile of per-component magic numbers. Six duration steps and
 			four easing roles are declared once on <code>&lt;Theme&gt;</code>; every component resolves
 			its transition against them, and so do the
 			<code>duration-*</code> / <code>ease-*</code> CSS utilities.
@@ -251,7 +299,60 @@ export const useDialogMotion = () => useComponentMotion('dialog', defaultDialogM
 			</table>
 		</div>
 
+		<div class="border-neutral-muted overflow-x-auto rounded-xl border">
+			<table class="w-full min-w-lg text-left text-sm">
+				<thead class="border-neutral-muted bg-surface-raised border-b">
+					<tr>
+						<th class="px-4 py-2 font-medium">Shape</th>
+						<th class="px-4 py-2 font-medium">Default</th>
+						<th class="px-4 py-2 font-medium">Current</th>
+						<th class="px-4 py-2 font-medium">Use</th>
+					</tr>
+				</thead>
+				<tbody class="divide-neutral-muted/60 divide-y">
+					{#each shapeSliders as slider (slider.token)}
+						<tr>
+							<td class="text-primary-readable px-4 py-2 font-mono">{slider.token}</td>
+							<td class="px-4 py-2 font-mono">{defaultMotionTokens[slider.token]}</td>
+							<td class="px-4 py-2 font-mono">{theme?.motion[slider.token]}</td>
+							<td class="text-neutral/70 px-4 py-2">{slider.description}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+
 		<Code language="svelte" code={themeMotionSnippet} />
+
+		<div class="max-w-3xl">
+			<h3 class="text-base font-semibold">The rules the presets follow</h3>
+			<ul class="mt-2 list-disc space-y-1 ps-5 text-sm leading-relaxed">
+				<li>
+					The smaller the surface, the quicker: tooltips <code>fast</code>, menus and popovers
+					<code>normal</code>, dialogs, toasts and revealed content <code>moderate</code>, drawers
+					and sheets <code>slow</code>.
+				</li>
+				<li>
+					A surface eases out on the way in (<code>enter</code>) and on the way out (<code
+						>exit</code
+					>), and leaves in <code>exitRatio</code> (80%) of the time it took to arrive. Something
+					that moves from one place to another uses <code>standard</code>.
+				</li>
+				<li>
+					A popover scales in from <code>surfaceScale</code> (0.95), from the side facing its trigger,
+					and leaves the same way.
+				</li>
+				<li>
+					A pressed button shrinks to <code>pressScale</code>. A switch thumb stretches by
+					<code>stretch</code> halfway across.
+				</li>
+				<li>Icons swap through a blurred crossfade; a confirmation pops as it arrives.</li>
+				<li>
+					A drawer or a toast pulled past its limit resists, then springs back. A floating window
+					flies to the dock along a curve.
+				</li>
+			</ul>
+		</div>
 	</section>
 
 	<section class="flex flex-col gap-5">
@@ -259,8 +360,9 @@ export const useDialogMotion = () => useComponentMotion('dialog', defaultDialogM
 			<h2 class="text-lg font-semibold">Live token scale</h2>
 			<p class="mt-1 text-sm leading-relaxed">
 				These controls drive the real <code>&lt;Theme&gt;</code> wrapping this documentation site while
-				you stay on this page. Speed scales all five duration steps together; the easing kit re-points
-				the four roles. Open a dialog or hover the card to feel the difference.
+				you stay on this page. Speed scales all six duration steps together; the easing kit re-points
+				the four roles; the shape tokens change how far things move. Open a dialog or hover the card to
+				feel the difference.
 			</p>
 		</div>
 
@@ -276,7 +378,7 @@ export const useDialogMotion = () => useComponentMotion('dialog', defaultDialogM
 				showValue
 				formatValue={formatSpeed}
 			/>
-			<div class="gap-xs grid grid-cols-5 text-center">
+			<div class="gap-xs grid grid-cols-6 text-center">
 				{#each motionDurationSteps as step (step)}
 					<div class="gap-micro grid">
 						<span class="text-neutral/70 text-xs uppercase">{step}</span>
@@ -294,7 +396,21 @@ export const useDialogMotion = () => useComponentMotion('dialog', defaultDialogM
 					class="w-full"
 				/>
 			</div>
+			<div class="gap-layout-sm grid sm:grid-cols-2">
+				{#each shapeSliders as slider (slider.token)}
+					<Slider
+						label={slider.label}
+						description={slider.description}
+						bind:value={playground.motionShape[slider.token]}
+						min={slider.min}
+						max={slider.max}
+						step={slider.step}
+						showValue
+					/>
+				{/each}
+			</div>
 			<div class="flex flex-wrap items-center gap-3">
+				<Switch label="Stretch" />
 				<Dialog
 					type="modal"
 					size="small"
@@ -446,7 +562,7 @@ export const useDialogMotion = () => useComponentMotion('dialog', defaultDialogM
 			<h2 class="text-lg font-semibold">CSS utilities</h2>
 			<p class="mt-1 text-sm leading-relaxed">
 				The same scale is available to plain CSS transitions and animations:
-				<code>duration-instant|fast|normal|slow|slower</code> and
+				<code>duration-instant|fast|normal|moderate|slow|slower</code> and
 				<code>ease-standard|enter|exit|emphasized</code>, backed by the
 				<code>--duration-*</code> / <code>--ease-*</code> variables. Use them instead of
 				<code>duration-200</code> so hand-written motion moves with the theme.

@@ -19,6 +19,10 @@
 	import { createVelocityTracker } from '$lib/utils/swipeVelocity.js';
 	import { composeHandlers } from '$lib/utils/handlers.js';
 	import { useTheme } from '../Theme/theme.state.svelte.js';
+	import { rubberBand } from '$lib/utils/rubberBand.js';
+
+	/** The furthest a toast follows a pull away from its edge, in px. */
+	const OVERDRAG_EXTENT = 24;
 
 	let {
 		toast,
@@ -196,8 +200,8 @@
 		},
 		onMove: ({ event, deltaX, deltaY }) => {
 			let delta = swipe.axis === 'x' ? deltaX : deltaY;
-			// Rubber-band when dragging away from the dismiss direction.
-			if (delta * swipe.dir < 0) delta /= 4;
+			// Dragged away from the dismiss direction, it resists more the further it goes.
+			if (delta * swipe.dir < 0) delta = rubberBand(delta, OVERDRAG_EXTENT);
 			dragOffset = delta;
 			tracker.add(axisPos(event), event.timeStamp);
 		},

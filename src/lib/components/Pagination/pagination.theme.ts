@@ -53,7 +53,7 @@ const defaultPaginationItem = cva({
 });
 
 const defaultPaginationControl = cva({
-	base: 'inline-flex shrink-0 select-none items-center justify-center rounded-md border font-medium outline-none transition-[color,background-color,border-color,box-shadow,translate] duration-fast ease-standard focus-visible:ring-2 focus-visible:ring-focus/50 [&:active]:translate-y-px [&_svg:not([class*=size-])]:size-icon-md',
+	base: 'inline-flex shrink-0 select-none items-center justify-center rounded-md border font-medium outline-none transition-[color,background-color,border-color,box-shadow,scale] duration-fast ease-standard focus-visible:ring-2 focus-visible:ring-focus/50 active:scale-(--motion-press-scale) [&_svg:not([class*=size-])]:size-icon-md',
 	variants: {
 		size: {
 			small: 'h-control-sm min-size-hit-sm px-md text-xs',

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { checkIcon } from '$lib/components/Icons/check.js';
+	import IconSwap from '$lib/transitions/IconSwap.svelte';
 	import { minusIcon } from '$lib/components/Icons/minus.js';
 	import Slot from '../../Slot/Slot.svelte';
 	import type { Slot as SlotContent } from '../../Slot/slot.js';
@@ -133,11 +134,10 @@
 			size
 		})}
 	>
-		{#if indeterminate}
-			{@render minusIcon({ size: 40 })}
-		{:else}
-			{@render checkIcon({ size: 40 })}
-		{/if}
+		<IconSwap swapped={indeterminate} class="size-full">
+			{#snippet from()}{@render checkIcon({ size: 40 })}{/snippet}
+			{#snippet to()}{@render minusIcon({ size: 40 })}{/snippet}
+		</IconSwap>
 	</div>
 
 	{#if !hiddenLabel}

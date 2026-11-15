@@ -39,7 +39,7 @@ const defaultInputContainer = cva({
 });
 
 const defaultCountryTrigger = cva({
-	base: '-ml-lg mr-md inline-flex h-auto shrink-0 self-stretch rounded-none border-0 bg-clip-border px-lg text-neutral focus-visible:ring-0 focus-visible:text-primary-readable active:translate-y-0 active:bg-transparent',
+	base: '-ml-lg mr-md inline-flex h-auto shrink-0 self-stretch rounded-none border-0 bg-clip-border px-lg text-neutral focus-visible:ring-0 focus-visible:text-primary-readable active:scale-none active:bg-transparent',
 	variants: {
 		size: {
 			small: 'gap-xs text-xs',
@@ -149,7 +149,7 @@ const defaultCountryListbox = cva({
 });
 
 const defaultCountryOption = cva({
-	base: 'w-full justify-start gap-md rounded-sm border-0 bg-clip-border px-md text-left font-normal shadow-none outline-none focus-visible:ring-0 active:translate-y-0',
+	base: 'w-full justify-start gap-md rounded-sm border-0 bg-clip-border px-md text-left font-normal shadow-none outline-none focus-visible:ring-0 active:scale-none',
 	variants: {
 		size: {
 			small: 'min-h-row-sm py-xs text-xs',

@@ -30,6 +30,8 @@ const defaultSwitchToggle = cva({
 	}
 });
 
+// The thumb stretches along its path halfway across and lands round again: what moves stretches a
+// little. See `stretchThumb` in Switch.svelte.
 const defaultSwitchThumb = cva({
 	base: 'pointer-events-none block rounded-full bg-surface-floating lift-1 ring-0 transition-transform duration-normal ease-standard',
 	variants: {

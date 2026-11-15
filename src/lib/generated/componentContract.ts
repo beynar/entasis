@@ -4780,6 +4780,7 @@ export const componentInventory = [
 			'MotionOverride',
 			'MotionResolveOptions',
 			'MotionResolver',
+			'MotionSide',
 			'MotionSpec',
 			'MotionTheme',
 			'MotionTokens',
@@ -4787,9 +4788,11 @@ export const componentInventory = [
 			'MotionVariantShape',
 			'ResolvedMotion',
 			'defaultMotionTokens',
+			'defaultRevealMotion',
 			'motion',
 			'resolveMotionTokens',
-			'useComponentMotion'
+			'useComponentMotion',
+			'useRevealSlide'
 		],
 		docs: [],
 		capabilities: ['motion', 'transition', 'utility'],

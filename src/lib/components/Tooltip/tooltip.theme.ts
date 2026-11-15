@@ -32,13 +32,13 @@ export const defaultTooltip = cva({
 	}
 });
 
-// A tooltip is a quick, small surface: it fades up over the shortest duration step
-// rather than borrowing the Popover's panel scale. The resolved preset is handed to
-// the underlying Popover as its `transition`, so it replaces the popover preset.
+// A tooltip is the smallest surface, so the quickest: it fades up over the shortest duration
+// step. The resolved preset is handed to the underlying Popover as its `transition`, so it
+// replaces the popover preset.
 export const defaultTooltipMotion = motion({
 	base: {
-		in: { x: 0, y: 2, scale: 0.98, opacity: 0 },
-		out: { x: 0, y: 2, scale: 0.98, opacity: 0 },
+		in: { x: 0, y: 2, scale: 'surface', opacity: 0 },
+		out: { x: 0, y: 2, scale: 'surface', opacity: 0 },
 		duration: 'fast'
 	}
 });

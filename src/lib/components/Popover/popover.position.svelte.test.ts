@@ -406,7 +406,12 @@ describe('panel positioner: place', () => {
 			offset: () => 8
 		});
 		await positioner.place(panel);
-		expect(computePosition).toHaveBeenCalledWith(reference, panel, expect.anything());
+		// The trigger, measured without the scale a press gives it.
+		expect(computePosition).toHaveBeenCalledWith(
+			expect.objectContaining({ contextElement: reference }),
+			panel,
+			expect.anything()
+		);
 		const options = lastOptions();
 		expect(options.strategy).toBe('fixed');
 		expect(options.placement).toBe('top-end');
@@ -572,7 +577,7 @@ describe('panel positioner: place', () => {
 		point = null;
 		await positioner.place(panel);
 		expect(middlewareNamed(lastOptions(), 'inline').options).toEqual({});
-		expect(computePosition.mock.calls.at(-1)![0]).toBe(reference);
+		expect(computePosition.mock.calls.at(-1)![0]).toMatchObject({ contextElement: reference });
 	});
 
 	test('a reference without client rects anchors to its box even with anchorTo line', async () => {

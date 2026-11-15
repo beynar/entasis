@@ -15,7 +15,8 @@
 import { useTheme } from '$lib/components/Theme/theme.state.svelte.js';
 import type { ResponsiveProps } from '$lib/components/Theme/theme.js';
 import { resolveMotionTokens, type DeepPartial, type MotionTokens } from '$lib/tailwind/scales.js';
-import type { Easing } from '$lib/transitions/easingFunctions.js';
+import { easingFunctions, type Easing } from '$lib/transitions/easingFunctions.js';
+import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
 import type { FSOParams, FSOProps } from '$lib/transitions/transition.js';
 import { getContext } from 'svelte';
 
@@ -23,13 +24,25 @@ export type { DeepPartial, MotionTokens };
 export type { MotionDurationToken, MotionEasingToken } from '$lib/tailwind/scales.js';
 export { defaultMotionTokens, resolveMotionTokens } from '$lib/tailwind/scales.js';
 
+/**
+ * One direction of a motion spec: FSO params whose `scale` may also be `'surface'`, the Theme's
+ * `surfaceScale` token (what popovers and dialogs grow from).
+ */
+export type MotionSide = Omit<FSOParams, 'scale'> & { scale?: number | 'surface' };
+
 /** One component's motion: the two directions plus the tokens they resolve against. */
 export type MotionSpec = {
-	in: FSOParams;
-	out: FSOParams;
-	/** Duration token name, or an explicit value in ms. Defaults to `normal`. */
+	in: MotionSide;
+	out: MotionSide;
+	/**
+	 * Duration token name, or an explicit value in ms, for the way in. Defaults to `normal`. The
+	 * way out lasts the Theme's `exitRatio` of it (0.8) unless its side names its own duration.
+	 */
 	duration?: keyof MotionTokens['duration'] | number;
-	/** Easing role name, or an easing function name. Defaults to the `standard` role. */
+	/**
+	 * Easing role name, or an easing function name. Unset, or the `enter` role, the way in takes
+	 * the `enter` role and the way out the `exit` role; anything else drives both directions.
+	 */
 	easing?: keyof MotionTokens['easing'] | Easing;
 };
 
@@ -122,13 +135,30 @@ const transitionSide = (transition: FSOProps | undefined, direction: 'in' | 'out
 	return transition as FSOParams;
 };
 
-const resolveSide = (params: FSOParams, spec: MotionSpec, theme: MotionTheme): FSOParams => ({
-	...params,
-	duration: theme.preferReducesMotion
-		? 0
-		: (params.duration ?? durationInMs(spec.duration, theme.motion)),
-	easing: params.easing ?? easingName(spec.easing, theme.motion)
-});
+// With no easing, or the `enter` role, a spec describes a surface arriving and leaving: the way in
+// takes the `enter` role and the way out the `exit` role. Any other easing (`standard` for
+// something that moves, a named curve) drives both directions.
+const easingFor = (easing: MotionSpec['easing'], direction: 'in' | 'out'): MotionSpec['easing'] =>
+	easing === undefined || easing === 'enter' ? (direction === 'in' ? 'enter' : 'exit') : easing;
+
+// An exit lasts the `exitRatio` share of its entrance: leaving should never keep someone waiting.
+const resolveSide = (
+	params: MotionSide,
+	spec: MotionSpec,
+	theme: MotionTheme,
+	direction: 'in' | 'out'
+): FSOParams => {
+	const duration = durationInMs(spec.duration, theme.motion);
+	return {
+		...params,
+		scale: params.scale === 'surface' ? theme.motion.surfaceScale : params.scale,
+		duration: theme.preferReducesMotion
+			? 0
+			: (params.duration ??
+				(direction === 'out' ? Math.round(duration * theme.motion.exitRatio) : duration)),
+		easing: params.easing ?? easingName(easingFor(spec.easing, direction), theme.motion)
+	};
+};
 
 /**
  * Builds a motion preset resolver. Calling it with variant props deep-merges
@@ -153,8 +183,18 @@ export const motion = <const V extends MotionVariantShape>(
 			mergeInto(spec, override);
 		}
 		return {
-			in: resolveSide(transitionSide(options?.transition, 'in') ?? spec.in ?? {}, spec, theme),
-			out: resolveSide(transitionSide(options?.transition, 'out') ?? spec.out ?? {}, spec, theme)
+			in: resolveSide(
+				transitionSide(options?.transition, 'in') ?? spec.in ?? {},
+				spec,
+				theme,
+				'in'
+			),
+			out: resolveSide(
+				transitionSide(options?.transition, 'out') ?? spec.out ?? {},
+				spec,
+				theme,
+				'out'
+			)
 		};
 	};
 };
@@ -200,5 +240,38 @@ export const useComponentMotion = <V extends MotionVariantShape>(
 			overrides: [theme.componentThemes?.[component]?.motion, context?.motion, overrides?.motion],
 			transition: transition === undefined ? undefined : theme.resolveResponsiveProps(transition)
 		});
+	};
+};
+
+/**
+ * Content a disclosure reveals in place (an expanded list, an added row): it slides open over the
+ * `moderate` step, eased out, and folds away a little quicker. Accordion, Collapsible, Field
+ * messages and Sidebar groups use the same timing through their own presets.
+ */
+export const defaultRevealMotion = motion({
+	base: {
+		in: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0 },
+		out: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0 },
+		duration: 'moderate'
+	}
+});
+
+/**
+ * `defaultRevealMotion` as parameters for Svelte's `slide`, resolved against the surrounding Theme
+ * so a `<Theme motion>` retune and reduced motion reach it; without a Theme, the library scale
+ * and the OS preference. Call it while a component initialises; read `.in` / `.out` from the
+ * returned getter.
+ */
+export const useRevealSlide = () => {
+	const theme = getContext<MotionTheme | undefined>('entasisTheme');
+	const side = ({ duration, easing }: FSOParams) => ({
+		duration,
+		easing: easingFunctions[easing ?? 'cubicOut']
+	});
+	return () => {
+		const resolved = defaultRevealMotion(undefined, {
+			theme: theme ?? { motion: fallbackTokens, preferReducesMotion: prefersReducedMotion() }
+		});
+		return { in: side(resolved.in), out: side(resolved.out) };
 	};
 };

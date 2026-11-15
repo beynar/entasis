@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
-	import { crossfade, fade, scale } from 'svelte/transition';
+	import { fade, scale } from 'svelte/transition';
+	import { arcCrossfade } from '$lib/transitions/arcCrossfade.js';
 	import { easingFunctions } from '$lib/transitions/easingFunctions.js';
 	import Button from '../Button/Button.svelte';
 	import { minusIcon } from '../Icons/minus.js';
@@ -60,7 +61,7 @@
 	const classes = $derived(useFloatingWindowTheme(theme));
 	const t = $derived(useI18n());
 	// Motion preset from `floatingWindowTheme.motion`, through the override ladder
-	// (registry → `setFloatingWindowTheme` → instance `theme.motion`). `crossfade` is
+	// (registry → `setFloatingWindowTheme` → instance `theme.motion`). The crossfade is
 	// built once, so the preset is read at init like the hardcoded timings it replaces.
 	const resolveMotion = useFloatingWindowMotion();
 	const { flight, enter, exit } = untrack(() => ({
@@ -68,7 +69,8 @@
 		enter: resolveMotion({ phase: 'enter' }, { motion: theme?.motion }),
 		exit: resolveMotion({ phase: 'exit' }, { motion: theme?.motion })
 	}));
-	const [send, receive] = crossfade({
+	// Window and dock chip trade places along a curve, not a straight line.
+	const [send, receive] = arcCrossfade({
 		duration: flight.in.duration ?? 0,
 		easing: easingFunctions[flight.in.easing ?? 'cubicOut'],
 		fallback: (node, _params, intro) => {
@@ -76,7 +78,7 @@
 			return scale(node, {
 				duration: side.duration ?? 0,
 				easing: easingFunctions[side.easing ?? 'cubicOut'],
-				start: side.scale ?? 0.97,
+				start: side.scale ?? 0.95,
 				opacity: side.opacity ?? 0
 			});
 		}

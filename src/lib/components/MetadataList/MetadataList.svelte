@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { safeHref } from '$lib/utils/safeHref.js';
 	import { slide } from 'svelte/transition';
+	import { useRevealSlide } from '$lib/utils/motion/index.js';
 	import Slot from '../Slot/Slot.svelte';
 	import Chip from '../Chip/Chip.svelte';
 	import { caretDownIcon } from '../Icons/caretDown.js';
@@ -43,6 +44,8 @@
 
 	const t = $derived(useI18n(i18n));
 	const classes = $derived(useMetadataListTheme(theme));
+	// Revealed content shares one timing across the library (see `defaultRevealMotion`).
+	const reveal = useRevealSlide();
 
 	// Formatters derived once from the active locale rather than rebuilt per item in the loop.
 	const numberFormat = $derived(new Intl.NumberFormat(t.locale));
@@ -197,7 +200,8 @@
 			<div
 				class={classes.list({ density })}
 				style={`grid-column: 1 / -1; ${columnsStyle}`}
-				transition:slide={{ duration: 200 }}
+				in:slide={reveal().in}
+				out:slide={reveal().out}
 			>
 				{#each hiddenItems as item, index (index)}
 					{@render row(item, limit + index)}

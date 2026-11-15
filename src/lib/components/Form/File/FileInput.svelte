@@ -10,6 +10,7 @@
 	import type { FileInputProps, FileInputType, FileInputValue } from './fileInput.props.js';
 	import { useFileInputTheme } from './fileInput.theme.js';
 	import { slide } from 'svelte/transition';
+	import { useRevealSlide } from '$lib/utils/motion/index.js';
 	import Slot from '../../Slot/Slot.svelte';
 	import { fileIcon } from '../../Icons/file.js';
 	import { plusIcon } from '../../Icons/plus.js';
@@ -109,6 +110,8 @@
 	});
 
 	const classes = $derived(useFileInputTheme(theme));
+	// Revealed content shares one timing across the library (see `defaultRevealMotion`).
+	const reveal = useRevealSlide();
 
 	const isImage = (file: File): boolean => {
 		return file.type.startsWith('image/');
@@ -169,18 +172,22 @@
 		disabled={field.disabled}
 	/>
 	{#if dropzone.files.length === 0}
-		<div transition:slide class={classes.placeholder({ class: placeholderClass, size: rest.size })}>
+		<div
+			in:slide={reveal().in}
+			out:slide={reveal().out}
+			class={classes.placeholder({ class: placeholderClass, size: rest.size })}
+		>
 			{@render placeholderIcon({ size: 40 })}
 			{#if resolvedPlaceholder}
 				<span class="mt-2">{resolvedPlaceholder}</span>
 			{/if}
 		</div>
 	{:else}
-		<div transition:slide class="h-fit w-full">
+		<div in:slide={reveal().in} out:slide={reveal().out} class="h-fit w-full">
 			<Slot render={fileList} class={classes.fileList({ class: fileListClass, size: rest.size })}>
 				{#each dropzone.files as fil (fil.name + fil.size)}
 					{@const size = dropzone.formatSize(fil.size, t)}
-					<div transition:slide={{ duration: 300 }}>
+					<div in:slide={reveal().in} out:slide={reveal().out}>
 						<Slot render={file} class={classes.file({ class: fileClass, size: rest.size })}>
 							{#if isImage(fil)}
 								{@const src = URL.createObjectURL(fil)}

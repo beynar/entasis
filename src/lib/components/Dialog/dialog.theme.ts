@@ -186,17 +186,18 @@ export const defaultDialogDescription = cva({
 // retune and a reduced-motion preference reach every dialog.
 export const defaultDialogMotion = motion({
 	base: {
-		in: { x: 0, y: 0, scale: 0.98, opacity: 0 },
-		out: { x: 0, y: 0, scale: 0.98, opacity: 0 }
+		in: { x: 0, y: 0, scale: 'surface', opacity: 0 },
+		out: { x: 0, y: 0, scale: 'surface', opacity: 0 },
+		duration: 'moderate'
 	},
 	variants: {
 		type: {
 			modal: {},
 			fullScreen: {},
-			drawerRight: { in: { x: '100%' }, out: { x: '100%' } },
-			drawerLeft: { in: { x: '-100%' }, out: { x: '-100%' } },
-			drawerBottom: { in: { y: '100%' }, out: { y: '100%' } },
-			drawerTop: { in: { y: '-100%' }, out: { y: '-100%' } },
+			drawerRight: { in: { x: '100%' }, out: { x: '100%' }, duration: 'slow' },
+			drawerLeft: { in: { x: '-100%' }, out: { x: '-100%' }, duration: 'slow' },
+			drawerBottom: { in: { y: '100%' }, out: { y: '100%' }, duration: 'slow' },
+			drawerTop: { in: { y: '-100%' }, out: { y: '-100%' }, duration: 'slow' },
 			alert: { in: { y: -100 }, out: { y: -100 } }
 		}
 	},

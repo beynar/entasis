@@ -337,6 +337,7 @@ export type MotionDurationTokens = {
 	instant: number;
 	fast: number;
 	normal: number;
+	moderate: number;
 	slow: number;
 	slower: number;
 };
@@ -349,11 +350,23 @@ export type MotionEasingTokens = {
 	emphasized: Easing;
 };
 
-/** The global motion scale: duration steps plus easing roles. */
+/** The global motion scale: duration steps, easing roles, and the shape of the movements. */
 export type MotionTokens = {
 	duration: MotionDurationTokens;
 	easing: MotionEasingTokens;
+	/** How long an exit lasts, as a share of its entrance. Default `0.8`. */
+	exitRatio: number;
+	/** The scale a pressed Button or Pagination item shrinks to. Default `0.97`. */
+	pressScale: number;
+	/** The scale popovers, menus, tooltips, dialogs and floating windows grow from. Default `0.95`. */
+	surfaceScale: number;
+	/** How far a Switch thumb stretches along its path halfway across. Default `1.25`. */
+	stretch: number;
 };
+
+/** The single-number motion tokens, next to the duration steps and easing roles. */
+export const motionShapeTokens = ['exitRatio', 'pressScale', 'surfaceScale', 'stretch'] as const;
+export type MotionShapeToken = (typeof motionShapeTokens)[number];
 
 export type MotionDurationToken = keyof MotionDurationTokens;
 export type MotionEasingToken = keyof MotionEasingTokens;
@@ -369,6 +382,7 @@ export const motionDurationSteps = [
 	'instant',
 	'fast',
 	'normal',
+	'moderate',
 	'slow',
 	'slower'
 ] as const satisfies readonly MotionDurationToken[];
@@ -380,9 +394,20 @@ export const motionEasingRoles = [
 	'emphasized'
 ] as const satisfies readonly MotionEasingToken[];
 
+/**
+ * The library's motion scale. Durations rank surfaces by size, so the smaller one is the quicker:
+ * `fast` tooltips and press feedback, `normal` menus and popovers, `moderate` dialogs, toasts and
+ * disclosed content, `slow` drawers and sheets. A surface eases out on the way in and, by
+ * default, on the way out too, so a dismissal answers at once; its exit lasts 80% of its entrance
+ * (`exitRatio`). `pressScale`, `surfaceScale` and `stretch` shape the movements themselves.
+ */
 export const defaultMotionTokens = {
-	duration: { instant: 0, fast: 100, normal: 200, slow: 300, slower: 500 },
-	easing: { standard: 'cubicInOut', enter: 'cubicOut', exit: 'cubicIn', emphasized: 'backOut' }
+	duration: { instant: 0, fast: 150, normal: 200, moderate: 250, slow: 300, slower: 500 },
+	easing: { standard: 'cubicInOut', enter: 'cubicOut', exit: 'cubicOut', emphasized: 'backOut' },
+	exitRatio: 0.8,
+	pressScale: 0.97,
+	surfaceScale: 0.95,
+	stretch: 1.25
 } as const satisfies MotionTokens;
 
 const easingName = (value: string, name: string): Easing => {
@@ -402,7 +427,20 @@ export const resolveMotionTokens = (motion?: DeepPartial<MotionTokens>): MotionT
 		const value = motion?.easing?.[role];
 		if (value !== undefined) easing[role] = easingName(value, `motion.easing.${role}`);
 	}
-	return { duration, easing };
+	const shape = (token: MotionShapeToken) => {
+		const value = motion?.[token];
+		return value === undefined
+			? defaultMotionTokens[token]
+			: positiveNumber(value, `motion.${token}`);
+	};
+	return {
+		duration,
+		easing,
+		exitRatio: shape('exitRatio'),
+		pressScale: shape('pressScale'),
+		surfaceScale: shape('surfaceScale'),
+		stretch: shape('stretch')
+	};
 };
 
 /**
@@ -424,13 +462,23 @@ export const mergeMotionTokens = (
 	if (!base) return override;
 	if (!override) return base;
 	return {
+		...base,
+		...override,
 		duration: { ...base.duration, ...override.duration },
 		easing: { ...base.easing, ...override.easing }
 	};
 };
 
+/** The CSS variable each shape token is written to. */
+export const motionShapeVariables = {
+	exitRatio: '--motion-exit-ratio',
+	pressScale: '--motion-press-scale',
+	surfaceScale: '--motion-surface-scale',
+	stretch: '--motion-stretch'
+} as const satisfies Record<MotionShapeToken, string>;
+
 /**
- * `--duration-*` / `--ease-*` declarations for a (possibly partial) motion scale.
+ * `--duration-*` / `--ease-*` / `--motion-*` declarations for a (possibly partial) motion scale.
  * Shared by the Tailwind motion engine and the runtime `Theme designTokens` compiler.
  */
 export const motionVariables = (motion?: DeepPartial<MotionTokens>) => {
@@ -441,6 +489,9 @@ export const motionVariables = (motion?: DeepPartial<MotionTokens>) => {
 		),
 		...Object.fromEntries(
 			motionEasingRoles.map((role) => [`--ease-${role}`, easingBezierStrings[tokens.easing[role]]])
+		),
+		...Object.fromEntries(
+			motionShapeTokens.map((token) => [motionShapeVariables[token], String(tokens[token])])
 		)
 	} as Record<string, string>;
 };

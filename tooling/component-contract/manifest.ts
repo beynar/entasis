@@ -3194,6 +3194,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'MotionOverride',
 		'MotionResolveOptions',
 		'MotionResolver',
+		'MotionSide',
 		'MotionSpec',
 		'MotionTheme',
 		'MotionTokens',
@@ -3201,9 +3202,11 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'MotionVariantShape',
 		'ResolvedMotion',
 		'defaultMotionTokens',
+		'defaultRevealMotion',
 		'motion',
 		'resolveMotionTokens',
-		'useComponentMotion'
+		'useComponentMotion',
+		'useRevealSlide'
 	],
 	scheduling: [
 		'SchedulingInterval',

@@ -33,8 +33,12 @@ import {
 	type PopupTriggerProps
 } from '$lib/utils/trigger.js';
 import { refuseDismissal } from '$lib/utils/dismissible.js';
+import { rubberBand } from '$lib/utils/rubberBand.js';
 import { useDialogMotion, type DialogThemeProps } from './dialog.theme.js';
 import type { DialogApi } from './dialog.api.js';
+
+/** The furthest a drawer follows a pull past fully open, in px, however far the finger goes. */
+const OVERDRAG_EXTENT = 48;
 
 export { DIALOG_Z_BASE, DIALOG_Z_STEP } from '../Theme/theme.layers.js';
 
@@ -235,11 +239,13 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 	 */
 	dragOffset = $state(0);
 	dragSize = $state(0); // panel extent along the axis, measured at drag start
+	/** How far the panel sits toward dismissal, in px; negative while pulled past open. */
+	dismissTravel = $derived(this.dragOffset * this.swipeSign);
 	/** Drag progress toward dismissal, 0 while resting at the open position or any snap point. */
 	dragProgress = $derived.by(() => {
 		const floor = this.snapFloor;
 		return this.dragSize > floor
-			? Math.min(Math.max(Math.abs(this.dragOffset) - floor, 0) / (this.dragSize - floor), 1)
+			? Math.min(Math.max(this.dismissTravel - floor, 0) / (this.dragSize - floor), 1)
 			: 0;
 	});
 	contentTransform = $derived.by(() => {
@@ -697,7 +703,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 					const largest = this.snapHeights[this.snapHeights.length - 1];
 					const index = settleSnapIndex(
 						this.snapHeights.map((snap) => snap.height),
-						largest.height - Math.abs(this.dragOffset),
+						largest.height - this.dismissTravel,
 						velocity,
 						this.swipeEnabled
 					);
@@ -706,8 +712,7 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 				} else {
 					// Without usable snap points the drag only dismisses where swiping to dismiss is on.
 					shouldClose =
-						this.swipeEnabled &&
-						(Math.abs(this.dragOffset) > this.dragSize * 0.25 || velocity > 0.4);
+						this.swipeEnabled && (this.dismissTravel > this.dragSize * 0.25 || velocity > 0.4);
 				}
 			}
 			// Closing keeps dragOffset so the out transition starts from the dragged position.
@@ -770,7 +775,10 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 						!selectionBlocks &&
 						!ownsGesture(startTarget));
 				const opening = this.snapHeights.length > 0 && !this.atLargestSnap && delta < -4;
-				if ((delta > 4 || opening) && eligible) return true;
+				// A handle pulled past fully open stretches a little and springs back. The body
+				// leaves that pull to its own scrolling.
+				const overdrag = onHandle && delta < -4;
+				if ((delta > 4 || opening || overdrag) && eligible) return true;
 				// Wrong direction, or the target owns the gesture: the press is spent. The session
 				// itself stays until the pointer lifts, so a second finger cannot take over mid-press.
 				if (Math.abs(pos - startPos) > 4) candidate = false;
@@ -781,12 +789,15 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 			},
 			onMove: ({ event }) => {
 				const pos = axisPos(event);
-				// Clamped: it can't be dragged past open, nor past its own extent.
+				// Not past its own extent; past open it resists and follows less and less, then
+				// springs back on release.
 				const travelled = startOffset + (pos - startPos) * this.swipeSign;
-				const magnitude = Math.max(
-					0,
-					this.dragSize > 0 ? Math.min(travelled, this.dragSize) : travelled
-				);
+				const magnitude =
+					travelled < 0
+						? rubberBand(travelled, OVERDRAG_EXTENT)
+						: this.dragSize > 0
+							? Math.min(travelled, this.dragSize)
+							: travelled;
 				this.dragOffset = this.swipeSign * magnitude;
 				tracker.add(pos, event.timeStamp);
 			},

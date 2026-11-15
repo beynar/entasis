@@ -39,22 +39,32 @@ const resolved = (props: ComponentProps<typeof MotionLawHarness> = {}) => {
 
 describe('dialog motion', () => {
 	test('motion:dialog.default-preset resolves the type preset against the Theme tokens', () => {
+		// A dialog ranks above menus (`normal`) and below drawers (`slow`); it eases out, and
+		// leaves in 80% of the time it took to arrive.
 		expect(resolved()).toMatchObject({
-			inDuration: 200,
+			inDuration: 250,
 			outDuration: 200,
-			inEasing: 'cubicInOut',
-			inScale: '0.98'
+			inEasing: 'cubicOut',
+			inScale: '0.95'
 		});
 		// The per-type variant still decides the geometry.
 		expect(resolved({ type: 'drawerRight' }).inX).toBe('100%');
 	});
 
 	test('motion:theme.tokens a Theme motion scale retunes the resolved duration', () => {
-		expect(resolved({ motion: { duration: { normal: 50 } } })).toMatchObject({
+		expect(resolved({ motion: { duration: { moderate: 50 } } })).toMatchObject({
 			inDuration: 50,
-			outDuration: 50
+			outDuration: 40
 		});
-		expect(resolved({ motion: { easing: { standard: 'expoOut' } } }).inEasing).toBe('expoOut');
+		expect(resolved({ motion: { easing: { enter: 'expoOut' } } }).inEasing).toBe('expoOut');
+	});
+
+	test('motion:theme.shape a Theme shape scale retunes the surface scale and the exit share', () => {
+		expect(resolved({ motion: { surfaceScale: 0.9, exitRatio: 0.5 } })).toMatchObject({
+			inDuration: 250,
+			outDuration: 125,
+			inScale: '0.9'
+		});
 	});
 
 	test('motion:theme.design-tokens the active theme motion block retunes the resolved duration', () => {
@@ -63,9 +73,9 @@ describe('dialog motion', () => {
 		expect(
 			resolved({
 				forcedTheme: 'dark',
-				designTokens: { dark: { motion: { duration: { normal: 33 } } } }
+				designTokens: { dark: { motion: { duration: { moderate: 30 } } } }
 			})
-		).toMatchObject({ inDuration: 33, outDuration: 33 });
+		).toMatchObject({ inDuration: 30, outDuration: 24 });
 	});
 
 	test('motion:theme.transition-flat a flat transition prop retunes both directions', () => {
@@ -97,7 +107,7 @@ describe('dialog motion', () => {
 				scopedMotion: { duration: 'slower' },
 				theme: { motion: { duration: 'fast' } }
 			}).inDuration
-		).toBe(100);
+		).toBe(150);
 	});
 
 	test('motion:dialog.transition-prop the instance transition prop beats every override', () => {
@@ -128,18 +138,18 @@ describe('dialog motion', () => {
 // duration, and a reduced-motion preference zeroes it — without rendering anything.
 describe('component motion presets', () => {
 	const scale = resolveMotionTokens({
-		duration: { instant: 0, fast: 11, normal: 22, slow: 33, slower: 44 }
+		duration: { instant: 0, fast: 11, normal: 22, moderate: 25, slow: 33, slower: 44 }
 	});
 	const theme = { motion: scale, preferReducesMotion: false };
 	const reduced = { motion: scale, preferReducesMotion: true };
 
 	const presets = [
-		['toast', defaultToastMotion, undefined, 22],
+		['toast', defaultToastMotion, undefined, 25],
 		['tooltip', defaultTooltipMotion, undefined, 11],
-		['hover-card', defaultHoverCardMotion, undefined, 11],
-		['accordion', defaultAccordionMotion, undefined, 22],
-		['collapsible', defaultCollapsibleMotion, undefined, 22],
-		['collapsible.peek', defaultCollapsibleMotion, { variant: 'peek' }, 33],
+		['hover-card', defaultHoverCardMotion, undefined, 22],
+		['accordion', defaultAccordionMotion, undefined, 25],
+		['collapsible', defaultCollapsibleMotion, undefined, 25],
+		['collapsible.peek', defaultCollapsibleMotion, { variant: 'peek' }, 25],
 		['stepper', defaultStepperMotion, undefined, 33],
 		['tabs', defaultTabsMotion, undefined, 33],
 		['floating-window', defaultFloatingWindowMotion, undefined, 33],
@@ -188,6 +198,16 @@ describe('component motion presets', () => {
 // The CSS half of the scale. `<Theme motion>` used to move only the Svelte transitions,
 // leaving `duration-*` / `ease-*` utilities on the build-time numbers.
 describe('motion css variables', () => {
+	test('motion:theme.css-shape the shape tokens reach their CSS variables', () => {
+		const css = compileThemeDesignTokens({
+			attribute: 'data-theme',
+			motion: { pressScale: 0.9, stretch: 1.4 }
+		});
+		expect(css).toContain('--motion-press-scale:0.9;');
+		expect(css).toContain('--motion-stretch:1.4;');
+		expect(css).toContain('--motion-surface-scale:0.95;');
+	});
+
 	test('motion:theme.css the motion prop rewrites the scale on html', () => {
 		const css = compileThemeDesignTokens({
 			attribute: 'data-theme',

@@ -45,14 +45,14 @@ const defaultHoverCardCard = cva({
 	}
 });
 
-// The card lifts in and settles back: `enter` on the way in, `exit` on the way out
-// is left to the tokens (one spec drives both sides). The resolved preset is handed
-// to the underlying Popover as its `transition`, replacing the popover preset.
+// The card lifts in and settles back, on the `enter` role in and the `exit` role out. The
+// resolved preset is handed to the underlying Popover as its `transition`, replacing the
+// popover preset.
 export const defaultHoverCardMotion = motion({
 	base: {
-		in: { x: 0, y: 4, scale: 0.98, opacity: 0 },
-		out: { x: 0, y: 4, scale: 0.98, opacity: 0 },
-		duration: 'fast',
+		in: { x: 0, y: 4, scale: 'surface', opacity: 0 },
+		out: { x: 0, y: 4, scale: 'surface', opacity: 0 },
+		duration: 'normal',
 		easing: 'enter'
 	}
 });

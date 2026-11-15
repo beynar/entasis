@@ -36,6 +36,7 @@ const gettingStartedLinks: AppNavigationLink[] = [
 	{ href: '/docs/colors', text: 'Color system' },
 	{ href: '/docs/tokens', text: 'Tokens' },
 	{ href: '/docs/motion', text: 'Motion' },
+	{ href: '/docs/motion/principles', text: 'Motion principles' },
 	{ href: '/docs/consistency', text: 'Consistency rules' },
 	{ href: '/docs/theme-transitions', text: 'Theme transitions' },
 	{ href: '/docs/i18n', text: 'Internationalization' },

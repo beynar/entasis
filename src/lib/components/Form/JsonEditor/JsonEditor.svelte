@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { BROWSER } from 'esm-env';
+	import IconSwap from '$lib/transitions/IconSwap.svelte';
 	import { setContext, tick, untrack } from 'svelte';
 	import type { Attachment } from 'svelte/attachments';
 	import { useI18n } from '$lib/i18n/context.svelte.js';
@@ -408,11 +409,10 @@
 								size: 'small'
 							})}
 						>
-							{#if clipboard.copied}
-								{@render checkIcon({ size: iconSize })}
-							{:else}
-								{@render copySimpleIcon({ size: iconSize })}
-							{/if}
+							<IconSwap swapped={clipboard.copied} pulse>
+								{#snippet from()}{@render copySimpleIcon({ size: iconSize })}{/snippet}
+								{#snippet to()}{@render checkIcon({ size: iconSize })}{/snippet}
+							</IconSwap>
 						</button>
 					{/if}
 					{#if shownIssues.length > 0 && modeState.value === 'tree'}

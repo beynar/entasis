@@ -4,6 +4,7 @@
 	import { codeToHtml } from './code.highlighter.js';
 	import { resolveLanguage, getLanguageLabel } from './highlighter/code-languages.js';
 	import Slot from '../Slot/Slot.svelte';
+	import IconSwap from '$lib/transitions/IconSwap.svelte';
 	import CodeTheme from './CodeTheme.svelte';
 	import Button from '../Button/Button.svelte';
 	import ScrollArea from '../ScrollArea/ScrollArea.svelte';
@@ -65,11 +66,10 @@
 		onclick={copy}
 		label={clipboard.copied ? t.copied : t.copy}
 	>
-		{#if clipboard.copied}
-			{@render checkIcon({ size: 14 })}
-		{:else}
-			{@render copyIcon({ size: 14 })}
-		{/if}
+		<IconSwap swapped={clipboard.copied} pulse>
+			{#snippet from()}{@render copyIcon({ size: 14 })}{/snippet}
+			{#snippet to()}{@render checkIcon({ size: 14 })}{/snippet}
+		</IconSwap>
 	</Button>
 {/snippet}
 

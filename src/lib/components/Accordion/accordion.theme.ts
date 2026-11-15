@@ -223,7 +223,8 @@ const defaultAccordionContent = cva({
 export const defaultAccordionMotion = motion({
 	base: {
 		in: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0.2 },
-		out: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0.2 }
+		out: { axis: 'y', x: 0, y: 0, scale: 1, opacity: 0.2 },
+		duration: 'moderate'
 	},
 	variants: {
 		axis: {

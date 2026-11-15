@@ -106,10 +106,10 @@ const defaultFloatingWindowDockItem = cva({
 // `!static`: the title is the pill's drag and restore surface, so its hover / press overlay (the
 // Button's `state-layer` ::before) anchors to the fixed dock item instead of the button and tints
 // the whole pill, clipped by its rounded overflow. The dock controls keep their own overlay.
-// `active:translate-none` drops the Button's press nudge: any `translate` but `none`, 0 included,
+// `active:scale-none` drops the Button's press shrink: any `scale` but `none`, 1 included,
 // makes the title the anchor of its own overlay again and pulls the press tint back inside it.
 const defaultFloatingWindowDockTitle = cva({
-	base: '!static active:translate-none !min-w-0 !flex-1 !rounded-none !text-xs !font-medium',
+	base: '!static active:scale-none !min-w-0 !flex-1 !rounded-none !text-xs !font-medium',
 	variants: {
 		orientation: {
 			horizontal: '!h-full !w-auto !justify-start !px-md !text-left',
@@ -165,14 +165,14 @@ const defaultFloatingWindowBackdrop = cva({
 
 export const defaultFloatingWindowMotion = motion({
 	base: {
-		in: { x: 0, y: 0, scale: 0.97, opacity: 0 },
-		out: { x: 0, y: 0, scale: 0.97, opacity: 0 }
+		in: { x: 0, y: 0, scale: 'surface', opacity: 0 },
+		out: { x: 0, y: 0, scale: 'surface', opacity: 0 }
 	},
 	variants: {
 		phase: {
-			flight: { duration: 'slow', easing: 'enter' },
-			enter: { duration: 'normal', easing: 'enter' },
-			exit: { duration: 'fast', easing: 'exit' }
+			flight: { duration: 'slow', easing: 'standard' },
+			enter: { duration: 'moderate' },
+			exit: { duration: 'moderate' }
 		}
 	},
 	defaultVariants: {

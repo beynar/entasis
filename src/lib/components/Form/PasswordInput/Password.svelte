@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import IconSwap from '$lib/transitions/IconSwap.svelte';
 	import { boundDefault } from '$lib/utils/state.svelte.js';
 	import { tick } from 'svelte';
 	import Field from '../Field/Field.svelte';
@@ -167,7 +168,15 @@
 		label={showPassword ? `${t.hide} ${t.password}` : `${t.show} ${t.password}`}
 		pressed={showPassword}
 		disabled={field.disabled}
-		prefix={showPassword ? eyeIcon : eyeClosedIcon}
+		prefix={eyeSwap}
 		onclick={togglePasswordVisibility}
 	/>
 </Field>
+
+<!-- The eye opens and closes through a blurred crossfade rather than a cut. -->
+{#snippet eyeSwap()}
+	<IconSwap swapped={showPassword}>
+		{#snippet from()}{@render eyeClosedIcon()}{/snippet}
+		{#snippet to()}{@render eyeIcon()}{/snippet}
+	</IconSwap>
+{/snippet}
