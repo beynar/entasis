@@ -92,6 +92,7 @@ export class ImageZoomLightbox {
 		this.eventCleanups.splice(0).forEach((cleanup) => cleanup());
 		const instance = this.instance;
 		this.instance = null;
+		this.zoom.lightboxContainer = null;
 		this.triggerElement = null;
 		this.imageElement = null;
 		this.previousFocus = null;
@@ -157,6 +158,7 @@ export class ImageZoomLightbox {
 		}
 
 		this.instance = instance;
+		this.zoom.lightboxContainer = instance.outer.get().closest<HTMLElement>('.lg-container');
 		this.syncGalleryItem(instance);
 		this.attachOutsideClickPolicy(instance.outer.get());
 		this.sync(this.zoom.isOpen);

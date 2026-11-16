@@ -165,6 +165,7 @@ export class ImageGalleryLightbox {
 		this.zoomPlugin = null;
 		this.activeSource = null;
 		this.instance = null;
+		this.gallery.lightboxContainer = null;
 		if (!instance) {
 			cleanupImages?.();
 			return;
@@ -247,6 +248,7 @@ export class ImageGalleryLightbox {
 		this.attachOriginAdapter(instance);
 		this.syncGalleryItems(instance);
 		this.instance = instance;
+		this.gallery.lightboxContainer = instance.outer.get().closest<HTMLElement>('.lg-container');
 		this.zoomPlugin = instance.plugins.find(this.isZoomPlugin) ?? null;
 		const outer = instance.outer.get();
 		outer.style.setProperty('--image-gallery-margin', `${Math.max(0, this.gallery.zoomMargin)}px`);

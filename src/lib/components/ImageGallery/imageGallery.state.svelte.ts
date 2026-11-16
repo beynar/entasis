@@ -78,6 +78,12 @@ export class ImageGalleryState extends createBindableStateClass<ImageGalleryStat
 	rootElement: HTMLElement | null = $state(null);
 	discoveredImages = $state<DiscoveredImage[]>([]);
 	readonly imageRegistry = new ImageGalleryImages(this);
+	/**
+	 * The container LightGallery appends to the document for its overlay, once it exists. The
+	 * caption is rendered into it: left where the component sits, inside a Dialog, its z-index
+	 * only ranked it within the dialog, under the overlay.
+	 */
+	lightboxContainer = $state<HTMLElement | null>(null);
 	private lightbox = new ImageGalleryLightbox(this);
 
 	// The DOM handle stays internal: the public payload is data only.
