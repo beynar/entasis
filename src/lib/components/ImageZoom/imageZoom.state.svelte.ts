@@ -74,6 +74,12 @@ type ImageZoomAttachmentConfig = Pick<
 export class ImageZoomState extends createBindableStateClass<ImageZoomStateOptions>() {
 	private inferredSrc = $state('');
 	private inferredAlt = $state('');
+	/**
+	 * The container LightGallery appends to the document for its overlay, once it exists. The
+	 * caption is rendered into it: left where the component sits, inside a Dialog, its z-index
+	 * only ranked it within the dialog, under the overlay.
+	 */
+	lightboxContainer = $state<HTMLElement | null>(null);
 	private lightbox = new ImageZoomLightbox(this);
 
 	resolvedSrc = $derived(this.src || this.inferredSrc);

@@ -127,6 +127,14 @@
 			return onAfterClose;
 		}
 	});
+
+	// Moves the caption into the lightbox's container once it exists, and out with it.
+	const captionHost = (node: HTMLElement) => {
+		const container = state.lightboxContainer;
+		if (!container) return;
+		container.append(node);
+		return () => node.remove();
+	};
 </script>
 
 <div
@@ -191,5 +199,9 @@
 </div>
 
 {#if openState.value && caption}
-	<Slot render={caption} payload={state.payload} class={classes.caption()} />
+	<!-- In LightGallery's own container, beside its overlay: rendered where the component sits,
+	     inside a Dialog the caption's z-index only ranked it within the dialog, under the overlay. -->
+	<div class="contents" {@attach captionHost}>
+		<Slot render={caption} payload={state.payload} class={classes.caption()} />
+	</div>
 {/if}

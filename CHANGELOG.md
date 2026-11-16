@@ -76,6 +76,12 @@ Unreleased section under the new version.
   title and the two buttons default to new I18n entries (`confirmationTitle`,
   `confirmationConfirm`, `confirmationCancel`) in all 8 locales.
 
+### Fixed
+
+- The caption of an `ImageGallery` or `ImageZoom` opened from a `Dialog` shows above the image
+  again. It was rendered where the component sits, so inside a dialog its stacking only counted
+  within the dialog, under the lightbox's overlay; it now renders in the lightbox's own container.
+
 ## 0.23.0 — 2026-11-14
 
 ### Added
