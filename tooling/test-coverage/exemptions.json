@@ -276,7 +276,6 @@
 			"browser": "todo"
 		},
 		"image-gallery": {
-			"browser": "todo",
 			"ssr": "todo"
 		},
 		"image-zoom": {
