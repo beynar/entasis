@@ -170,7 +170,7 @@ ${'</' + 'script>'}
 
 <input aria-label="Search" {@attach tourTarget('tour-search')} />
 <Button {@attach tourTarget('tour-create')}>New project</Button>
-<button aria-label="Profile" {@attach tourTarget('tour-profile')}>AL</button>
+<button aria-label="AL, profile" {@attach tourTarget('tour-profile')}>AL</button>
 <Button onclick={() => (open = true)}>Start the tour</Button>
 
 <Tour
@@ -197,7 +197,7 @@ ${'</' + 'script>'}
 				<button
 					{@attach tourTarget('tour-profile')}
 					type="button"
-					aria-label="Profile"
+					aria-label="AL, profile"
 					class="bg-primary/15 text-primary flex size-8 items-center justify-center rounded-full text-xs font-medium"
 				>
 					AL
