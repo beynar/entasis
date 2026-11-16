@@ -48,6 +48,29 @@ popover parts, \`theme.field\` for the field wrapper.
 
 The selector stays open after selection by default. Set \`closeOnSelect\` to close after a date, a complete range, or a multiple-date change.
 
+## Granularity: weeks, months and years
+
+\`granularity\` (\`'day' | 'week' | 'month' | 'year'\`, default \`'day'\`) makes one selection a whole period, in every \`mode\`. There are no separate month, week or year pickers.
+
+\`\`\`svelte
+<script lang="ts">
+  let month = $state<Date | null>(null);
+  let billing = $state<[Date | null, Date | null] | null>(null);
+  let years = $state<Date[]>([]);
+</script>
+
+<DateSelector granularity="month" bind:value={month} />
+<DateSelector granularity="week" mode="range" bind:value={billing} />
+<DateSelector granularity="year" mode="multiple" bind:value={years} />
+\`\`\`
+
+- Values stay \`Date\`s in the mode's shape. A selected period is its **first day** (local noon, like day values); a week starts on Monday, or Sunday with \`weekStartsOnMonday={false}\`.
+- A range runs from the first day of its first period to the **last day** of its last period, so it stays an inclusive day range: weeks 10 to 12 of 2026 are \`[2 March, 22 March]\`.
+- Values set from outside are read by period, and every value the selector emits (picks and presets) is normalised that way; \`multiple\` keeps one date per period.
+- A period is disabled only when all its days are (\`minDate\`, \`maxDate\`, \`disabledDates\`).
+- The default trigger names the period: "March 2026", "Week 12, 2026" (the catalog's \`calendarWeekLabel\`), "2026", or "start – end" for a range.
+- \`week\` shows the day grid with a leading column of ISO week numbers and selects whole rows (hover highlights the row). \`month\` shows a 3×4 grid of months paged by year, \`year\` a 3×4 grid of a decade with a year on each side. Arrow keys move one period (a row of three up and down; a week up and down), PageUp/PageDown change the year or decade, Home/End reach the row's ends. See the Calendar docs for the full keyboard and styling hooks.
+
 ## Presets
 
 \`\`\`svelte
@@ -68,7 +91,7 @@ The \`trigger\` prop follows Popover's trigger contract. A trigger snippet recei
 
 ## Calendar configuration
 
-Use \`view\`, \`weekStartsOnMonday\`, \`weekdayLength\`, \`locale\`, \`minDate\`, \`maxDate\`, and \`disabledDates\` to configure the embedded calendar. Set \`readOnly\` to let the popup open while refusing date and preset choices. Set \`mobileSheet\` to render the selector as a bottom sheet below 768px. \`focusOnClose\` sets where focus goes when it closes (DateInput returns it to its text field), as on Popover.
+Use \`granularity\`, \`view\`, \`weekStartsOnMonday\`, \`weekdayLength\`, \`locale\`, \`minDate\`, \`maxDate\`, and \`disabledDates\` to configure the embedded calendar. Set \`readOnly\` to let the popup open while refusing date and preset choices. Set \`mobileSheet\` to render the selector as a bottom sheet below 768px. \`focusOnClose\` sets where focus goes when it closes (DateInput returns it to its text field), as on Popover.
 
 The content container animates intrinsic height changes. Month navigation uses a direction-aware slide and respects reduced-motion preferences.
 

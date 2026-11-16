@@ -37,6 +37,22 @@ Use \`format\` with \`dd\`, \`mm\`, \`yy\`, and \`yyyy\` segments. Supported val
 <DateInput label="Starts at" type="datetime" timeZone="Europe/Paris" bind:value={startsAt} />
 \`\`\`
 
+## Granularity: a week, a month or a year
+
+\`granularity\` (\`'day' | 'week' | 'month' | 'year'\`, default \`'day'\`) makes the value a whole period: its **first day at midnight** (in \`timeZone\` when given). The calendar popup picks with the same granularity, and the default mask follows it:
+
+- \`month\`: typed \`mm/yyyy\`, or \`yyyy/mm\` in locales that write the year first (Japanese, Chinese).
+- \`year\`: typed \`yyyy\`.
+- \`week\`: typed as any day of the week (\`dd/mm/yyyy\`); the value is that week's first day (Monday, or Sunday with \`weekStartsOnMonday={false}\`), the text shows that day once the field loses focus, and the ISO week number ("W12", the catalog's \`calendarWeekShort\`) sits beside it.
+
+\`\`\`svelte
+<DateInput label="Billing month" granularity="month" bind:value />
+<DateInput label="Sprint week" granularity="week" bind:value={week} />
+<DateInput label="Fiscal year" granularity="year" bind:value={year} />
+\`\`\`
+
+A \`format\` you pass still wins; whatever date it reads is moved to the start of its period. A granularity other than \`'day'\` edits no hour, even with \`type="datetime"\`.
+
 ## Selector options
 
 - \`presets\`: date shortcuts shaped as \`{ label, value }\`.

@@ -37,6 +37,17 @@ export type OpenChangeReason =
 	| 'trigger-unmount'
 	/** The browser's find-in-page, a text fragment or a `#id` link reached content a disclosure hides. */
 	| 'find-in-page'
+	/** A Skip button ended a walkthrough (a Tour) before its last step. */
+	| 'skip-press'
+	/**
+	 * A walkthrough (a Tour) finished: Done on its last step, or the last step's `advanceOn` event.
+	 */
+	| 'complete'
+	/**
+	 * The element a step points at never appeared (or left the page) and the owner was told to
+	 * stop rather than skip it or show it centred (a Tour with `missingTarget: 'stop'`).
+	 */
+	| 'target-missing'
 	/** Code called `open()`, `close()`, `toggle()` or `setOpen()` with no user event behind it. */
 	| 'imperative-action';
 

@@ -37,6 +37,21 @@ const defaultInputContainer = cva({
 	}
 });
 
+// The ISO week number shown after the text when `granularity` is 'week'.
+const defaultPeriod = cva({
+	base: 'shrink-0 ps-sm pe-xs font-medium text-neutral/70 tabular-nums',
+	variants: {
+		size: {
+			small: 'text-xs',
+			normal: 'text-xs',
+			large: 'text-sm'
+		}
+	},
+	defaultVariants: {
+		size: 'normal'
+	}
+});
+
 const defaultPopover = cva({
 	base: 'w-[18rem] max-w-[calc(100vw-2rem)] p-0'
 });
@@ -44,6 +59,7 @@ const defaultPopover = cva({
 export const dateInputTheme = {
 	input: defaultInput,
 	inputContainer: defaultInputContainer,
+	period: defaultPeriod,
 	popover: defaultPopover
 };
 

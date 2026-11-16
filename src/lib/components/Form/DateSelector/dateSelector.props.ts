@@ -6,6 +6,7 @@ import type { InferComponentTheme } from '$lib/utils/cva/index.js';
 import type { InputProps } from '../Field/field.js';
 import type { fieldTheme } from '../Field/field.theme.js';
 import type { CalendarThemeProps } from '../Calendar/calendar.theme.js';
+import type { CalendarGranularity } from '../Calendar/calendar.periods.js';
 import type { DateSelectorThemeProps } from './dateSelector.theme.js';
 
 export type DateSelectorMode = 'date' | 'range' | 'multiple';
@@ -26,6 +27,17 @@ export type DateSelectorPreset<Mode extends DateSelectorMode = DateSelectorMode>
 export type DateSelectorProps<Mode extends DateSelectorMode = 'date'> = {
 	/** Selection model used by the calendar. */
 	mode?: Mode;
+	/**
+	 * Period one selection covers: `'day'` (default), `'week'`, `'month'` or `'year'`. A week
+	 * picks whole rows of the day grid, each led by its ISO week number; a month and a year pick
+	 * from 3×4 grids paged by year and by decade. Values stay `Date`s in the `mode`'s shape: a
+	 * selected period is its first day (a week starts on Monday, or Sunday when
+	 * `weekStartsOnMonday` is false), and a range runs from its first period's first day to its
+	 * last period's last day, so it stays an inclusive day range. Values set from outside are read
+	 * by period, and every value the selector emits is normalised that way. A period is disabled
+	 * only when all its days are (bounds, `disabledDates`).
+	 */
+	granularity?: CalendarGranularity;
 	/** Current selected date, range, or date list. */
 	value?: DateSelectorValue<Mode>;
 	/** Initial selection when `value` is omitted. */

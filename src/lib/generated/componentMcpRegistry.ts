@@ -48,6 +48,7 @@ import { fileInputDescription } from '$lib/components/Form/File/fileInput.mcp.js
 import { formDescription } from '$lib/components/Form/Form/form.mcp.js';
 import { jsonEditorDescription } from '$lib/components/Form/JsonEditor/jsonEditor.mcp.js';
 import { keyValueInputDescription } from '$lib/components/Form/KeyValueInput/keyValueInput.mcp.js';
+import { maskedInputDescription } from '$lib/components/Form/MaskedInput/maskedInput.mcp.js';
 import { multiStepFormDescription } from '$lib/components/Form/MultiStepForm/multiStepForm.mcp.js';
 import { numberInputDescription } from '$lib/components/Form/NumberInput/numberInput.mcp.js';
 import { passwordInputDescription } from '$lib/components/Form/PasswordInput/passwordInput.mcp.js';
@@ -116,6 +117,7 @@ import { hoverCardDescription } from '$lib/components/HoverCard/hoverCard.mcp.js
 import { linkPreviewDescription } from '$lib/components/LinkPreview/linkPreview.mcp.js';
 import { overlayDescription } from '$lib/components/Overlay/overlay.mcp.js';
 import { popoverDescription } from '$lib/components/Popover/popover.mcp.js';
+import { tourDescription } from '$lib/components/Tour/tour.mcp.js';
 import { tooltipDescription } from '$lib/components/Tooltip/tooltip.mcp.js';
 import { audioPlayerDescription } from '$lib/components/AudioPlayer/audioPlayer.mcp.js';
 import { carouselDescription } from '$lib/components/Carousel/carousel.mcp.js';
@@ -198,6 +200,7 @@ export const componentMcpRegistry = {
 	form: formDescription,
 	'json-editor': jsonEditorDescription,
 	'key-value-input': keyValueInputDescription,
+	'masked-input': maskedInputDescription,
 	'multi-step-form': multiStepFormDescription,
 	'number-input': numberInputDescription,
 	'password-input': passwordInputDescription,
@@ -267,6 +270,7 @@ export const componentMcpRegistry = {
 	'link-preview': linkPreviewDescription,
 	overlay: overlayDescription,
 	popover: popoverDescription,
+	tour: tourDescription,
 	tooltip: tooltipDescription,
 	'audio-player': audioPlayerDescription,
 	carousel: carouselDescription,

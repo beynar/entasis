@@ -7,10 +7,10 @@
 	import CalendarPrimitive from '../Calendar/CalendarPrimitive.svelte';
 	import {
 		getCalendarDateKey,
-		normalizeCalendarDate,
 		type CalendarType,
 		type CalendarValue
 	} from '../Calendar/useCalendar.svelte.js';
+	import { formatPeriod, getPeriodEnd, getPeriodStart } from '../Calendar/calendar.periods.js';
 	import type {
 		DateSelectorMode,
 		DateSelectorProps,
@@ -20,6 +20,7 @@
 
 	let {
 		mode = 'date' as Mode,
+		granularity = 'day',
 		defaultValue = (mode === 'multiple' ? [] : null) as DateSelectorProps<Mode>['value'],
 		value = $bindable(),
 		defaultOpen = false,
@@ -75,9 +76,11 @@
 				? 'calendar-range'
 				: 'calendar-multiple') as CalendarType
 	);
+	const weekStartsOn = $derived(weekStartsOnMonday ? 1 : 0);
 	// The default trigger is a form control, so it must display its value — a
 	// static label would leave the field looking empty after a selection.
-	const formatDay = (date: Date) => date.toLocaleDateString(locale);
+	const formatDay = (date: Date) =>
+		formatPeriod(date, granularity, { locale, weekStartsOn, weekLabel: t.calendarWeekLabel });
 	const defaultTriggerLabel = $derived.by(() => {
 		if (mode === 'date') {
 			const date = valueState.value as Date | null;
@@ -111,25 +114,32 @@
 		}
 	});
 
+	// A period is its first day; a range ends on its last period's last day.
+	const periodStart = (date: Date) => getPeriodStart(date, granularity, weekStartsOn);
+	const periodEnd = (date: Date) => getPeriodEnd(date, granularity, weekStartsOn);
+
 	function normalizeValue(nextValue: DateSelectorValue<Mode>): DateSelectorValue<Mode> {
 		if (mode === 'date') {
 			const date = nextValue as Date | null;
-			return (date ? normalizeCalendarDate(date) : null) as DateSelectorValue<Mode>;
+			return (date ? periodStart(date) : null) as DateSelectorValue<Mode>;
 		}
 		if (mode === 'range') {
 			const range = nextValue as [Date | null, Date | null] | null;
 			return (
 				range
-					? [
-							range[0] ? normalizeCalendarDate(range[0]) : null,
-							range[1] ? normalizeCalendarDate(range[1]) : null
-						]
+					? [range[0] ? periodStart(range[0]) : null, range[1] ? periodEnd(range[1]) : null]
 					: null
 			) as DateSelectorValue<Mode>;
 		}
-		return (nextValue as Date[])
-			.map(normalizeCalendarDate)
-			.sort((first, second) => first.getTime() - second.getTime()) as DateSelectorValue<Mode>;
+		const dates = (nextValue as Date[])
+			.map(periodStart)
+			.sort((first, second) => first.getTime() - second.getTime());
+		if (granularity === 'day') return dates as DateSelectorValue<Mode>;
+		// Two days of one period are one selected period.
+		return dates.filter(
+			(date, index) =>
+				index === 0 || getCalendarDateKey(date) !== getCalendarDateKey(dates[index - 1])
+		) as DateSelectorValue<Mode>;
 	}
 
 	function commitValue(nextValue: DateSelectorValue<Mode>, isSelectionComplete = true) {
@@ -205,7 +215,7 @@
 			<div class={classes.presets()} aria-label={t.presetDates}>
 				{#each presets as preset (preset.label)}
 					<Button
-						variant={isValueSelected(preset.value) ? 'soft' : 'ghost'}
+						variant={isValueSelected(normalizeValue(preset.value)) ? 'soft' : 'ghost'}
 						size="small"
 						fullWidth
 						disabled={disabled || readOnly}
@@ -220,6 +230,7 @@
 
 		<CalendarPrimitive
 			type={calendarType}
+			{granularity}
 			value={valueState.value as CalendarValue<CalendarType>}
 			{view}
 			{weekStartsOnMonday}

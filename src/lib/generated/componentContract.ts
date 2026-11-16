@@ -1321,6 +1321,7 @@ export const componentInventory = [
 		sourceIndex: 'src/lib/components/Form/Calendar/index.ts',
 		exportedSymbols: [
 			'BaseCalendarProps',
+			'CalendarGranularity',
 			'CalendarInput',
 			'CalendarInputProps',
 			'CalendarPrimitive',
@@ -1332,6 +1333,9 @@ export const componentInventory = [
 			'Cell',
 			'Event',
 			'calendarTheme',
+			'getIsoWeek',
+			'getPeriodEnd',
+			'getPeriodStart',
 			'setCalendarInputTheme',
 			'useCalendarInputTheme'
 		],
@@ -1707,6 +1711,40 @@ export const componentInventory = [
 		],
 		capabilities: ['svelte', 'component', 'forms'],
 		relatedComponents: [],
+		visibility: 'public'
+	},
+	{
+		id: 'masked-input',
+		subpath: 'entasis/masked-input',
+		sourceIndex: 'src/lib/components/Form/MaskedInput/index.ts',
+		exportedSymbols: [
+			'MASKED_INPUT_TOKENS',
+			'MaskedInput',
+			'MaskedInputAttributes',
+			'MaskedInputMask',
+			'MaskedInputProps',
+			'MaskedInputShowMask',
+			'MaskedInputTheme',
+			'MaskedInputThemeProps',
+			'MaskedInputToken',
+			'MaskedInputTokens',
+			'MaskedInputTransform',
+			'MaskedInputValueDetails',
+			'MaskedInputValueFormat',
+			'maskedInputTheme',
+			'setMaskedInputTheme',
+			'useMaskedInputTheme'
+		],
+		docs: [
+			{
+				id: 'masked-input',
+				route: '/components/masked-input',
+				category: 'Forms',
+				label: 'Masked input'
+			}
+		],
+		capabilities: ['svelte', 'component', 'forms'],
+		relatedComponents: ['text-input', 'pin-input', 'phone-input'],
 		visibility: 'public'
 	},
 	{
@@ -4029,6 +4067,47 @@ export const componentInventory = [
 		visibility: 'public'
 	},
 	{
+		id: 'tour',
+		subpath: 'entasis/tour',
+		sourceIndex: 'src/lib/components/Tour/index.ts',
+		exportedSymbols: [
+			'Tour',
+			'TourApi',
+			'TourBeforeContext',
+			'TourCssVariable',
+			'TourDataAttribute',
+			'TourLabels',
+			'TourMissingTarget',
+			'TourNavigationInput',
+			'TourProgress',
+			'TourProps',
+			'TourStatus',
+			'TourStep',
+			'TourStepChangeDetails',
+			'TourStepChangeReason',
+			'TourTarget',
+			'TourTheme',
+			'TourThemeProps',
+			'setTourTheme',
+			'tourCssVariables',
+			'tourDataAttributes',
+			'tourTarget',
+			'tourTheme',
+			'useTourTheme'
+		],
+		docs: [
+			{
+				id: 'tour',
+				route: '/components/tour',
+				category: 'Overlays',
+				label: 'Tour'
+			}
+		],
+		capabilities: ['svelte', 'component', 'overlays'],
+		relatedComponents: ['popover', 'dialog'],
+		visibility: 'public'
+	},
+	{
 		id: 'tooltip',
 		subpath: 'entasis/tooltip',
 		sourceIndex: 'src/lib/components/Tooltip/index.ts',
@@ -4959,6 +5038,7 @@ export const relatedComponents = {
 	form: ['multi-step-form'],
 	'json-editor': [],
 	'key-value-input': [],
+	'masked-input': ['text-input', 'pin-input', 'phone-input'],
 	'multi-step-form': ['form', 'stepper'],
 	'number-input': ['slider', 'text-input'],
 	'password-input': ['text-input'],
@@ -5028,6 +5108,7 @@ export const relatedComponents = {
 	'link-preview': ['hover-card'],
 	overlay: ['dialog', 'popover'],
 	popover: ['dialog', 'tooltip'],
+	tour: ['popover', 'dialog'],
 	tooltip: ['popover', 'hover-card'],
 	'audio-player': ['media-volume', 'video-player'],
 	carousel: ['image-gallery'],

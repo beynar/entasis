@@ -3,6 +3,7 @@ export type {
 	CalendarInputProps,
 	CalendarPrimitiveProps,
 	BaseCalendarProps,
+	CalendarGranularity,
 	CalendarType,
 	CalendarValue,
 	Event,
@@ -16,3 +17,4 @@ export {
 	type CalendarThemeProps
 } from './calendar.theme.js';
 export { default as CalendarPrimitive } from './CalendarPrimitive.svelte';
+export { getIsoWeek, getPeriodEnd, getPeriodStart } from './calendar.periods.js';

@@ -396,6 +396,11 @@
 			"svelte": "./dist/components/Form/KeyValueInput/index.js",
 			"default": "./dist/components/Form/KeyValueInput/index.js"
 		},
+		"./masked-input": {
+			"types": "./dist/components/Form/MaskedInput/index.d.ts",
+			"svelte": "./dist/components/Form/MaskedInput/index.js",
+			"default": "./dist/components/Form/MaskedInput/index.js"
+		},
 		"./multi-step-form": {
 			"types": "./dist/components/Form/MultiStepForm/index.d.ts",
 			"svelte": "./dist/components/Form/MultiStepForm/index.js",
@@ -736,6 +741,11 @@
 			"svelte": "./dist/components/Popover/index.js",
 			"default": "./dist/components/Popover/index.js"
 		},
+		"./tour": {
+			"types": "./dist/components/Tour/index.d.ts",
+			"svelte": "./dist/components/Tour/index.js",
+			"default": "./dist/components/Tour/index.js"
+		},
 		"./tooltip": {
 			"types": "./dist/components/Tooltip/index.d.ts",
 			"svelte": "./dist/components/Tooltip/index.js",
@@ -1032,6 +1042,9 @@
 			"key-value-input": [
 				"dist/components/Form/KeyValueInput/index.d.ts"
 			],
+			"masked-input": [
+				"dist/components/Form/MaskedInput/index.d.ts"
+			],
 			"multi-step-form": [
 				"dist/components/Form/MultiStepForm/index.d.ts"
 			],
@@ -1235,6 +1248,9 @@
 			],
 			"popover": [
 				"dist/components/Popover/index.d.ts"
+			],
+			"tour": [
+				"dist/components/Tour/index.d.ts"
 			],
 			"tooltip": [
 				"dist/components/Tooltip/index.d.ts"

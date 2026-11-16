@@ -216,3 +216,27 @@ export const fromPickedDay = (picked: Date, current: Date | null, timeZone?: str
 		timeZone
 	);
 };
+
+/**
+ * The mask a DateInput uses by default for a granularity: a month in the locale's order of month
+ * and year (`yyyy/mm` where the year comes first, as in Japanese or Chinese), a year alone, and a
+ * week as any of its days.
+ */
+export const defaultGranularityFormat = (
+	granularity: 'day' | 'week' | 'month' | 'year',
+	locale?: string
+): DateOnlyFormat => {
+	if (granularity === 'year') return 'yyyy';
+	if (granularity !== 'month') return 'dd/mm/yyyy';
+	let parts: Intl.DateTimeFormatPart[];
+	try {
+		parts = new Intl.DateTimeFormat(locale, { year: 'numeric', month: '2-digit' }).formatToParts(
+			new Date(2026, 2, 1)
+		);
+	} catch {
+		return 'mm/yyyy';
+	}
+	const yearIndex = parts.findIndex((part) => part.type === 'year');
+	const monthIndex = parts.findIndex((part) => part.type === 'month');
+	return yearIndex !== -1 && yearIndex < monthIndex ? 'yyyy/mm' : 'mm/yyyy';
+};

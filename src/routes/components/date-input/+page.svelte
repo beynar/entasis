@@ -7,6 +7,9 @@
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	let date = $state<Date | null>(null);
+	let month = $state<Date | null>(null);
+	let week = $state<Date | null>(null);
+	let year = $state<Date | null>(null);
 	const presets = [
 		{ label: 'Tomorrow', value: new Date(2026, 6, 16, 12) },
 		{ label: 'Next week', value: new Date(2026, 6, 22, 12) }
@@ -33,6 +36,13 @@
 			value: 'top',
 			options: ['top', 'left']
 		},
+		{
+			name: 'granularity',
+			type: 'segmented',
+			label: 'Granularity',
+			value: 'day',
+			options: ['day', 'week', 'month', 'year']
+		},
 		{ name: 'disabled', type: 'switch', label: 'Disabled', value: false },
 		{ name: 'readOnly', type: 'switch', label: 'Read only', value: false }
 	]);
@@ -45,6 +55,7 @@
 	features={[
 		'Maskito date masking (@maskito/kit)',
 		'Configurable format masks',
+		'Week, month, and year granularity',
 		'Bindable Date value',
 		'Reusable DateSelector popover',
 		'Optional presets and mobile sheet',
@@ -59,6 +70,7 @@
 	size="${controls.value.size}"
 	density="${controls.value.density}"
 	labelPosition="${controls.value.labelPosition}"
+	granularity="${controls.value.granularity}"
 	disabled={${controls.value.disabled}}
 	readOnly={${controls.value.readOnly}}
 	label="Appointment date"
@@ -71,6 +83,7 @@
 				size={controls.value.size}
 				density={controls.value.density}
 				labelPosition={controls.value.labelPosition}
+				granularity={controls.value.granularity}
 				disabled={controls.value.disabled}
 				readOnly={controls.value.readOnly}
 				label="Appointment date"
@@ -94,6 +107,20 @@
 			<div class="grid w-full max-w-md gap-6">
 				<DateInput label="US format" format="mm/dd/yyyy" />
 				<DateInput label="Month & year" format="mm/yyyy" />
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Weeks, months and years"
+			description="granularity sets the mask and the calendar popup: a month is typed mm/yyyy, a year yyyy, and a week as any of its days, shown as its Monday with its ISO week number. The value is the period's first day at midnight."
+			code={`<DateInput label="Billing month" granularity="month" bind:value={month} />
+<DateInput label="Sprint week" granularity="week" bind:value={week} />
+<DateInput label="Fiscal year" granularity="year" bind:value={year} />`}
+		>
+			<div class="grid w-full max-w-md gap-6">
+				<DateInput label="Billing month" granularity="month" bind:value={month} />
+				<DateInput label="Sprint week" granularity="week" bind:value={week} />
+				<DateInput label="Fiscal year" granularity="year" bind:value={year} />
 			</div>
 		</ComponentCard>
 

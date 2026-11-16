@@ -35,6 +35,14 @@
 	let selectedDates = $state<Date[]>([day(0), day(2)]);
 	let constrainedDate = $state<Date | null>(null);
 	let closingDate = $state<Date | null>(null);
+	let billingPeriod = $state<[Date | null, Date | null] | null>([
+		new Date(2026, 0, 1, 12),
+		new Date(2026, 2, 31, 12)
+	]);
+	let sprintWeek = $state<Date | null>(new Date(2026, 2, 16, 12));
+	let fiscalYears = $state<Date[]>([new Date(2025, 0, 1, 12), new Date(2026, 0, 1, 12)]);
+	const monthName = (date: Date | null | undefined) =>
+		date?.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) ?? '…';
 	const controls = createComponentControls([
 		{
 			name: 'size',
@@ -58,6 +66,13 @@
 			options: ['top', 'left']
 		},
 		{
+			name: 'granularity',
+			type: 'segmented',
+			label: 'Granularity',
+			value: 'day',
+			options: ['day', 'week', 'month', 'year']
+		},
+		{
 			name: 'view',
 			type: 'segmented',
 			label: 'View',
@@ -75,6 +90,7 @@
 	component="DateSelector"
 	features={[
 		'Single, range, and multiple selection',
+		'Day, week, month, and year granularity',
 		'Typed bindable values and presets',
 		'Configurable close on selection',
 		'Animated intrinsic height',
@@ -90,6 +106,7 @@
 	size="${controls.value.size}"
 	density="${controls.value.density}"
 	labelPosition="${controls.value.labelPosition}"
+	granularity="${controls.value.granularity}"
 	view="${controls.value.view}"
 	disabled={${controls.value.disabled}}
 	readOnly={${controls.value.readOnly}}
@@ -103,6 +120,7 @@
 				size={controls.value.size}
 				density={controls.value.density}
 				labelPosition={controls.value.labelPosition}
+				granularity={controls.value.granularity}
 				view={controls.value.view}
 				disabled={controls.value.disabled}
 				readOnly={controls.value.readOnly}
@@ -165,6 +183,45 @@
 				<p class="text-neutral/70 text-xs">
 					{selectedDates.length}
 					{selectedDates.length === 1 ? 'date' : 'dates'} selected
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Billing period (month range)"
+			description="granularity=&quot;month&quot; picks whole months from a 3×4 grid paged by year. The range runs from the first day of its first month to the last day of its last, so it stays an inclusive day range."
+			code={`<DateSelector granularity="month" mode="range" bind:value={billingPeriod} />`}
+		>
+			<div class="flex flex-col items-center gap-3">
+				<DateSelector granularity="month" mode="range" bind:value={billingPeriod} />
+				<p class="text-neutral/70 text-xs">
+					{monthName(billingPeriod?.[0])} – {billingPeriod?.[1]?.toLocaleDateString() ?? '…'}
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Week picker"
+			description="granularity=&quot;week&quot; leads each row with its ISO week number; hovering highlights the row and a click selects the whole week, bound as its Monday."
+			code={`<DateSelector granularity="week" bind:value={week} />`}
+		>
+			<div class="flex flex-col items-center gap-3">
+				<DateSelector granularity="week" bind:value={sprintWeek} />
+				<p class="text-neutral/70 text-xs">
+					Starts {sprintWeek?.toLocaleDateString() ?? '…'}
+				</p>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Year picker"
+			description="granularity=&quot;year&quot; shows a decade at a time; PageUp and PageDown change the decade. Here several years toggle."
+			code={`<DateSelector granularity="year" mode="multiple" bind:value={years} />`}
+		>
+			<div class="flex flex-col items-center gap-3">
+				<DateSelector granularity="year" mode="multiple" bind:value={fiscalYears} />
+				<p class="text-neutral/70 text-xs">
+					{fiscalYears.map((date) => date.getFullYear()).join(', ') || 'No year'}
 				</p>
 			</div>
 		</ComponentCard>
