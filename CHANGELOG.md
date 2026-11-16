@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.24.0 — 2026-11-16
+
 ### Changed
 
 - Motion follows one set of rules across the library. These change how components look by default;
