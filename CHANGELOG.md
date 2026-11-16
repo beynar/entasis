@@ -6,6 +6,16 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.24.1 — 2026-11-16
+
+The first published release of 0.24: 0.24.0 was tagged but never published, its release run
+stopped on an accessibility check of the Tour documentation page. Everything listed under 0.24.0
+ships in this release.
+
+### Fixed
+
+- The Tour documentation demo names its "AL" avatar button after the text it shows.
+
 ## 0.24.0 — 2026-11-16
 
 ### Changed
