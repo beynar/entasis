@@ -4,10 +4,11 @@
 // description, `inert` in modal mode, the announcement, focus coming back).
 //
 // Layering: the tour registers one layer (kind `popover`) that is modal for the layer stack, so a
-// press on its popup never dismisses a Dialog the target sits in. Each step shows in a fresh
-// Popover rendered inside that layer, so it opens above the backdrop; when another layer opened
-// above the tour (a Dialog a step's `before` opened), the tour's layer is raised before the next
-// popup opens, keeping the backdrop above it and the popup above the backdrop.
+// press on its popup never dismisses a Dialog the target sits in. The popup is one Popover rendered
+// inside that layer, so it opens above the backdrop; from one step to the next it glides to the new
+// target while a Stepper inside it slides from one step's content to the next. When another layer
+// opened above the tour (a Dialog a step's `before` opened), the tour's layer is raised and a
+// fresh popup opens, keeping the backdrop above that layer and the popup above the backdrop.
 import { tick, untrack } from 'svelte';
 import { on } from 'svelte/events';
 import { autoUpdate, getOverflowAncestors, type VirtualElement } from '@floating-ui/dom';
@@ -15,7 +16,7 @@ import { useTheme } from '../Theme/theme.state.svelte.js';
 import { useOpenLifecycle } from '$lib/utils/openLifecycle.svelte.js';
 import { useLiveRegions } from '$lib/utils/useLiveAnnouncer.svelte.js';
 import { useDirection } from '$lib/utils/useDirection.svelte.js';
-import { easingFunctions } from '$lib/transitions/easingFunctions.js';
+import { easingBezierStrings, easingFunctions } from '$lib/transitions/easingFunctions.js';
 import {
 	composedContains,
 	getDeepActiveElement,
@@ -78,11 +79,14 @@ export interface TourOptions {
 	readonly motion: () => { backdrop: ResolvedMotion; spotlight: ResolvedMotion };
 }
 
-/** One step popup. Steps get a fresh Popover each, so the next one opens above the backdrop. */
+/**
+ * The step popup. One Popover carries the steps from one to the next: `index` and `target` move
+ * on. A fresh one opens when the tour opens, and when a layer opened above the tour.
+ */
 export interface TourPopup {
 	readonly key: number;
-	readonly index: number;
-	readonly target: HTMLElement | null;
+	index: number;
+	target: HTMLElement | null;
 	open: boolean;
 	/** The popup's `<dialog>`, once mounted. */
 	root: HTMLElement | null;
@@ -328,11 +332,14 @@ export class TourState {
 		return last && last.open ? last : null;
 	}
 
-	titleId = (popup: TourPopup) => `${this.options.id}-title-${popup.key}`;
-	descriptionId = (popup: TourPopup) => `${this.options.id}-description-${popup.key}`;
-	/** Whether the step a popup shows has something to describe it with. */
-	hasDescription = (popup: TourPopup) => {
-		const step = this.steps[popup.index];
+	// Per step as well as per popup: while the content crossfades, the leaving step keeps its ids.
+	titleId = (popup: TourPopup, index = popup.index) =>
+		`${this.options.id}-title-${popup.key}-${index}`;
+	descriptionId = (popup: TourPopup, index = popup.index) =>
+		`${this.options.id}-description-${popup.key}-${index}`;
+	/** Whether a step has something to describe it with. */
+	hasDescription = (index: number) => {
+		const step = this.steps[index];
 		return !!(step?.description || step?.content);
 	};
 
@@ -422,6 +429,7 @@ export class TourState {
 		this.#leaveStep();
 		for (const popup of this.popups) popup.open = false;
 		this.#cancelGlide();
+		clearTimeout(this.#glideTimer);
 		this.#destination = null;
 		this.spotlight = null;
 		this.target = null;
@@ -611,11 +619,14 @@ export class TourState {
 	async #present(index: number, target: HTMLElement | null, generation: number) {
 		const first = !this.#presented;
 		this.#leaveStep();
-		for (const popup of this.popups) popup.open = false;
-
 		// A layer that opened above the tour (a Dialog `before` opened) would cover the backdrop and
-		// the popup: raise the tour first, then open the popup above it.
-		if (this.#layerAbove()) {
+		// the popup: raise the tour first, then open a fresh popup above it. Otherwise the popup on
+		// show moves on to this step.
+		const layerAbove = this.#layerAbove();
+		const moving = first || layerAbove ? null : this.currentPopup;
+		for (const popup of this.popups) if (popup !== moving) popup.open = false;
+
+		if (layerAbove) {
 			this.#raise += 1;
 			await tick();
 			if (generation !== this.#generation || !this.options.isOpen) return;
@@ -624,14 +635,25 @@ export class TourState {
 		this.target = target;
 		this.status = 'ready';
 		this.#presented = true;
-		const popup: TourPopup = $state({
-			key: ++this.#popupKey,
-			index,
-			target,
-			open: true,
-			root: null
-		});
-		this.popups.push(popup);
+		let popup: TourPopup;
+		let refocus = false;
+		if (moving) {
+			popup = moving;
+			refocus = this.#focusIn(popup);
+			this.#glidePopup(popup);
+			popup.index = index;
+			popup.target = target;
+		} else {
+			const fresh: TourPopup = $state({
+				key: ++this.#popupKey,
+				index,
+				target,
+				open: true,
+				root: null
+			});
+			popup = fresh;
+			this.popups.push(popup);
+		}
 
 		// The spotlight glides there, except onto the first step, which fades in with the backdrop.
 		this.#measure(false, !first);
@@ -644,6 +666,9 @@ export class TourState {
 
 		await tick();
 		if (generation !== this.#generation || !this.options.isOpen) return;
+		// The control that had focus left with the previous step's panel (`inert` as it slides
+		// away): the new step's takes it.
+		if (refocus) this.#focusStep(popup, index);
 		if (this.options.modal) {
 			this.#releaseInert();
 			const keep = [target, this.root, popup.root].filter(
@@ -683,8 +708,8 @@ export class TourState {
 		const cleanups = this.#stepCleanups;
 		target.setAttribute('data-tour-target', '');
 		cleanups.push(() => target.removeAttribute('data-tour-target'));
-		if (this.hasDescription(popup)) {
-			const id = this.descriptionId(popup);
+		if (this.hasDescription(index)) {
+			const id = this.descriptionId(popup, index);
 			editTokens(target, 'aria-describedby', id, true);
 			cleanups.push(() => editTokens(target, 'aria-describedby', id, false));
 		}
@@ -708,6 +733,49 @@ export class TourState {
 				elementResize: true
 			})
 		);
+	}
+
+	/** Whether focus is in `popup`, or nowhere (on `<body>`, where a removed control leaves it). */
+	#focusIn(popup: TourPopup) {
+		const active = getDeepActiveElement(document);
+		if (!active || active === document.body) return true;
+		return !!popup.root && composedContains(popup.root, active);
+	}
+
+	/** Focuses the control step `index` asks for in `popup` (its main action), else its first. */
+	#focusStep(popup: TourPopup, index: number) {
+		const content = popup.root?.querySelector<HTMLElement>(`[data-tour-content="${index}"]`);
+		if (!content) return;
+		const target =
+			content.querySelector<HTMLElement>('[data-autofocus]') ??
+			getTabbableElements(content).find((element) => !element.hasAttribute('data-autofocus-skip'));
+		target?.focus({ preventScroll: true });
+	}
+
+	#glideTimer: ReturnType<typeof setTimeout> | undefined;
+
+	/**
+	 * Lets the popup's next placement glide: the Popover writes its place as `left`/`top` (the
+	 * arrow's too), so a transition on those, for as long as the spotlight's glide, carries both
+	 * to the new target with the spotlight. Placements after it (a scroll) apply at once again.
+	 */
+	#glidePopup(popup: TourPopup) {
+		const root = popup.root;
+		const motion = this.options.motion().spotlight.in;
+		const duration = motion.duration ?? 0;
+		if (!root || duration <= 0) return;
+		const curve = easingBezierStrings[motion.easing ?? 'cubicInOut'];
+		const arrow = root.firstElementChild?.querySelector<HTMLElement>(
+			':scope > [aria-hidden="true"]'
+		);
+		const elements = [root, arrow].filter((element): element is HTMLElement => !!element);
+		clearTimeout(this.#glideTimer);
+		for (const element of elements) {
+			element.style.transition = `left ${duration}ms ${curve}, top ${duration}ms ${curve}`;
+		}
+		this.#glideTimer = setTimeout(() => {
+			for (const element of elements) element.style.transition = '';
+		}, duration);
 	}
 
 	/** Undoes what the shown step did to the page. */

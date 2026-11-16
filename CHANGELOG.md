@@ -38,8 +38,10 @@ Unreleased section under the new version.
 - `Tour` (`entasis/tour`): a guided walkthrough. Steps target a selector, an element, a function
   or a name registered with `{@attach tourTarget('name')}` (`null` centres the step). One SVG
   spotlight with a rounded hole follows its target through scroll and resize; the page stays
-  clickable through the hole and the backdrop does nothing by default. Each step opens a Popover
-  with title, description, progress, Previous/Next/Done, Skip and close. Awaited `before()` hooks,
+  clickable through the hole and the backdrop does nothing by default. A Popover shows each step
+  with title, description, progress, Previous/Next/Done, Skip and close; from one step to the next
+  it glides along with the spotlight while a `Stepper` inside it slides to the next step's content
+  and resizes on the same timing, and focus moves to the new step's Next. Awaited `before()` hooks,
   `missingTarget` (`skip`, `center`, `stop`) after `targetTimeout`, `advanceOn` for "click this"
   steps, `modal` (the page goes inert, Tab cycles popup and target), arrow keys (mirrored in RTL),
   cancellable `onOpenChange` and `onStepChange`, live-region announcements, `--spotlight-*` CSS

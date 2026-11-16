@@ -23,14 +23,29 @@ const defaultTourBlocker = cva({
 	base: 'pointer-events-auto fill-transparent'
 });
 
-// The popup body inside the Popover panel.
+// The Stepper inside the Popover panel that carries the steps' content: it slides from one step
+// to the next and tweens its height. Its panels are laid out in an absolute track, so it sets the
+// popup's width itself.
+const defaultTourStage = cva({
+	base: '',
+	variants: {
+		size: {
+			small: 'w-60',
+			normal: 'w-72',
+			large: 'w-80'
+		}
+	},
+	defaultVariants: { size: 'normal' }
+});
+
+// A step's content, one per Stepper panel.
 const defaultTourPanel = cva({
 	base: 'flex flex-col outline-none',
 	variants: {
 		size: {
-			small: 'w-60 gap-xs',
-			normal: 'w-72 gap-sm',
-			large: 'w-80 gap-md'
+			small: 'gap-xs',
+			normal: 'gap-sm',
+			large: 'gap-md'
 		}
 	},
 	defaultVariants: { size: 'normal' }
@@ -85,8 +100,9 @@ const defaultTourActions = cva({
 });
 
 // The backdrop fades in and out; the spotlight glides from one target to the next over the
-// `moderate` step with the `standard` curve (something that moves, not a surface arriving).
-// Reduced motion zeroes both.
+// `moderate` step with the `standard` curve (something that moves, not a surface arriving), and
+// the popup glides along with it while its Stepper slides to the next step's content on that timing.
+// Reduced motion zeroes all of it.
 export const defaultTourMotion = motion({
 	base: {
 		in: { opacity: 0 },
@@ -108,6 +124,7 @@ export const tourTheme = {
 	svg: defaultTourSvg,
 	backdrop: defaultTourBackdrop,
 	blocker: defaultTourBlocker,
+	stage: defaultTourStage,
 	panel: defaultTourPanel,
 	header: defaultTourHeader,
 	title: defaultTourTitle,

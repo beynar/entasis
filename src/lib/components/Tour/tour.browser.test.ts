@@ -522,4 +522,73 @@ describe('Tour', () => {
 		expect(samples.some((width) => width < first.width - 1 && width > named.width + 1)).toBe(true);
 		expect(spot().width).toBeCloseTo(named.width, 0);
 	});
+
+	test('the popup glides to the next target as one dialog while its steps slide', async () => {
+		// A longer first description, so the popup changes size on the way.
+		const steps: TourStep[] = [
+			{
+				...basic[0],
+				description:
+					'The first button, described at some length so that this step needs a few more lines than the next one does.'
+			},
+			basic[1],
+			basic[2]
+		];
+		await render(Harness, { steps, open: true, padding: 0 });
+		await expect.poll(popupTitle).toBe('First step');
+		const dialog = popup()!;
+		const panel = () => dialog.firstElementChild!.getBoundingClientRect();
+		const content = (index: number) =>
+			dialog.querySelector<HTMLElement>(`[data-tour-content="${index}"]`);
+		await frames(4);
+		const start = panel();
+		const samples: {
+			x: number;
+			y: number;
+			height: number;
+			leavingInert: boolean;
+			leavingShift: number;
+		}[] = [];
+		await userEvent.click(button('Next'));
+		for (let index = 0; index < 50; index += 1) {
+			const box = panel();
+			const leaving = content(0);
+			samples.push({
+				x: box.left,
+				y: box.top,
+				height: box.height,
+				leavingInert: !!leaving?.closest('[inert]'),
+				leavingShift: leaving ? leaving.getBoundingClientRect().left - box.left : 0
+			});
+			await frames(1);
+		}
+		const end = panel();
+		const distance = (a: { x: number; y: number }, b: { x: number; y: number }) =>
+			Math.hypot(a.x - b.x, a.y - b.y);
+		const from = { x: start.left, y: start.top };
+		const to = { x: end.left, y: end.top };
+		expect(distance(from, to)).toBeGreaterThan(20);
+		// On the way, not a jump, and its size glides with the move rather than after it.
+		expect(start.height).not.toBeCloseTo(end.height, 0);
+		const low = Math.min(start.height, end.height);
+		const high = Math.max(start.height, end.height);
+		expect(
+			samples.some(
+				(sample) =>
+					distance(sample, from) > 5 &&
+					distance(sample, to) > 5 &&
+					sample.height > low + 1 &&
+					sample.height < high - 1
+			)
+		).toBe(true);
+		expect(Math.max(...samples.map((sample) => sample.height))).toBeLessThanOrEqual(high + 1);
+		// The previous step's content slides out sideways, out of reach as soon as it leaves.
+		expect(samples.some((sample) => sample.leavingShift < -20 && sample.leavingInert)).toBe(true);
+		expect(samples.every((sample) => sample.leavingShift >= 0 || sample.leavingInert)).toBe(true);
+		expect(popup()).toBe(dialog);
+		expect(popupTitle()).toBe('Second step');
+		expect(content(0)).toBeNull();
+		expect(document.activeElement?.textContent?.trim()).toBe('Next');
+		expect(content(1)?.contains(document.activeElement)).toBe(true);
+	});
 });

@@ -8,6 +8,7 @@
 	import { openStateAttributes, transitionStatusAttributes } from '$lib/utils/stateAttributes.js';
 	import Popover from '../Popover/Popover.svelte';
 	import Button from '../Button/Button.svelte';
+	import Stepper from '../Stepper/Stepper.svelte';
 	import { xIcon } from '../Icons/x.js';
 	import { spotlightPath } from './tour.geometry.js';
 	import type { TourProps } from './tour.props.js';
@@ -165,18 +166,34 @@
 			};
 		});
 
-	/** Describes the popup's dialog by the step description, and keeps it for `inert` and focus. */
+	/** Keeps the popup's dialog for `inert`, focus and its glide. */
 	const popupAttachment =
 		(popup: TourPopup): Attachment<HTMLElement> =>
 		(node) =>
 			untrack(() => {
 				popup.root = node;
-				if (tour.hasDescription(popup))
-					node.setAttribute('aria-describedby', tour.descriptionId(popup));
 				return () => {
 					if (popup.root === node) popup.root = null;
 				};
 			});
+
+	/** Describes the popup's dialog by the description of the step it shows. */
+	const describePopup =
+		(popup: TourPopup): Attachment<HTMLElement> =>
+		(node) => {
+			const index = popup.index;
+			if (!tour.hasDescription(index)) return;
+			node.setAttribute('aria-describedby', tour.descriptionId(popup, index));
+			return () => node.removeAttribute('aria-describedby');
+		};
+
+	// From one step to the next the popup moves on rather than reopening: a Stepper inside it slides
+	// from one step's content to the next and tweens its height, on the spotlight's timing, while
+	// the popup glides to the new target.
+	const stepTransition = $derived({
+		duration: motion.spotlight.in.duration,
+		easing: motion.spotlight.in.easing
+	});
 
 	const autofocus: Attachment<HTMLElement> = (node) => node.setAttribute('data-autofocus', '');
 	const skipAutofocus: Attachment<HTMLElement> = (node) =>
@@ -261,16 +278,106 @@
 	</div>
 {/if}
 
+{#snippet stepContent(popup: TourPopup, index: number)}
+	{@const item = steps[index]}
+	{@const isLast = index >= steps.length - 1}
+	{@const resolving =
+		tour.status === 'resolving' && popup === tour.currentPopup && index === popup.index}
+	<div
+		class={classes.panel({ size })}
+		data-tour-content={index}
+		data-step={index}
+		data-resolving={resolving ? '' : undefined}
+		aria-busy={resolving ? 'true' : undefined}
+	>
+		{#if children}
+			{@render children(tour.api)}
+		{:else if item}
+			<div class={classes.header()}>
+				<h2 id={tour.titleId(popup, index)} class={classes.title({ size })}>{item.title}</h2>
+				{#if closeButton}
+					<Button
+						squared
+						size="small"
+						variant="ghost"
+						color="neutral"
+						label={text.close}
+						{@attach skipAutofocus}
+						onclick={tour.pressClose}
+					>
+						{@render xIcon({ size: 16 })}
+					</Button>
+				{/if}
+			</div>
+			{#if item.content}
+				<div id={tour.descriptionId(popup, index)} class={classes.description({ size })}>
+					{@render item.content(tour.api)}
+				</div>
+			{:else if item.description}
+				<p id={tour.descriptionId(popup, index)} class={classes.description({ size })}>
+					{item.description}
+				</p>
+			{/if}
+			<div class={classes.footer()}>
+				{#if progress === 'count'}
+					<span class={classes.progress()}>{text.progress(index + 1, steps.length)}</span>
+				{:else if progress === 'dots'}
+					<span
+						class={classes.dots()}
+						role="img"
+						aria-label={text.progress(index + 1, steps.length)}
+					>
+						{#each steps as dotStep, dotIndex (dotStep.id ?? dotIndex)}
+							<span class={classes.dot()} data-active={dotIndex === index ? '' : undefined}></span>
+						{/each}
+					</span>
+				{/if}
+				<div class={classes.actions()}>
+					{#if skippable && !isLast}
+						<Button
+							size={buttonSize}
+							variant="ghost"
+							color="neutral"
+							{@attach skipAutofocus}
+							onclick={(event) => tour.pressSkip(event)}
+						>
+							{text.skip}
+						</Button>
+					{/if}
+					{#if index > 0}
+						<Button
+							size={buttonSize}
+							variant="outline"
+							color="neutral"
+							onclick={(event) => {
+								if (popup === tour.currentPopup && !resolving) tour.pressPrevious(event);
+							}}
+						>
+							{text.previous}
+						</Button>
+					{/if}
+					<Button
+						size={buttonSize}
+						{@attach autofocus}
+						onclick={(event) => {
+							if (popup === tour.currentPopup && !resolving) tour.pressNext(event);
+						}}
+					>
+						{isLast ? text.done : text.next}
+					</Button>
+				</div>
+			</div>
+		{/if}
+	</div>
+{/snippet}
+
 {#each tour.popups as popup (popup.key)}
-	{@const item = steps[popup.index]}
-	{@const isLast = popup.index >= steps.length - 1}
-	{@const resolving = tour.status === 'resolving' && popup === tour.currentPopup}
 	<Popover
 		trigger={false}
 		ref={popup.target ?? tour.centerReference}
 		positionPanel={popup.target ? undefined : tour.centerPanel}
 		bind:open={popup.open}
-		position={item?.position ?? position}
+		position={steps[popup.index]?.position ?? position}
 		{size}
 		arrow={arrow && !!popup.target}
 		focusOnOpen="first"
@@ -284,92 +391,20 @@
 		onOpenChange={tour.popupOpenChange(popup)}
 		onAfterClose={() => tour.removePopup(popup)}
 		{@attach popupAttachment(popup)}
+		{@attach describePopup(popup)}
 	>
-		<div
-			class={classes.panel({ size })}
-			data-step={popup.index}
-			data-resolving={resolving ? '' : undefined}
-			aria-busy={resolving ? 'true' : undefined}
+		<Stepper
+			items={steps}
+			value={popup.index}
+			mount="lazy"
+			panelRole={null}
+			panelAriaLabelledby={false}
+			transition={stepTransition}
+			class={classes.stage({ size })}
 		>
-			{#if children}
-				{@render children(tour.api)}
-			{:else if item}
-				<div class={classes.header()}>
-					<h2 id={tour.titleId(popup)} class={classes.title({ size })}>{item.title}</h2>
-					{#if closeButton}
-						<Button
-							squared
-							size="small"
-							variant="ghost"
-							color="neutral"
-							label={text.close}
-							{@attach skipAutofocus}
-							onclick={tour.pressClose}
-						>
-							{@render xIcon({ size: 16 })}
-						</Button>
-					{/if}
-				</div>
-				{#if item.content}
-					<div id={tour.descriptionId(popup)} class={classes.description({ size })}>
-						{@render item.content(tour.api)}
-					</div>
-				{:else if item.description}
-					<p id={tour.descriptionId(popup)} class={classes.description({ size })}>
-						{item.description}
-					</p>
-				{/if}
-				<div class={classes.footer()}>
-					{#if progress === 'count'}
-						<span class={classes.progress()}>{text.progress(popup.index + 1, steps.length)}</span>
-					{:else if progress === 'dots'}
-						<span
-							class={classes.dots()}
-							role="img"
-							aria-label={text.progress(popup.index + 1, steps.length)}
-						>
-							{#each steps as dotStep, index (dotStep.id ?? index)}
-								<span class={classes.dot()} data-active={index === popup.index ? '' : undefined}
-								></span>
-							{/each}
-						</span>
-					{/if}
-					<div class={classes.actions()}>
-						{#if skippable && !isLast}
-							<Button
-								size={buttonSize}
-								variant="ghost"
-								color="neutral"
-								{@attach skipAutofocus}
-								onclick={(event) => tour.pressSkip(event)}
-							>
-								{text.skip}
-							</Button>
-						{/if}
-						{#if popup.index > 0}
-							<Button
-								size={buttonSize}
-								variant="outline"
-								color="neutral"
-								onclick={(event) => {
-									if (popup === tour.currentPopup && !resolving) tour.pressPrevious(event);
-								}}
-							>
-								{text.previous}
-							</Button>
-						{/if}
-						<Button
-							size={buttonSize}
-							{@attach autofocus}
-							onclick={(event) => {
-								if (popup === tour.currentPopup && !resolving) tour.pressNext(event);
-							}}
-						>
-							{isLast ? text.done : text.next}
-						</Button>
-					</div>
-				</div>
-			{/if}
-		</div>
+			{#snippet children({ index })}
+				{@render stepContent(popup, index)}
+			{/snippet}
+		</Stepper>
 	</Popover>
 {/each}
