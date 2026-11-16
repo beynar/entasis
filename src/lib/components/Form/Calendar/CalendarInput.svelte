@@ -15,6 +15,7 @@
 		errors = $bindable([]),
 		focused = $bindable(false),
 		type = 'calendar' as T,
+		granularity,
 		required = false,
 		disabled,
 		readOnly,
@@ -123,6 +124,7 @@
 			theme={theme?.calendar}
 			value={field.value as unknown as CalendarValue<T>}
 			type={type || 'calendar'}
+			{granularity}
 			{disabledDates}
 			{minDate}
 			{maxDate}

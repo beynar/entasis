@@ -5,6 +5,7 @@ import type { WithSlot } from '$lib/components/Slot/slot.js';
 import type { ButtonProps } from '$lib/components/Button/index.js';
 import type { Snippet } from 'svelte';
 import type { Event, CalendarType, CalendarValue, CalendarWeekday } from './useCalendar.svelte.js';
+import type { CalendarGranularity } from './calendar.periods.js';
 import type { calendarTheme } from './calendar.theme.js';
 import type { ChipProps } from '$lib/components/Chip/chip.props.js';
 
@@ -16,6 +17,7 @@ export type {
 	CalendarValue,
 	CalendarWeekday
 } from './useCalendar.svelte.js';
+export type { CalendarGranularity } from './calendar.periods.js';
 export { CalendarState } from './useCalendar.svelte.js';
 
 export type CalendarPrimitiveProps<
@@ -33,6 +35,14 @@ export type CalendarPrimitiveProps<
 	value?: CalendarValue<T>;
 	/** Initial selection when `value` is omitted. */
 	defaultValue?: CalendarValue<T>;
+	/**
+	 * Period one selection covers: a `'day'` (default), a `'week'` (whole rows of the day grid,
+	 * led by their ISO week number), a `'month'` (a 3×4 grid of months per year) or a `'year'` (a
+	 * 3×4 grid of years per decade). A selected period is its first day, the week starting on
+	 * `weekStartsOn`; a range runs from its first period's first day to its last period's last
+	 * day, so it stays an inclusive day range. A period is disabled only when all its days are.
+	 */
+	granularity?: CalendarGranularity;
 	/** Keeps browsing months but refuses selecting a date. */
 	readOnly?: boolean;
 	/** Called whenever the calendar selection changes. */

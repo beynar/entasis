@@ -249,6 +249,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	}),
 	component('json-editor', 'components/Form/JsonEditor', 'Forms', 'JSON editor'),
 	component('key-value-input', 'components/Form/KeyValueInput', 'Forms', 'Key value input'),
+	component('masked-input', 'components/Form/MaskedInput', 'Forms', 'Masked input', {
+		related: ['text-input', 'pin-input', 'phone-input']
+	}),
 	component('multi-step-form', 'components/Form/MultiStepForm', 'Forms', 'Multi-step form', {
 		related: ['form', 'stepper']
 	}),
@@ -450,6 +453,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	}),
 	component('popover', 'components/Popover', 'Overlays', 'Popover', {
 		related: ['dialog', 'tooltip']
+	}),
+	component('tour', 'components/Tour', 'Overlays', 'Tour', {
+		related: ['popover', 'dialog']
 	}),
 	component('tooltip', 'components/Tooltip', 'Overlays', 'Tooltip', {
 		related: ['popover', 'hover-card']
@@ -1375,6 +1381,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	],
 	calendar: [
 		'BaseCalendarProps',
+		'CalendarGranularity',
 		'CalendarInput',
 		'CalendarInputProps',
 		'CalendarPrimitive',
@@ -1386,6 +1393,9 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'Cell',
 		'Event',
 		'calendarTheme',
+		'getIsoWeek',
+		'getPeriodEnd',
+		'getPeriodStart',
 		'setCalendarInputTheme',
 		'useCalendarInputTheme'
 	],
@@ -1574,6 +1584,24 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'keyValueInputTheme',
 		'setKeyValueInputTheme',
 		'useKeyValueInputTheme'
+	],
+	'masked-input': [
+		'MASKED_INPUT_TOKENS',
+		'MaskedInput',
+		'MaskedInputAttributes',
+		'MaskedInputMask',
+		'MaskedInputProps',
+		'MaskedInputShowMask',
+		'MaskedInputTheme',
+		'MaskedInputThemeProps',
+		'MaskedInputToken',
+		'MaskedInputTokens',
+		'MaskedInputTransform',
+		'MaskedInputValueDetails',
+		'MaskedInputValueFormat',
+		'maskedInputTheme',
+		'setMaskedInputTheme',
+		'useMaskedInputTheme'
 	],
 	'multi-step-form': [
 		'FormStep',
@@ -2791,6 +2819,31 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'setPopoverTheme',
 		'usePopoverContext',
 		'usePopoverTheme'
+	],
+	tour: [
+		'Tour',
+		'TourApi',
+		'TourBeforeContext',
+		'TourCssVariable',
+		'TourDataAttribute',
+		'TourLabels',
+		'TourMissingTarget',
+		'TourNavigationInput',
+		'TourProgress',
+		'TourProps',
+		'TourStatus',
+		'TourStep',
+		'TourStepChangeDetails',
+		'TourStepChangeReason',
+		'TourTarget',
+		'TourTheme',
+		'TourThemeProps',
+		'setTourTheme',
+		'tourCssVariables',
+		'tourDataAttributes',
+		'tourTarget',
+		'tourTheme',
+		'useTourTheme'
 	],
 	tooltip: [
 		'Tooltip',

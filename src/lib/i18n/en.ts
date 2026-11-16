@@ -18,6 +18,26 @@ export const en = {
 	open: 'Open',
 	toggle: 'Toggle',
 	clear: 'Clear',
+	/** MaskedInput: a value that leaves required slots of its mask empty. */
+	maskedInputIncomplete: 'Enter the complete value',
+	/** Tour step popup: buttons, progress (`2 of 5`) and the step announced to screen readers. */
+	tourNext: 'Next',
+	tourPrevious: 'Back',
+	tourDone: 'Done',
+	tourSkip: 'Skip tour',
+	tourClose: 'Close tour',
+	tourProgress: (current: string | number, total: string | number) => `${current} of ${total}`,
+	tourStepAnnouncement: (current: string | number, total: string | number, title: string) =>
+		`Step ${current} of ${total}: ${title}`,
+	/** Date granularity: week names, the week-number column, and month/year grid paging. */
+	calendarWeekLabel: (week: string | number, year: string | number) => `Week ${week}, ${year}`,
+	calendarWeekShort: (week: string | number) => `W${week}`,
+	calendarWeekColumn: 'Wk',
+	calendarWeekNumber: 'Week number',
+	calendarPreviousYear: 'Previous year',
+	calendarNextYear: 'Next year',
+	calendarPreviousDecade: 'Previous decade',
+	calendarNextDecade: 'Next decade',
 	selection: 'selection',
 	search: 'Search',
 	loading: 'Loading',

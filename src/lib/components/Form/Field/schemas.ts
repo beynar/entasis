@@ -50,6 +50,7 @@ export const schemas: {
 		phone: nonEmptyString,
 		'rich-text': nonEmptyString,
 		pin: nonEmptyString,
+		masked: nonEmptyString,
 
 		// Number input types
 		number: v.number(),
@@ -119,6 +120,7 @@ export const schemas: {
 		phone: optional(emptyStringNull(v.string())),
 		'rich-text': optional(emptyStringNull(v.string())),
 		pin: optional(emptyStringNull(v.string())),
+		masked: optional(emptyStringNull(v.string())),
 		// Number input types
 		number: optional(v.number()),
 		slider: optional(v.number()),

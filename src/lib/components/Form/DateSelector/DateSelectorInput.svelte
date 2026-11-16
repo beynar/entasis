@@ -23,6 +23,7 @@
 		open = $bindable(),
 		onOpenChange,
 		mode = 'date' as Mode,
+		granularity,
 		required = false,
 		disabled,
 		readOnly,
@@ -140,6 +141,7 @@
 	>
 		<DateSelector
 			{mode}
+			{granularity}
 			value={field.value as unknown as DateSelectorValue<Mode>}
 			onValueChange={(nextValue: DateSelectorValue<Mode>) => {
 				field.value = nextValue as unknown as FieldValue<FieldType>;

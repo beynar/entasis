@@ -13,13 +13,18 @@
 	import type { PopoverApi } from '../../Popover/popover.api.js';
 	import type { DateInputProps } from './dateInput.props.js';
 	import { useDateInputTheme } from './dateInput.theme.js';
-	import { useI18n } from '$lib/i18n/context.svelte.js';
+	import { useI18n, useI18nLocale } from '$lib/i18n/context.svelte.js';
+	import { getPeriodStart, getWeekNumber } from '../Calendar/calendar.periods.js';
 	import {
+		defaultGranularityFormat,
 		formatDateValue,
 		fromPickedDay,
+		fromZonedParts,
 		parseDateValue,
 		splitFormat,
-		toLocalWallClock
+		toLocalWallClock,
+		zonedParts,
+		type DateFormat
 	} from './dateInput.format.js';
 
 	let {
@@ -50,6 +55,8 @@
 		onSelect,
 		visible,
 		type = 'date',
+		granularity = 'day',
+		weekStartsOnMonday = true,
 		id: idProp,
 		...rest
 	}: DateInputProps = $props();
@@ -59,12 +66,21 @@
 	const generatedId = $props.id();
 	const id = untrack(() => resolveControlId(idProp, undefined, generatedId));
 	const dateSeparator = $derived(separator || '/');
-	// `datetime` edits the day and the hour unless a format says otherwise.
-	const format = $derived(formatProp ?? (type === 'datetime' ? 'dd/mm/yyyy HH:MM' : 'dd/mm/yyyy'));
+	const resolvedLocale = $derived(locale ?? useI18nLocale());
+	const weekStartsOn = $derived(weekStartsOnMonday ? 1 : 0);
+	// `datetime` edits the day and the hour unless a format or a coarser granularity says otherwise.
+	const format = $derived<DateFormat>(
+		formatProp ??
+			(granularity !== 'day'
+				? defaultGranularityFormat(granularity, resolvedLocale)
+				: type === 'datetime'
+					? 'dd/mm/yyyy HH:MM'
+					: 'dd/mm/yyyy')
+	);
 	const placeholder = $derived(placeholderProp ?? format);
 	const mask = $derived(splitFormat(format));
-	// A date-only edit of a datetime keeps the hour it had.
-	const keepsTime = $derived(type === 'datetime');
+	// A date-only edit of a datetime keeps the hour it had; a week, month or year has none.
+	const keepsTime = $derived(type === 'datetime' && granularity === 'day');
 	let isCalendarOpen = $state(false);
 
 	const field = createFieldState({
@@ -124,7 +140,36 @@
 
 	const classes = $derived(useDateInputTheme(theme));
 
-	const formatDate = (date: Date | null) => formatDateValue(date, format, dateSeparator, timeZone);
+	/** Midnight (in `timeZone`) of the first day of the period holding `date`. */
+	const toPeriodStart = (date: Date) => {
+		if (granularity === 'day') return date;
+		const parts = zonedParts(date, timeZone);
+		const start = getPeriodStart(
+			new Date(parts.year, parts.month - 1, parts.day, 12),
+			granularity,
+			weekStartsOn
+		);
+		return fromZonedParts(
+			{
+				year: start.getFullYear(),
+				month: start.getMonth() + 1,
+				day: start.getDate(),
+				hour: 0,
+				minute: 0
+			},
+			timeZone
+		);
+	};
+
+	const formatDate = (date: Date | null) =>
+		formatDateValue(date ? toPeriodStart(date) : null, format, dateSeparator, timeZone);
+
+	// The ISO week number shown beside a week's first day.
+	const weekBadge = $derived.by(() => {
+		if (granularity !== 'week' || !(value instanceof Date)) return '';
+		const local = toLocalWallClock(value, timeZone)!;
+		return t.calendarWeekShort(getWeekNumber(local, weekStartsOn).week);
+	});
 
 	const extractDate = (inputValue: string) =>
 		parseDateValue(
@@ -172,13 +217,15 @@
 
 		const date = extractDate(currentValue);
 		if (date) {
-			field.value = date;
+			field.value = toPeriodStart(date);
 		}
 	};
 
 	const handleCalendarChange = (picked: Date | null) => {
 		const date = picked
-			? fromPickedDay(picked, keepsTime ? (field.value as Date | null) : null, timeZone)
+			? toPeriodStart(
+					fromPickedDay(picked, keepsTime ? (field.value as Date | null) : null, timeZone)
+				)
 			: null;
 		field.value = date;
 		onSelect?.(date);
@@ -199,6 +246,8 @@
 	focusOnClose={() => field.node ?? true}
 	position="bottom-start"
 	mode="date"
+	{granularity}
+	{weekStartsOnMonday}
 	value={toLocalWallClock(field.value as Date | null, timeZone)}
 	{presets}
 	{disabledDates}
@@ -266,6 +315,9 @@
 					field.focused = false;
 				}}
 			/>
+			{#if weekBadge}
+				<span class={classes.period({ size: rest.size })} data-week-number>{weekBadge}</span>
+			{/if}
 			<FieldActionButton
 				active={isCalendarOpen}
 				size={rest.size}

@@ -25,6 +25,7 @@ export type TagGroupInputType = 'tag-group';
 export type KeyValueInputType = 'keyvalue';
 export type JsonInputType = 'json';
 export type PinInputType = 'pin';
+export type MaskedInputType = 'masked';
 export type DateInputType = 'datetime' | 'date';
 export type TimeInputType = 'time';
 export type BooleanInputType = 'switch' | 'checkbox';
@@ -77,6 +78,7 @@ export type InputType =
 	| KeyValueInputType
 	| JsonInputType
 	| PinInputType
+	| MaskedInputType
 	| SingleOptionInputType
 	| CalendarInputType;
 
@@ -118,7 +120,7 @@ export type FieldValue<T extends FieldType> = T extends RegisteredInputType
 												? string
 												: T extends RichTextInputType
 													? string
-													: T extends PinInputType
+													: T extends PinInputType | MaskedInputType
 														? string
 														: T extends BooleanInputType
 															? boolean

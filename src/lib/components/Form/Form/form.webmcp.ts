@@ -22,6 +22,11 @@ import type {
 } from '$lib/utils/webmcp/webmcp.types.js';
 import type { FieldType } from '../Field/field.js';
 import { denormalizeTimeValue, type TimeInputValueUnit } from '../TimeInput/timeInputValue.js';
+import {
+	describeMaskForTool,
+	type MaskedInputMask,
+	type MaskedInputTokens
+} from '../MaskedInput/maskedInput.mask.js';
 import { getFormInputDefinition } from './form.registry.js';
 import type { FormState } from './form.state.svelte.js';
 import {
@@ -143,6 +148,14 @@ export function fieldToolSchema(
 			return { type: 'string', description: 'International format, such as +33612345678.' };
 		case 'color':
 			return { type: 'string' };
+		case 'masked':
+			return {
+				type: 'string',
+				description: describeMaskForTool(
+					props.mask as MaskedInputMask | undefined,
+					props.tokens as MaskedInputTokens | undefined
+				)
+			};
 		case 'pin': {
 			const length = numeric(props.length);
 			return defined({ type: 'string', minLength: length, maxLength: length });

@@ -45,6 +45,7 @@ const valueControlPages = [
 	'date-selector',
 	'file',
 	'key-value-input',
+	'masked-input',
 	'number-input',
 	'password',
 	'phone',

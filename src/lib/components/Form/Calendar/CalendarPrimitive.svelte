@@ -11,9 +11,11 @@
 	import { prefersReducedMotion } from '$lib/utils/motion.svelte.js';
 	import { useResizeObserver } from '$lib/utils/useResizeObserver.svelte.js';
 	import { cubicOut } from 'svelte/easing';
+	import { on } from 'svelte/events';
 	import type { CalendarPrimitiveProps, CalendarType } from './calendarInput.props.js';
 	import type { Event } from './useCalendar.svelte.js';
 	import { CalendarState, getCalendarDateKey } from './useCalendar.svelte.js';
+	import { getWeekNumber, PERIOD_GRID_COLUMNS } from './calendar.periods.js';
 	import Button from '../../Button/Button.svelte';
 	import Slot from '../../Slot/Slot.svelte';
 	import { caretRightIcon } from '$lib/components/Icons/caretRight.js';
@@ -29,6 +31,7 @@
 			T
 		>['value'],
 		value = $bindable(),
+		granularity = 'day',
 		disabledDates = [],
 		view = 'single',
 		weekStartsOnMonday = true,
@@ -127,6 +130,9 @@
 		get view() {
 			return resolvedView;
 		},
+		get granularity() {
+			return granularity;
+		},
 		get weekStartsOnMonday() {
 			return weekStartsOnMonday;
 		},
@@ -187,6 +193,62 @@
 		css: (t: number, u: number) =>
 			`${outgoing ? 'position:absolute;top:0;inset-inline-start:0;width:100%;' : ''}opacity:${t};transform:scale(${0.985 + t * 0.015});filter:blur(${u * 3}px);transform-origin:center`
 	});
+
+	const isWeekGranularity = $derived(granularity === 'week');
+	// The week row under the pointer, keyed by its first day, highlighted as one target.
+	let hoveredWeekKey = $state<string | null>(null);
+	const weekKeyOf = (date: Date) => getCalendarDateKey(calendar.periodStartOf(date));
+
+	const trackWeekHover = (node: HTMLElement) => {
+		const removeOver = on(node, 'pointerover', handleWeekPointerOver);
+		const removeLeave = on(node, 'pointerleave', () => (hoveredWeekKey = null));
+		return () => {
+			removeOver();
+			removeLeave();
+		};
+	};
+
+	function handleWeekPointerOver(event: PointerEvent) {
+		if (!isWeekGranularity || event.pointerType === 'touch') return;
+		const cell = (event.target as Element | null)?.closest<HTMLElement>('[data-date]');
+		const dateKey = cell?.dataset.date;
+		if (!dateKey || cell.hasAttribute('disabled')) {
+			hoveredWeekKey = null;
+			return;
+		}
+		const [year, month, day] = dateKey.split('-').map(Number);
+		hoveredWeekKey = weekKeyOf(new Date(year, month - 1, day, 12));
+	}
+
+	const yearFormat = (date: Date) => date.toLocaleDateString(locale, { year: 'numeric' });
+	const periodPageLabel = $derived.by(() => {
+		if (granularity !== 'year') return yearFormat(calendar.date);
+		// The decade itself; the year shown on each side is a neighbour.
+		const first = new Date(calendar.yearPageStart + 1, 0, 1, 12);
+		const last = new Date(calendar.yearPageStart + 10, 0, 1, 12);
+		try {
+			return new Intl.DateTimeFormat(locale, { year: 'numeric' }).formatRange(first, last);
+		} catch {
+			return `${yearFormat(first)} – ${yearFormat(last)}`;
+		}
+	});
+	const periodRows = $derived.by(() => {
+		const rows: (typeof calendar.periodCells)[] = [];
+		for (let index = 0; index < calendar.periodCells.length; index += PERIOD_GRID_COLUMNS) {
+			rows.push(calendar.periodCells.slice(index, index + PERIOD_GRID_COLUMNS));
+		}
+		return rows;
+	});
+	const periodPageButtonLabels = $derived(
+		granularity === 'year'
+			? { prev: t.calendarPreviousDecade, next: t.calendarNextDecade }
+			: { prev: t.calendarPreviousYear, next: t.calendarNextYear }
+	);
+
+	function handlePageChange(direction: -1 | 1) {
+		if (disabled) return;
+		calendar.goToPeriodPage(direction);
+	}
 
 	function getViewChangeParams() {
 		return {
@@ -261,7 +323,38 @@
 	{@attach calendar.calendar}
 >
 	<Slot render={header} class={classes.header({ picker: activeView === 'picker' })}>
-		{#if activeView === 'days'}
+		{#if calendar.isPeriodGrid}
+			<Button
+				tool={false}
+				squared
+				size="small"
+				variant="ghost"
+				class="rotate-180"
+				label={periodPageButtonLabels.prev}
+				{...buttonProps.prev}
+				type="button"
+				disabled={disabled || buttonProps.prev.disabled || !calendar.canGoToPeriodPage(-1)}
+				onclick={() => handlePageChange(-1)}
+			>
+				{@render caretRightIcon()}
+			</Button>
+			<span class={classes.viewTrigger({ class: 'text-center' })} aria-live="polite">
+				{periodPageLabel}
+			</span>
+			<Button
+				tool={false}
+				squared
+				size="small"
+				variant="ghost"
+				label={periodPageButtonLabels.next}
+				{...buttonProps.next}
+				type="button"
+				disabled={disabled || buttonProps.next.disabled || !calendar.canGoToPeriodPage(1)}
+				onclick={() => handlePageChange(1)}
+			>
+				{@render caretRightIcon()}
+			</Button>
+		{:else if activeView === 'days'}
 			<Button
 				tool={false}
 				squared
@@ -279,25 +372,27 @@
 				{@render caretRightIcon()}
 			</Button>
 		{/if}
-		<Button
-			tool={false}
-			type="button"
-			bind:ref={viewTriggerElement}
-			size="normal"
-			variant="ghost"
-			color="neutral"
-			class={classes.viewTrigger()}
-			{disabled}
-			label={activeView === 'picker'
-				? t.calendarShowDaysFor(calendar.displayedMonthLabel)
-				: t.calendarChooseMonthAndYear(calendar.displayedMonthLabel)}
-			expanded={activeView === 'picker'}
-			controls={pickerId}
-			onclick={toggleActiveView}
-		>
-			<span aria-live="polite">{calendar.displayedMonthLabel}</span>
-		</Button>
-		{#if activeView === 'days'}
+		{#if !calendar.isPeriodGrid}
+			<Button
+				tool={false}
+				type="button"
+				bind:ref={viewTriggerElement}
+				size="normal"
+				variant="ghost"
+				color="neutral"
+				class={classes.viewTrigger()}
+				{disabled}
+				label={activeView === 'picker'
+					? t.calendarShowDaysFor(calendar.displayedMonthLabel)
+					: t.calendarChooseMonthAndYear(calendar.displayedMonthLabel)}
+				expanded={activeView === 'picker'}
+				controls={pickerId}
+				onclick={toggleActiveView}
+			>
+				<span aria-live="polite">{calendar.displayedMonthLabel}</span>
+			</Button>
+		{/if}
+		{#if !calendar.isPeriodGrid && activeView === 'days'}
 			<Button
 				tool={false}
 				squared
@@ -319,7 +414,17 @@
 	<div class={classes.viewport()} {@attach transitionSize({ axis: 'height' })}>
 		{#key activeView}
 			<div class={classes.viewPanel()} in:viewZoom out:viewZoom={{ outgoing: true }}>
-				{#if activeView === 'days'}
+				{#if calendar.isPeriodGrid}
+					{#key calendar.pageKey}
+						<div
+							class={classes.months({ view: 'single' })}
+							in:monthSlide={{ direction: enterDirection }}
+							out:monthSlide={{ direction: -enterDirection, outgoing: true }}
+						>
+							{@render periodPart()}
+						</div>
+					{/key}
+				{:else if activeView === 'days'}
 					{#key calendar.viewKey}
 						<div
 							class={classes.months({ view: resolvedView })}
@@ -355,10 +460,16 @@
 	<div
 		role="grid"
 		aria-readonly={readOnly || undefined}
-		class={classes.grid()}
+		class={classes.grid({ weekNumbers: isWeekGranularity })}
 		aria-label={month.toLocaleDateString(locale, { month: 'long', year: 'numeric' })}
+		{@attach trackWeekHover}
 	>
 		<div role="row" class="contents">
+			{#if isWeekGranularity}
+				<span role="columnheader" aria-label={t.calendarWeekNumber} class={classes.weekday()}>
+					{t.calendarWeekColumn}
+				</span>
+			{/if}
 			{#each [0, 1, 2, 3, 4, 5, 6] as dayIndex (dayIndex)}
 				{@const weekDay = (calendar.resolvedWeekStartsOn + dayIndex) % 7}
 				<span
@@ -376,29 +487,50 @@
 		</div>
 
 		{#each rows as row (getCalendarDateKey(row.cells[0].date))}
+			{@const rowWeek = isWeekGranularity
+				? getWeekNumber(row.cells[0].date, calendar.resolvedWeekStartsOn)
+				: null}
+			{@const rowWeekLabel = rowWeek ? t.calendarWeekLabel(rowWeek.week, rowWeek.year) : ''}
+			{@const rowHovered = isWeekGranularity && hoveredWeekKey === weekKeyOf(row.cells[0].date)}
 			<div role="row" class="contents">
+				{#if rowWeek}
+					<span role="rowheader" aria-label={rowWeekLabel} class={classes.weekNumber()}>
+						{rowWeek.week}
+					</span>
+				{/if}
 				{#each row.cells as cell, columnIndex (getCalendarDateKey(cell.date))}
 					{#if cell.visible}
+						{@const dayLabel = cell.date.toLocaleDateString(locale, {
+							weekday: 'long',
+							day: 'numeric',
+							month: 'long',
+							year: 'numeric'
+						})}
+						{@const inBand = isWeekGranularity && (cell.selected || cell.isInRange)}
 						<button
 							type="button"
 							role="gridcell"
-							aria-colindex={columnIndex + 1}
+							aria-colindex={columnIndex + (rowWeek ? 2 : 1)}
 							{...cell.attributes}
-							aria-label={cell.date.toLocaleDateString(locale, {
-								weekday: 'long',
-								day: 'numeric',
-								month: 'long',
-								year: 'numeric'
-							})}
+							data-highlighted={rowHovered && !cell.disabled ? 'true' : undefined}
+							aria-label={rowWeek ? `${dayLabel}, ${rowWeekLabel}` : dayLabel}
 							class={classes.day({
 								selected: cell.selected,
 								disabled: cell.disabled,
 								inMonth: cell.inMonth,
 								inRange: cell.isInRange,
 								today: cell.isToday,
-								startOfRange: cell.isStartOfRange,
-								endOfRange: cell.isEndOfRange,
-								isPast: cell.isInPreviousMonth
+								startOfRange: !isWeekGranularity && cell.isStartOfRange,
+								endOfRange: !isWeekGranularity && cell.isEndOfRange,
+								isPast: cell.isInPreviousMonth,
+								band: inBand
+									? columnIndex === 0
+										? 'start'
+										: columnIndex === 6
+											? 'end'
+											: 'middle'
+									: undefined,
+								unavailable: cell.attributes['data-unavailable'] === true
 							})}
 						>
 							{#if cell.isToday}
@@ -419,6 +551,44 @@
 					{:else}
 						<span aria-hidden="true"></span>
 					{/if}
+				{/each}
+			</div>
+		{/each}
+	</div>
+{/snippet}
+
+{#snippet periodPart()}
+	<div
+		role="grid"
+		aria-readonly={readOnly || undefined}
+		class={classes.periodGrid()}
+		aria-label={periodPageLabel}
+	>
+		{#each periodRows as periodRow (getCalendarDateKey(periodRow[0].date))}
+			<div role="row" class="contents">
+				{#each periodRow as period, columnIndex (getCalendarDateKey(period.date))}
+					<button
+						type="button"
+						role="gridcell"
+						aria-colindex={columnIndex + 1}
+						{...period.attributes}
+						aria-label={granularity === 'year'
+							? yearFormat(period.date)
+							: period.date.toLocaleDateString(locale, { month: 'long', year: 'numeric' })}
+						class={classes.period({
+							selected: period.selected,
+							disabled: period.disabled,
+							inRange: period.isInRange,
+							startOfRange: period.isStartOfRange && !!calendar.rangeEnd,
+							endOfRange: period.isEndOfRange && !!calendar.rangeStart,
+							outside: period.outside,
+							current: period.isCurrent
+						})}
+					>
+						{granularity === 'year'
+							? yearFormat(period.date)
+							: period.date.toLocaleDateString(locale, { month: 'short' })}
+					</button>
 				{/each}
 			</div>
 		{/each}

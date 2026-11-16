@@ -212,6 +212,10 @@ export const componentNavigationSections = [
 				text: 'Key value input'
 			},
 			{
+				href: '/components/masked-input',
+				text: 'Masked input'
+			},
+			{
 				href: '/components/multi-step-form',
 				text: 'Multi-step form'
 			},
@@ -516,6 +520,10 @@ export const componentNavigationSections = [
 			{
 				href: '/components/popover',
 				text: 'Popover'
+			},
+			{
+				href: '/components/tour',
+				text: 'Tour'
 			},
 			{
 				href: '/components/tooltip',

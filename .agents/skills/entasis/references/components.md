@@ -71,6 +71,7 @@ Each link is that entry's full documentation as Markdown (props, data model, the
 - [Form](https://entasis.beynar.workers.dev/components/form.md) `entasis/form` — Form renders configured entasis fields inside a div, owns their state and validation, and submits programmatically.
 - [JSON editor](https://entasis.beynar.workers.dev/components/json-editor.md) `entasis/json-editor` — JsonEditor edits a JSON value through the right control for each field.
 - [Key value input](https://entasis.beynar.workers.dev/components/key-value-input.md) `entasis/key-value-input` — An editable list of key/value string pairs.
+- [Masked input](https://entasis.beynar.workers.dev/components/masked-input.md) `entasis/masked-input` — A text field that formats what is typed to a fixed pattern: plates, company numbers, IBANs, phone numbers, postal codes.
 - [Multi-step form](https://entasis.beynar.workers.dev/components/multi-step-form.md) `entasis/multi-step-form` — MultiStepForm owns one Form per step, displays them through Stepper, validates visited steps before navigation, and validates every step before final submission.
 - [Number input](https://entasis.beynar.workers.dev/components/number-input.md) `entasis/number-input` — The NumberInput component is a locale-aware numeric input: a text input that reads and shows numbers the way the user writes them (`1 234,5`, `١٢٣٫٤`, `R$ 12,50`), with +/- steppers, keyboard stepping, min/max validation, and a hidden in…
 - [Password](https://entasis.beynar.workers.dev/components/password-input.md) `entasis/password-input` — The PasswordInput component is a specialized text input for password entry with visibility toggle functionality.
@@ -158,6 +159,7 @@ Each link is that entry's full documentation as Markdown (props, data model, the
 - [Link preview](https://entasis.beynar.workers.dev/components/link-preview.md) `entasis/link-preview` — LinkPreview renders an anchor trigger with a HoverCard preview that loads link metadata asynchronously.
 - [Overlay](https://entasis.beynar.workers.dev/components/overlay.md) `entasis/overlay` — Overlay layers concise content and actions over bounded media or another visual surface.
 - [Popover](https://entasis.beynar.workers.dev/components/popover.md) `entasis/popover` — The Popover component displays floating content positioned relative to a trigger element.
+- [Tour](https://entasis.beynar.workers.dev/components/tour.md) `entasis/tour` — A guided walkthrough anchored to elements of the page.
 - [Tooltip](https://entasis.beynar.workers.dev/components/tooltip.md) `entasis/tooltip` — Contextual information shown on hover or on keyboard focus (when the focus ring shows).
 
 ## Media

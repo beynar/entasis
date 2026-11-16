@@ -36,6 +36,7 @@ import type { TagsInputProps } from '../TagsInput/tagsInput.props.js';
 import type { JsonEditorProps } from '../JsonEditor/jsonEditor.props.js';
 import type { KeyValueInputProps } from '../KeyValueInput/keyValueInput.props.js';
 import type { PinInputProps } from '../PinInput/pinInput.props.js';
+import type { MaskedInputProps } from '../MaskedInput/maskedInput.props.js';
 import type { Slot } from '$lib/components/Slot/slot.js';
 import type { ButtonProps } from '$lib/components/Button/index.js';
 import type { Component, Snippet } from 'svelte';
@@ -237,7 +238,10 @@ type BaseFormFieldInput =
 	  } & JsonEditorProps)
 	| ({
 			type: 'pin';
-	  } & PinInputProps);
+	  } & PinInputProps)
+	| ({
+			type: 'masked';
+	  } & MaskedInputProps);
 
 // FormInput with dynamic visibility support
 // The visibility property can be a boolean or a function that receives the form value

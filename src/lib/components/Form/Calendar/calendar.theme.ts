@@ -45,7 +45,62 @@ const defaultMonths = cva({
 });
 
 const defaultGrid = cva({
-	base: 'grid min-w-0 grid-cols-7 gap-micro'
+	base: 'grid min-w-0 grid-cols-7 gap-micro',
+	variants: {
+		// A week granularity leads each row with its week number, and drops the gap between days
+		// so a selected or hovered week reads as one band.
+		weekNumbers: {
+			true: 'grid-cols-[auto_repeat(7,minmax(0,1fr))] gap-x-0',
+			false: null
+		}
+	},
+	defaultVariants: {
+		weekNumbers: false
+	}
+});
+
+const defaultWeekNumber = cva({
+	base: 'flex items-center justify-center px-xs text-xs font-medium text-neutral/70 tabular-nums'
+});
+
+// The month and year grids: three columns of four periods.
+const defaultPeriodGrid = cva({
+	base: 'grid min-w-0 grid-cols-3 gap-micro'
+});
+
+const defaultPeriod = cva({
+	base: 'state-layer relative flex h-row-md w-full cursor-pointer items-center justify-center rounded-sm px-sm text-sm text-neutral ring-inset outline-none transition-colors focus-visible:z-[2] focus-visible:ring-2 focus-visible:ring-focus/50 disabled:cursor-not-allowed disabled:opacity-50',
+	variants: {
+		selected: {
+			true: `${selectedSoft} font-semibold`
+		},
+		inRange: {
+			true: `${selectedSoft} rounded-none`
+		},
+		startOfRange: {
+			true: 'rounded-e-none'
+		},
+		endOfRange: {
+			true: 'rounded-s-none'
+		},
+		// The year before and after the decade on a year page.
+		outside: {
+			true: 'text-neutral/70'
+		},
+		current: {
+			true: 'underline decoration-2 underline-offset-4'
+		},
+		disabled: {
+			true: 'opacity-50 cursor-not-allowed'
+		}
+	},
+	compoundVariants: [
+		{
+			startOfRange: true,
+			endOfRange: true,
+			class: 'rounded-sm'
+		}
+	]
 });
 
 const defaultPicker = cva({
@@ -115,6 +170,16 @@ const defaultDay = cva({
 		},
 		isPast: {
 			true: ''
+		},
+		// A week granularity draws a selected or in-range week as one band across its row.
+		band: {
+			start: 'rounded-e-none',
+			middle: 'rounded-none',
+			end: 'rounded-s-none'
+		},
+		// A day that cannot be picked alone, inside a week that can.
+		unavailable: {
+			true: 'text-neutral/45 line-through'
 		}
 	},
 	compoundVariants: [
@@ -142,7 +207,10 @@ export const calendarTheme = {
 	pickerOptions: defaultPickerOptions,
 	pickerOption: defaultPickerOption,
 	weekday: defaultWeekday,
-	day: defaultDay
+	weekNumber: defaultWeekNumber,
+	day: defaultDay,
+	periodGrid: defaultPeriodGrid,
+	period: defaultPeriod
 };
 
 export type CalendarTheme = typeof calendarTheme;

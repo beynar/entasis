@@ -107,6 +107,7 @@ const supportedInputTypes = new Set<InputType>([
 	'keyvalue',
 	'json',
 	'pin',
+	'masked',
 	'select',
 	'select-multiple',
 	'radio',

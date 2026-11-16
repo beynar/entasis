@@ -35,6 +35,29 @@ Unreleased section under the new version.
 
 ### Added
 
+- `Tour` (`entasis/tour`): a guided walkthrough. Steps target a selector, an element, a function
+  or a name registered with `{@attach tourTarget('name')}` (`null` centres the step). One SVG
+  spotlight with a rounded hole follows its target through scroll and resize; the page stays
+  clickable through the hole and the backdrop does nothing by default. Each step opens a Popover
+  with title, description, progress, Previous/Next/Done, Skip and close. Awaited `before()` hooks,
+  `missingTarget` (`skip`, `center`, `stop`) after `targetTimeout`, `advanceOn` for "click this"
+  steps, `modal` (the page goes inert, Tab cycles popup and target), arrow keys (mirrored in RTL),
+  cancellable `onOpenChange` and `onStepChange`, live-region announcements, `--spotlight-*` CSS
+  variables. A Tour stays above an open Dialog. Labels in all 8 locales.
+- Open-change reasons `skip-press`, `complete` and `target-missing`.
+- `MaskedInput` (`entasis/masked-input`): text formatted to a pattern (`#` digit, `A` letter, `*`
+  alphanumeric, `\` escapes, `?` optional, `+` repeats, custom tokens with case transforms),
+  several masks (the first that fits wins) or a function, `showMask` (`always`, `focus`, `never`),
+  raw or masked `value` with `onValueChange(value, { masked, raw, complete })`, `readOnly`, native
+  form submission, and a localized "incomplete" validation message. Built on Maskito, which
+  DateInput and TimeInput already use. Form entries take `{ type: 'masked', mask }`.
+- `granularity` (`'day' | 'week' | 'month' | 'year'`, default `'day'`) on DateSelector,
+  DateSelectorInput, DateInput, CalendarPrimitive and CalendarInput: pick whole weeks (with ISO
+  week numbers), months (a 3×4 grid per year) or years (a 3×4 grid per decade) in date, range and
+  multiple modes. A period is its first day; a range ends on the last day of its last period.
+  DateInput's mask follows the granularity (`mm/yyyy` or `yyyy/mm` by locale, `yyyy`, or a week
+  typed as any of its days) and DateInput gains `weekStartsOnMonday`. `entasis/calendar` exports
+  `getPeriodStart`, `getPeriodEnd`, `getIsoWeek` and `CalendarGranularity`.
 - A `moderate` motion duration step (250ms), with its `duration-moderate` utility.
 - Motion shape tokens, beside the durations and easings, in `<Theme motion>`,
   `designTokens.<theme>.motion` and the Tailwind plugin's `motion` option: `exitRatio` (0.8, how

@@ -9,7 +9,7 @@ Colors names semantic palette roles. Sizes selects small, normal, or large compo
 
 Every overlay's \`onOpenChange(open, details)\` receives \`OpenChangeDetails\` as its second argument, and runs before the state changes:
 
-- \`reason\` (\`OpenChangeReason\`): \`'trigger-press'\`, \`'trigger-hover'\`, \`'trigger-focus'\`, \`'outside-press'\`, \`'escape-key'\`, \`'close-watcher'\` (the Android Back gesture), \`'close-press'\`, \`'item-press'\`, \`'list-navigation'\`, \`'input-change'\` (typing in a combobox input), \`'focus-out'\`, \`'swipe'\`, \`'trigger-unmount'\`, \`'find-in-page'\` (the browser's find-in-page opened a disclosure that hides its content until found) or \`'imperative-action'\`.
+- \`reason\` (\`OpenChangeReason\`): \`'trigger-press'\`, \`'trigger-hover'\`, \`'trigger-focus'\`, \`'outside-press'\`, \`'escape-key'\`, \`'close-watcher'\` (the Android Back gesture), \`'close-press'\`, \`'item-press'\`, \`'list-navigation'\`, \`'input-change'\` (typing in a combobox input), \`'focus-out'\`, \`'swipe'\`, \`'trigger-unmount'\`, \`'find-in-page'\` (the browser's find-in-page opened a disclosure that hides its content until found), \`'skip-press'\` (a Tour's Skip button), \`'complete'\` (a Tour's last step was finished), \`'target-missing'\` (a Tour step's target never appeared) or \`'imperative-action'\`.
 - \`event\`: the DOM event behind the change, when there is one.
 - \`trigger\`: the trigger element involved, when a trigger caused it.
 - \`interaction\` (\`OpenChangeInteraction\`): \`'mouse'\`, \`'touch'\`, \`'pen'\`, \`'keyboard'\`, \`'programmatic'\` (no user input behind it) or \`'agent'\` (a WebMCP tool under \`<Theme webmcp>\` caused it; it can be cancelled like any other change).

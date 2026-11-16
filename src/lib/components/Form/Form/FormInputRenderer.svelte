@@ -17,6 +17,7 @@
 	import NumberInput from '../NumberInput/NumberInput.svelte';
 	import PasswordInput from '../PasswordInput/Password.svelte';
 	import PhoneInput from '../PhoneInput/PhoneInput.svelte';
+	import MaskedInput from '../MaskedInput/MaskedInput.svelte';
 	import PinInput from '../PinInput/PinInput.svelte';
 	import RadioInput from '../RadioInput/RadioInput.svelte';
 	import RatingInput from '../RatingInput/RatingInput.svelte';
@@ -139,6 +140,8 @@
 	<JsonEditor {...inputProps as FormInputProps<'json'>} {name} />
 {:else if input.type === 'pin'}
 	<PinInput {...inputProps as FormInputProps<'pin'>} {name} />
+{:else if input.type === 'masked'}
+	<MaskedInput {...inputProps as FormInputProps<'masked'>} {name} />
 {:else if input.type === 'time'}
 	<TimeInput {...inputProps as FormInputProps<'time'>} {name} />
 {/if}
