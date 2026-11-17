@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.25.0 — 2026-11-17
+
 ### Added
 
 - Stepper: `fit="content"` lets each panel keep its own width (`max-content`, capped by the
