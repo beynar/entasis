@@ -96,9 +96,8 @@ const defaultNavigationMenuViewport = cva({
 	}
 });
 
-// The visible, animated surface. It animates its own width and height as the active panel
-// changes, so it hugs whichever panel it shows. It is the positioning context of an outgoing panel,
-// which leaves absolutely positioned inside it and is clipped with it.
+// The visible, animated surface. It hugs whichever panel it shows: the Stepper inside it takes the
+// panel's width and height and tweens both when the panel changes.
 const defaultNavigationMenuPopup = cva({
 	base: 'raised-3 bg-surface-floating text-neutral relative isolate max-w-full origin-top rounded-lg text-sm',
 	variants: {
@@ -111,6 +110,12 @@ const defaultNavigationMenuPopup = cva({
 	defaultVariants: {
 		density: 'normal'
 	}
+});
+
+// The Stepper that carries the panels inside the popup. A panel keeps its own width, capped so
+// the popup with its padding stays inside the viewport like the panel area around it.
+const defaultNavigationMenuStage = cva({
+	base: '[--stepper-panel-max-width:calc(100vw-1rem-2*var(--pad-parent-x,0px))]'
 });
 
 const defaultNavigationMenuPanel = cva({
@@ -137,7 +142,7 @@ const defaultNavigationMenuContentList = cva({
 		},
 		nested: {
 			true: 'ps-md',
-			false: 'min-w-64'
+			false: ''
 		}
 	},
 	defaultVariants: {
@@ -221,16 +226,25 @@ const defaultNavigationMenuNestedTrigger = cva({
 	}
 });
 
-// The popup lifts in from its trigger and settles back out. `duration` and `easing` stay tokens,
-// so `<Theme motion>` and the reduced-motion preference reach it. A panel that replaces another
-// slides in from the side of the new trigger with the same duration and easing.
+// The popup lifts in from its trigger and settles back out. When another panel replaces the open
+// one, its Stepper slides from the old panel to the new one over the `normal` step with the
+// `standard` curve (something that moves, not a surface arriving), the timing of the popup's own
+// glide to the new trigger. `duration` and `easing` stay tokens, so `<Theme motion>` and the
+// reduced-motion preference reach both.
 export const defaultNavigationMenuMotion = motion({
 	base: {
 		in: { x: 0, y: -4, scale: 'surface', opacity: 0 },
 		out: { x: 0, y: -4, scale: 'surface', opacity: 0 },
 		duration: 'fast',
 		easing: 'enter'
-	}
+	},
+	variants: {
+		part: {
+			popup: {},
+			panel: { duration: 'normal', easing: 'standard' }
+		}
+	},
+	defaultVariants: { part: 'popup' }
 });
 
 export const navigationMenuTheme = {
@@ -243,6 +257,7 @@ export const navigationMenuTheme = {
 	caret: defaultNavigationMenuCaret,
 	viewport: defaultNavigationMenuViewport,
 	popup: defaultNavigationMenuPopup,
+	stage: defaultNavigationMenuStage,
 	panel: defaultNavigationMenuPanel,
 	contentList: defaultNavigationMenuContentList,
 	contentLink: defaultNavigationMenuContentLink,

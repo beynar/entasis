@@ -31,6 +31,12 @@ export type StepperPanelAriaLabel<Item> =
  */
 export type StepperMount = 'eager' | 'lazy' | 'once';
 
+/**
+ * How wide each panel is: `container` fills the Stepper's width, `content` keeps the panel's own
+ * width and the Stepper animates its width with its height from one panel to the next.
+ */
+export type StepperFit = 'container' | 'content';
+
 export type StepperProps<Item> = {
 	/**
 	 * Data for each step, passed to the repeated children snippet as `item`.
@@ -100,4 +106,13 @@ export type StepperProps<Item> = {
 	 * @default 'eager'
 	 */
 	mount?: StepperMount;
+	/**
+	 * How wide each panel is. `container` (the default) lays every panel out at the Stepper's
+	 * width. `content` lets each panel keep its own width (`max-content`): the Stepper takes the
+	 * shown panel's width and tweens it with the height during a slide, so it fits a surface that
+	 * hugs its content, such as a popup. Cap a panel's width with the
+	 * `--stepper-panel-max-width` CSS variable.
+	 * @default 'container'
+	 */
+	fit?: StepperFit;
 };

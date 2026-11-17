@@ -27,7 +27,8 @@
 		panelAriaLabel,
 		panelId,
 		panelActivationDirection,
-		mount = 'eager'
+		mount = 'eager',
+		fit = 'container'
 	}: StepperProps<Item> = $props();
 	const valueState = createBindableValue(
 		() => value,
@@ -57,6 +58,9 @@
 		},
 		get motion() {
 			return theme?.motion;
+		},
+		get fit() {
+			return fit;
 		}
 	});
 
@@ -64,8 +68,28 @@
 	if (BROWSER) bindableApi = stepper;
 	const classes = $derived(useStepperTheme(theme));
 	const stepCount = $derived(Math.max(items.length, 1));
-	const trackWidth = $derived(stepper.expanded ? `${stepCount * 100}%` : '100%');
+	const fitsContent = $derived(fit === 'content');
+	const trackWidth = $derived(
+		fitsContent ? 'max-content' : stepper.expanded ? `${stepCount * 100}%` : '100%'
+	);
+	const trackColumns = $derived(
+		`repeat(${stepper.expanded ? stepCount : 1}, ${fitsContent ? 'max-content' : 'minmax(0, 1fr)'})`
+	);
 	const activeHeight = $derived(stepper.activeHeight);
+	const activeWidth = $derived(stepper.activeWidth);
+
+	// With `fit: 'content'` each panel's own width is read from its border box: unlike
+	// `clientWidth` it keeps the fraction, so the root never rounds a panel's text into wrapping,
+	// and unlike `getBoundingClientRect` it ignores a transform on an ancestor (a popup scaling in).
+	const measureWidth = (index: number) => (node: HTMLElement) => {
+		if (!fitsContent || typeof ResizeObserver === 'undefined') return;
+		const observer = new ResizeObserver(([entry]) => {
+			const size = entry?.borderBoxSize?.[0]?.inlineSize ?? node.offsetWidth;
+			stepper.setStepWidth(index, node.hidden ? 0 : size);
+		});
+		observer.observe(node);
+		return () => observer.disconnect();
+	};
 
 	onMount(() => {
 		void tick().then(() => stepper.measureStepHeights());
@@ -74,6 +98,15 @@
 	$effect(() => {
 		const targetStep = valueState.value;
 		if (items.length === 0) return;
+		// Panels of their own width are placed from the layout, which shows the new panel only
+		// once this update has reached the DOM: the slide starts in the microtask after it, before
+		// any paint (`tick()` would wait for the next frame in async mode).
+		if (untrack(() => fit) === 'content') {
+			queueMicrotask(() => {
+				if (valueState.value === targetStep) stepper.syncActiveStep(targetStep);
+			});
+			return;
+		}
 		untrack(() => stepper.syncActiveStep(targetStep));
 	});
 
@@ -125,7 +158,8 @@ const container = document.getElementById('stepper-${id}');
 if(!container) return;
 const firstSlide = container.querySelector('[data-step-active="true"]');
 if(!firstSlide) return;		
-container.style.height = firstSlide.clientHeight + 'px';			
+container.style.height = firstSlide.clientHeight + 'px';
+if (container.dataset.fit === 'content') container.style.width = firstSlide.getBoundingClientRect().width + 'px';
 	};
 	setStepperHeight_${id}();
 `
@@ -136,22 +170,26 @@ container.style.height = firstSlide.clientHeight + 'px';
 	{@attach stepper.scroller}
 	class={classes.root({
 		mode,
+		fit,
 		className
 	})}
 	id="stepper-{id}"
 	data-animating={stepper.isAnimating}
-	style:will-change="height"
+	data-fit={fit}
+	style:will-change={fitsContent ? 'width, height' : 'height'}
 	style:height={activeHeight == null ? undefined : `${activeHeight}px`}
+	style:width={activeWidth == null ? undefined : `${activeWidth}px`}
 	style:transition-duration={`${stepper.timing.duration}ms`}
 	style:transition-timing-function={stepper.timing.easing}
 >
 	<div
 		bind:this={stepper.stepContainer}
 		class={classes.container({
-			mode
+			mode,
+			fit
 		})}
 		style:width={trackWidth}
-		style:grid-template-columns="repeat({stepper.expanded ? stepCount : 1}, minmax(0, 1fr))"
+		style:grid-template-columns={trackColumns}
 	>
 		{#each items as item, index (index)}
 			{@const isActiveStep = stepper.value === index}
@@ -182,8 +220,10 @@ container.style.height = firstSlide.clientHeight + 'px';
 				style:transition-timing-function={stepper.timing.easing}
 				style:grid-column={stepper.expanded ? index + 1 : 1}
 				class={classes.step({
-					mode
+					mode,
+					fit
 				})}
+				{@attach measureWidth(index)}
 			>
 				{#if mounted}
 					{@render children?.({ api: stepper, item, index })}

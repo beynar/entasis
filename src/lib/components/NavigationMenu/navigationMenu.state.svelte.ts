@@ -16,8 +16,7 @@ import type { Attachment } from 'svelte/attachments';
 import { on } from 'svelte/events';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { useTheme } from '$lib/components/Theme/theme.state.svelte.js';
-import { easingBezierStrings, easingFunctions } from '$lib/transitions/easingFunctions.js';
-import type { TransitionConfig } from 'svelte/transition';
+import { easingBezierStrings } from '$lib/transitions/easingFunctions.js';
 import type { FSOProps } from '$lib/transitions/transition.js';
 import type { ResponsiveProps } from '$lib/components/Theme/theme.js';
 import {
@@ -43,10 +42,6 @@ import { useNavigationMenuMotion } from './navigationMenu.theme.js';
 
 /** Space in px kept between the panel area and the edges of the layout viewport. */
 const COLLISION_PADDING = 8;
-/** Distance in px a panel travels when it replaces another (in) or is replaced (out). */
-const SWITCH_DISTANCE = 24;
-/** How long a panel switch counts as under way: the window in which size and slide animations run. */
-const SWITCH_WINDOW = 300;
 
 const FOCUS_VISIBLE = { preventScroll: true, focusVisible: true } as FocusOptions;
 const ITEM_SELECTOR = '[data-slot="navigation-menu-trigger"], [data-slot="navigation-menu-link"]';
@@ -131,13 +126,10 @@ export function useNavigationMenuState<Value extends string>(
 	// Set by a request just before it writes the value and consumed by the effect that sees the
 	// panel change, so a value the parent assigns by itself never counts as a hover.
 	let pendingHover: Value | null = null;
-	let switchedAt = -Infinity;
 	let activationDirection = $state<'left' | 'right' | null>(null);
-	const now = () => (typeof performance === 'undefined' ? Date.now() : performance.now());
-	const isSwitching = () => now() - switchedAt < SWITCH_WINDOW;
 
 	// Notices a panel replacing another (a switch) as opposed to opening from closed. Runs before
-	// the DOM update so the panel and size animations that start with it see the flag.
+	// the DOM update so the panel slide that starts with it sees the flag.
 	let previousValue: Value | null = untrack(() => activeValue);
 	$effect.pre(() => {
 		const next = activeValue;
@@ -146,18 +138,11 @@ export function useNavigationMenuState<Value extends string>(
 			previousValue = next;
 			hoverValue = next !== null && pendingHover === next ? next : null;
 			pendingHover = null;
-			if (next === null) {
-				switchedAt = -Infinity;
-				activationDirection = null;
-				return;
-			}
-			if (from === null) {
-				switchedAt = -Infinity;
+			if (next === null || from === null) {
 				activationDirection = null;
 				return;
 			}
 			if (from === next) return;
-			switchedAt = now();
 			const later = panelIndex(next) > panelIndex(from);
 			const physical = (later ? 'right' : 'left') as 'left' | 'right';
 			activationDirection =
@@ -331,10 +316,10 @@ export function useNavigationMenuState<Value extends string>(
 	let handledOpen = untrack(() => isOpen);
 	let exitAnimation: Animation | null = null;
 	const playPopup = (element: HTMLElement, direction: 'in' | 'out') => {
-		const spec = resolveMotion(undefined, {
-			motion: options.motion(),
-			transition: options.transition()
-		})[direction];
+		const spec = resolveMotion(
+			{ part: 'popup' },
+			{ motion: options.motion(), transition: options.transition() }
+		)[direction];
 		const duration = spec.duration ?? 0;
 		if (!duration || typeof element.animate !== 'function') return null;
 		const hiddenFrame = {
@@ -364,68 +349,17 @@ export function useNavigationMenuState<Value extends string>(
 		});
 	});
 
-	/** Slides a panel in from the side of the trigger that was open before it. */
-	// A switch is staged like a cross-slide: the old panel leaves first (`panelOut`, the motion's
-	// out duration), then the new one slides in over twice the in duration while the popup is still
-	// resizing, so each step can be seen. It waits invisible (`fill: backwards`) until its turn.
-	const animatePanel = (element: HTMLElement) => {
-		if (!isSwitching() || activationDirection === null) return;
-		const resolved = resolveMotion(undefined, {
-			motion: options.motion(),
-			transition: options.transition()
-		});
-		const duration = (resolved.in.duration ?? 0) * 2;
-		if (!duration || typeof element.animate !== 'function') return;
-		const from = activationDirection === 'right' ? SWITCH_DISTANCE : -SWITCH_DISTANCE;
-		return element.animate(
-			[
-				{ opacity: 0, transform: `translateX(${from}px)` },
-				{ opacity: 1, transform: 'translateX(0px)' }
-			],
-			{
-				duration,
-				delay: resolved.out.duration ?? 0,
-				fill: 'backwards',
-				easing: easingBezierStrings[resolved.in.easing ?? 'cubicOut']
-			}
-		);
-	};
-
-	/**
-	 * The outgoing panel of a switch: it leaves toward the side away from the new trigger while the
-	 * new one slides in from the other side. It is taken out of the layout first, at the place and
-	 * width it occupied, so only the incoming panel sizes the popup. Closing the menu does not run
-	 * it (the panel stays until the popup is gone), and neither does a panel kept mounted.
-	 */
-	const panelOut = (element: HTMLElement): TransitionConfig => {
-		// Runs as the old panel leaves the DOM, before the effect that records the switch, so the
-		// direction comes from the panels themselves: where the leaving one sits relative to the new.
-		const next = activeValue;
-		const leaving = [...panelElements].find(([, panel]) => panel === element)?.[0];
-		if (next === null || leaving === undefined || leaving === next) return { duration: 0 };
-		const later = panelIndex(next) > panelIndex(leaving);
-		const physical = later ? 'right' : 'left';
-		const toward = getDirection() === 'rtl' ? (physical === 'right' ? 'left' : 'right') : physical;
-		const spec = resolveMotion(undefined, {
-			motion: options.motion(),
-			transition: options.transition()
-		}).out;
-		const duration = spec.duration ?? 0;
-		if (!duration) return { duration: 0 };
-		const to = toward === 'right' ? -SWITCH_DISTANCE : SWITCH_DISTANCE;
-		const { offsetTop, offsetLeft, offsetWidth } = element;
-		element.style.position = 'absolute';
-		element.style.top = `${offsetTop}px`;
-		element.style.left = `${offsetLeft}px`;
-		element.style.width = `${offsetWidth}px`;
-		element.style.pointerEvents = 'none';
-		const easing = easingFunctions[spec.easing ?? 'cubicOut'] ?? easingFunctions.cubicOut;
-		return {
-			duration,
-			easing,
-			css: (t) => `opacity: ${t}; transform: translateX(${(1 - t) * to}px);`
-		};
-	};
+	// The panel slide of a switch, run by the Stepper inside the popup: the old panel slides out
+	// as the new one slides in, while the popup's width and height tween to the new panel's. A
+	// panel that opens the menu from closed appears in place with the popup's own entrance.
+	const panelTransition = $derived.by(() => {
+		if (activationDirection === null) return { duration: 0 };
+		const spec = resolveMotion(
+			{ part: 'panel' },
+			{ motion: options.motion(), transition: options.transition() }
+		).in;
+		return { duration: spec.duration ?? 0, easing: spec.easing };
+	});
 
 	// ---- placement -------------------------------------------------------------------------
 
@@ -712,18 +646,13 @@ export function useNavigationMenuState<Value extends string>(
 
 	const panel =
 		(value: Value): Attachment<HTMLElement> =>
-		(node) => {
-			untrack(() => panelElements.set(value, node));
-			// Reads the state it animates for: a kept-mounted panel runs again when it becomes active.
-			const active = displayValue === value && isOpen;
-			const animation = active ? untrack(() => animatePanel(node)) : undefined;
-			return () => {
-				animation?.cancel();
-				untrack(() => {
+		(node) =>
+			untrack(() => {
+				panelElements.set(value, node);
+				return () => {
 					if (panelElements.get(value) === node) panelElements.delete(value);
-				});
-			};
-		};
+				};
+			});
 
 	return {
 		get panels() {
@@ -765,8 +694,9 @@ export function useNavigationMenuState<Value extends string>(
 		get delay() {
 			return options.delay();
 		},
-		isSwitching,
-		panelOut,
+		get panelTransition() {
+			return panelTransition;
+		},
 		panelIndex,
 		triggerId: (value: Value) => `${options.id}-trigger-${panelIndex(value)}`,
 		panelId: (value: Value) => `${options.id}-panel-${panelIndex(value)}`,

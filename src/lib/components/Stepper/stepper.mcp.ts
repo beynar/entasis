@@ -60,6 +60,7 @@ Use items for the collection and a single children snippet for the repeated pane
 - panelId: (index) => string giving each panel a DOM id so a tab can reference it with aria-controls. Tabs uses it to link Tabbar tabs to their panels.
 - panelActivationDirection: (index) => string | undefined giving the value of \`data-activation-direction\` for each panel. Tabs sets it on the active panel with the direction the selection moved.
 - mount: when a step's content is created — \`eager\` (default) for every step up front, \`lazy\` on first activation and destroyed once the slide away from it finishes, \`once\` on first activation and kept. Inactive panels are \`inert\` and \`aria-hidden\` at once and \`hidden\` as soon as the slide settles, so at rest exactly one panel is not \`hidden\`. Tabs forwards its own \`mount\`, which defaults to \`lazy\`.
+- fit: \`container\` (default) lays every panel out at the Stepper's width; \`content\` lets each panel keep its own width (\`max-content\`, capped by the \`--stepper-panel-max-width\` CSS variable), and the Stepper takes the shown panel's width and tweens it with the height during a slide. Use it inside a surface that hugs its content, such as a popup; NavigationMenu does.
 - class: extra classes applied to the root container.
 
 ## StepperApi (StepperState)
@@ -94,7 +95,8 @@ The theme supports the mode variant on root, container, and step.
 ## Motion
 
 - **motion** theme slot: one preset (no variants) whose \`duration\` / \`easing\` drive the Web
-  Animations step translation and the matching CSS height/opacity transitions.
+  Animations step translation and the matching CSS height/opacity transitions (width too with
+  \`fit: 'content'\`).
 - Ladder: \`<Theme components={{ stepper: { motion } }}>\` → \`setStepperTheme({ motion })\` →
   \`theme.motion\` → the \`transition\` prop (how Tabs forwards its own preset).
 - A resolved duration of 0 (reduced motion, or \`duration: 'instant'\`) snaps between steps.

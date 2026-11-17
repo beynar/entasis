@@ -1,6 +1,6 @@
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
 import { easingBezierStrings } from '$lib/transitions/easingFunctions.js';
-import type { StepperProps } from './stepper.props.js';
+import type { StepperFit, StepperProps } from './stepper.props.js';
 import { useStepperMotion, type StepperThemeProps } from './stepper.theme.js';
 
 type StepperStateBindableProps = {
@@ -11,6 +11,8 @@ type StepperStateBindableProps = {
 	motion?: StepperThemeProps['motion'];
 	/** The instance `transition` prop; wins over every motion override. */
 	transition?: StepperProps<unknown>['transition'];
+	/** How wide each panel is: the root's width, or its own content's. */
+	fit?: StepperFit;
 };
 
 type StepperStateProps<Item> = {
@@ -19,6 +21,7 @@ type StepperStateProps<Item> = {
 	onValueChange?: (payload: { value: number; item: Item; index: number }) => void;
 	motion?: StepperThemeProps['motion'];
 	transition?: StepperProps<unknown>['transition'];
+	fit?: StepperFit;
 };
 
 export class StepperState<Item> extends createBindableStateClass<StepperStateBindableProps>() {
@@ -26,8 +29,11 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 	stepAnimation = $state<Animation>();
 	offsets = $state<number[]>([]);
 	stepHeights = $state<number[]>([]);
+	/** Each panel's own width, measured with `fit: 'content'` only. */
+	stepWidths = $state<number[]>([]);
 	stepContainer: HTMLElement | null = null;
 	declare value: number;
+	declare fit: StepperFit | undefined;
 	visualStep = $state(0);
 	isAnimating = $state(false);
 	// The track is one viewport wide at rest (only the active panel is laid out, in column one) and
@@ -69,6 +75,30 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 		return this.stepHeights[this.value] || this.lastActiveHeight;
 	}
 
+	// The same for the width when every panel keeps its own (`fit: 'content'`): a panel that is
+	// revealed measures 0 until its first frame, and the root keeps the width it had meanwhile.
+	private lastActiveWidth = $state<number | undefined>(undefined);
+
+	get fitsContent() {
+		return this.fit === 'content';
+	}
+
+	get activeWidth() {
+		if (!this.fitsContent) return undefined;
+		return this.stepWidths[this.value] || this.lastActiveWidth;
+	}
+
+	setStepWidth(index: number, width: number) {
+		if (this.stepWidths[index] === width) return;
+		this.stepWidths[index] = width;
+		this.rememberActiveWidth();
+	}
+
+	private rememberActiveWidth() {
+		const width = this.stepWidths[this.value];
+		if (width) this.lastActiveWidth = width;
+	}
+
 	measureStepHeights() {
 		const steps = this.getSteps();
 		if (steps.length === 0) return;
@@ -85,6 +115,7 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 	private rememberActiveHeight() {
 		const height = this.stepHeights[this.value];
 		if (height) this.lastActiveHeight = height;
+		this.rememberActiveWidth();
 	}
 
 	next = () => {
@@ -185,20 +216,27 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 		// user is looking at — written to the DOM synchronously, before the browser can paint, so
 		// the slide starts from the resting picture without a frame of the collapsed layout. The
 		// reactive `expanded` flag makes the template render the same values on its next flush.
-		const from = this.offsets[this.visualStep] ?? 0;
+		let from = this.offsets[this.visualStep] ?? 0;
 		if (!this.expanded) {
 			this.expanded = true;
 			const steps = this.getSteps();
-			this.stepContainer.style.width = `${Math.max(steps.length, 1) * 100}%`;
-			this.stepContainer.style.gridTemplateColumns = `repeat(${Math.max(steps.length, 1)}, minmax(0, 1fr))`;
+			const count = Math.max(steps.length, 1);
+			this.stepContainer.style.width = this.fitsContent ? 'max-content' : `${count * 100}%`;
+			this.stepContainer.style.gridTemplateColumns = this.fitsContent
+				? `repeat(${count}, max-content)`
+				: `repeat(${count}, minmax(0, 1fr))`;
 			steps.forEach((node, index) => {
 				node.style.gridColumn = String(index + 1);
 			});
-			this.stepContainer.style.transform = `translateX(-${from}px)`;
+			// Panels of their own width: only the shown and the leaving panel take a column (the
+			// others are `hidden`), so where a panel starts is read from the widened track.
+			if (this.fitsContent) from = this.panelStart(this.visualStep);
+			this.stepContainer.style.transform = `translateX(${-from}px)`;
 		}
-		const fromTransform = this.stepContainer.style.transform || `translateX(-${from}px)`;
-		const toTransform = `translateX(-${offset}px)`;
-		this.destinationOffset = offset;
+		const target = this.fitsContent ? this.panelStart(step) : offset;
+		const fromTransform = this.stepContainer.style.transform || `translateX(${-from}px)`;
+		const toTransform = `translateX(${-target}px)`;
+		this.destinationOffset = target;
 		this.stepAnimation = this.stepContainer.animate(
 			[{ transform: fromTransform }, { transform: toTransform }],
 			this.timing
@@ -227,13 +265,20 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 		this.visualStep = step;
 	}
 
+	/** Where a panel starts along the widened track, in px from its left edge (also in RTL). */
+	private panelStart(step: number) {
+		return this.getSteps()[step]?.offsetLeft ?? 0;
+	}
+
 	// At rest the track collapses to one viewport with the shown panel in column one, written to
 	// the DOM in the same frame the slide settles so the panel never moves twice.
 	private collapseTrack() {
 		if (this.stepContainer) {
 			this.stepContainer.style.transform = 'translateX(0px)';
-			this.stepContainer.style.width = '100%';
-			this.stepContainer.style.gridTemplateColumns = 'repeat(1, minmax(0, 1fr))';
+			this.stepContainer.style.width = this.fitsContent ? 'max-content' : '100%';
+			this.stepContainer.style.gridTemplateColumns = this.fitsContent
+				? 'repeat(1, max-content)'
+				: 'repeat(1, minmax(0, 1fr))';
 			this.getSteps().forEach((node) => {
 				node.style.gridColumn = '1';
 			});
@@ -250,6 +295,7 @@ export class StepperState<Item> extends createBindableStateClass<StepperStateBin
 		this.targetStep = undefined;
 		this.visualStep = -1;
 		this.lastActiveHeight = undefined;
+		this.lastActiveWidth = undefined;
 	}
 
 	private cancelAnimations() {

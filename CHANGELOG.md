@@ -6,6 +6,29 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- Stepper: `fit="content"` lets each panel keep its own width (`max-content`, capped by the
+  `--stepper-panel-max-width` CSS variable). The Stepper takes the shown panel's width and tweens
+  it together with the height during a slide, so it fits a surface that hugs its content. The
+  default, `fit="container"`, is unchanged.
+
+### Changed
+
+- NavigationMenu: switching panels now runs through the Stepper, as the Tour does. The popup
+  stays, the old panel slides out and the new one slides in at full width with a crossfade, and
+  the popup tweens its width and height while it glides under the new trigger. This replaces the
+  staged 24 px nudge. The theme motion gains `popup` and `panel` parts (the slide uses `normal` /
+  `standard`), and a `stage` theme part styles the Stepper. Panel ids now sit on the Stepper's
+  panel element. A panel's list no longer has a 16rem minimum width (`min-w-64`), so the popup
+  hugs a short panel.
+
+### Fixed
+
+- NavigationMenu: going back to a panel while it is still sliding out (hovering the next trigger
+  and coming back quickly) no longer leaves the popup collapsed to a small dot with the panel's
+  links spilling out of it: the slide reverses from where it is.
+
 ## 0.24.1 — 2026-11-16
 
 The first published release of 0.24: 0.24.0 was tagged but never published, its release run

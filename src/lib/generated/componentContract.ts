@@ -3602,6 +3602,7 @@ export const componentInventory = [
 		exportedSymbols: [
 			'Stepper',
 			'StepperApi',
+			'StepperFit',
 			'StepperMount',
 			'StepperPanelAriaLabel',
 			'StepperPanelAriaLabelledby',

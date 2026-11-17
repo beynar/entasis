@@ -3,7 +3,6 @@
 	import type { Attachment } from 'svelte/attachments';
 	import Button from '../Button/Button.svelte';
 	import { useDefaultColor } from '../Theme/theme.state.svelte.js';
-	import { transitionSize } from '$lib/attachments/transitionSize.js';
 	import { createBindableValue } from '$lib/utils/state.svelte.js';
 	import { composeHandlers } from '$lib/utils/handlers.js';
 	import {
@@ -11,6 +10,7 @@
 		transitionStatusAttributes,
 		presence
 	} from '$lib/utils/stateAttributes.js';
+	import Stepper from '../Stepper/Stepper.svelte';
 	import NavigationMenuContent from './NavigationMenuContent.svelte';
 	import NavigationMenuTrigger from './NavigationMenuTrigger.svelte';
 	import type { NavigationMenuProps } from './navigationMenu.props.js';
@@ -75,8 +75,6 @@
 		onAfterOpen: () => onAfterOpen,
 		onAfterClose: () => onAfterClose
 	});
-	// Svelte's `out:` directive takes an identifier.
-	const panelOut = menu.panelOut;
 	setNavigationMenuState(menu as unknown as NavigationMenuState<string>);
 
 	// The current page: `aria-current` is not a Button prop, so it is written on the element.
@@ -166,31 +164,40 @@
 		>
 			<div
 				{@attach menu.popup}
-				{@attach transitionSize({ axis: 'both', isActive: () => menu.isSwitching() })}
 				data-side="bottom"
 				data-align="start"
 				{...openStateAttributes(menu.isOpen)}
 				{...transitionStatusAttributes(menu.status)}
 				class={classes.popup({ density })}
 			>
-				{#each menu.panels as panel (panel.value)}
-					{#if keepMounted || panel.value === menu.displayValue}
+				<!-- From one panel to the next the popup stays: a Stepper slides from the old panel to
+				     the new one and tweens the popup's width and height, while the popup glides to the
+				     new trigger. Each panel keeps its own width. -->
+				<Stepper
+					items={menu.panels}
+					value={menu.panelIndex(menu.displayValue)}
+					fit="content"
+					mount={keepMounted ? 'eager' : 'lazy'}
+					panelRole={null}
+					panelAriaLabelledby={false}
+					panelId={(index) => menu.panelId(menu.panels[index].value)}
+					transition={menu.panelTransition}
+					class={classes.stage()}
+				>
+					{#snippet children({ item: panel })}
 						{@const active = panel.value === menu.displayValue && menu.isOpen}
 						<div
-							id={menu.panelId(panel.value)}
-							hidden={!active}
 							data-activation-direction={active
 								? (menu.activationDirection ?? undefined)
 								: undefined}
 							{...openStateAttributes(active)}
 							class={classes.panel({ density })}
 							{@attach menu.panel(panel.value)}
-							out:panelOut
 						>
 							<NavigationMenuContent item={panel} {size} {density} {classes} />
 						</div>
-					{/if}
-				{/each}
+					{/snippet}
+				</Stepper>
 			</div>
 		</div>
 	{/if}

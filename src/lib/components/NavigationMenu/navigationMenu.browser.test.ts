@@ -22,6 +22,12 @@ beforeEach(async () => {
 });
 
 const outside = () => page.getByText('Outside').element() as HTMLElement;
+// The Stepper inside the popup and its panels; a panel neither shown nor leaving is `hidden`.
+const stage = () => popup()?.querySelector<HTMLElement>('[data-fit="content"]') ?? null;
+const stepPanels = () => Array.from(stage()?.querySelectorAll<HTMLElement>('[data-step]') ?? []);
+const shownPanels = () => stepPanels().filter((panel) => !panel.hidden);
+const panelOf = (link: string) =>
+	stepPanels().find((panel) => panel.textContent?.includes(link)) as HTMLElement;
 
 describe('hover', () => {
 	test('resting on a trigger opens its panel after the delay, moving to another switches at once', async () => {
@@ -214,27 +220,61 @@ describe('keyboard inside a panel and along the bar', () => {
 		trigger('Product').focus();
 		await userEvent.keyboard('{Enter}');
 		await expect.poll(() => expanded('Product')).toBe('true');
-		const popup = linkNamed('Components')
-			.closest('[data-slot="navigation-menu-content-link"]')!
-			.parentElement!.closest('[id]')!.parentElement!;
-		// Both panels are in the popup while the old one leaves, out of the layout. The exit is
-		// recorded as it happens rather than polled, which a slow runner can step over.
-		const panels = () => Array.from(popup.children).filter((child) => child.id);
-		let leavingSeen = false;
-		const observer = new MutationObserver(() => {
-			const current = panels();
-			if (
-				current.length === 2 &&
-				current.some((panel) => getComputedStyle(panel).position === 'absolute')
-			)
-				leavingSeen = true;
-		});
-		observer.observe(popup, { childList: true, subtree: true, attributes: true });
+		await expect.poll(() => popup()!.getAnimations({ subtree: true }).length).toBe(0);
+		const leaving = panelOf('Components');
+		// Sampled every frame rather than polled, which a slow runner can step over.
+		let shownTogether = false;
+		let leftward = false;
+		let leavingInert = true;
+		let sampling = true;
+		const sample = () => {
+			if (!sampling) return;
+			if (shownPanels().length === 2) {
+				shownTogether = true;
+				leavingInert &&= leaving.inert;
+				// Against the Stepper in the same frame: the popup itself glides to the new trigger.
+				const stageLeft = stage()!.getBoundingClientRect().left;
+				if (leaving.getBoundingClientRect().left < stageLeft - 20) leftward = true;
+			}
+			requestAnimationFrame(sample);
+		};
+		requestAnimationFrame(sample);
 		await userEvent.keyboard('{ArrowRight}');
-		await expect.poll(() => leavingSeen).toBe(true);
-		await expect.poll(() => panels().length, { timeout: 2000 }).toBe(1);
-		observer.disconnect();
+		await expect.poll(() => leftward, { timeout: 2000 }).toBe(true);
+		await expect.poll(() => shownPanels().length, { timeout: 2000 }).toBe(1);
+		sampling = false;
+		expect(shownTogether).toBe(true);
+		expect(leavingInert).toBe(true);
 		expect(expanded('Company')).toBe('true');
+		expect(shownPanels()[0].contains(linkNamed('About'))).toBe(true);
+	});
+
+	test('going back to a panel while it is still sliding out leaves it in place at its size', async () => {
+		// The default motion, so the first panel is still on its way out when its trigger takes over
+		// again.
+		render(NavigationMenuHarness, { props: { menu: { transition: undefined } } });
+		trigger('Product').focus();
+		await userEvent.keyboard('{Enter}');
+		await expect.poll(() => expanded('Product')).toBe('true');
+		await expect.poll(() => popup()!.getAnimations({ subtree: true }).length).toBe(0);
+		const settled = popup()!.getBoundingClientRect();
+		await userEvent.keyboard('{ArrowRight}');
+		await expect.poll(() => shownPanels().length).toBe(2);
+		await userEvent.keyboard('{ArrowLeft}');
+		await expect.poll(() => expanded('Product')).toBe('true');
+		await expect.poll(() => shownPanels().length, { timeout: 2000 }).toBe(1);
+		await expect
+			.poll(() => popup()!.getAnimations({ subtree: true }).length, { timeout: 2000 })
+			.toBe(0);
+		expect(shownPanels()[0].contains(linkNamed('Components'))).toBe(true);
+		const after = popup()!.getBoundingClientRect();
+		expect(Math.abs(after.width - settled.width)).toBeLessThan(2);
+		expect(Math.abs(after.height - settled.height)).toBeLessThan(2);
+		expect(
+			Math.abs(
+				panelOf('Components').getBoundingClientRect().left - stage()!.getBoundingClientRect().left
+			)
+		).toBeLessThan(1);
 	});
 
 	test('arrowing along the bar with a panel open switches to the panel of the focused trigger', async () => {
@@ -369,7 +409,7 @@ describe('animated size', () => {
 	test('switching to a panel of another size animates the popup instead of jumping', async () => {
 		render(NavigationMenuHarness, {
 			props: {
-				menu: { defaultValue: 'a', transition: { in: { duration: 0 }, out: { duration: 0 } } },
+				menu: { defaultValue: 'a', transition: undefined },
 				items: [
 					{ type: 'panel', value: 'a', label: 'Small', content: [{ label: 'One', href: '#1' }] },
 					{
@@ -377,7 +417,11 @@ describe('animated size', () => {
 						value: 'b',
 						label: 'Large',
 						content: [
-							{ label: 'Alpha', href: '#a', description: 'First of many' },
+							{
+								label: 'Alpha',
+								href: '#a',
+								description: 'First of many, with a description that widens the panel'
+							},
 							{ label: 'Beta', href: '#b', description: 'Second of many' },
 							{ label: 'Gamma', href: '#c', description: 'Third of many' },
 							{ label: 'Delta', href: '#d', description: 'Fourth of many' }
@@ -387,15 +431,34 @@ describe('animated size', () => {
 			}
 		});
 		await expect.poll(() => popup()?.getBoundingClientRect().height).toBeGreaterThan(0);
-		const before = popup()!.getBoundingClientRect().height;
+		await expect.poll(() => popup()!.getAnimations({ subtree: true }).length).toBe(0);
+		const before = popup()!.getBoundingClientRect();
+		// The size of every frame of the switch, so a jump between two frames shows.
+		const sizes: DOMRect[] = [];
+		let sampling = true;
+		const sample = () => {
+			if (!sampling) return;
+			sizes.push(popup()!.getBoundingClientRect());
+			requestAnimationFrame(sample);
+		};
+		requestAnimationFrame(sample);
 		await userEvent.click(trigger('Large'));
-		await expect.poll(() => popup()!.getAnimations().length).toBeGreaterThan(0);
-		const during = popup()!.getBoundingClientRect().height;
-		// Started from the old height, not the new one.
-		expect(during).toBeLessThan(before + 120);
-		await expect.poll(() => popup()!.getAnimations().length, { timeout: 2000 }).toBe(0);
-		const after = popup()!.getBoundingClientRect().height;
-		expect(after).toBeGreaterThan(before + 60);
+		await expect.poll(() => popup()!.getAnimations({ subtree: true }).length).toBeGreaterThan(0);
+		await expect
+			.poll(() => popup()!.getAnimations({ subtree: true }).length, { timeout: 2000 })
+			.toBe(0);
+		sampling = false;
+		const after = popup()!.getBoundingClientRect();
+		expect(after.height).toBeGreaterThan(before.height + 60);
+		// Each panel keeps its own width: the wider one widens the popup.
+		expect(after.width).toBeGreaterThan(before.width + 40);
+		// It went through sizes in between instead of jumping to the new one.
+		const between = (value: number, from: number, to: number) => value > from + 5 && value < to - 5;
+		expect(sizes.some((size) => between(size.height, before.height, after.height))).toBe(true);
+		expect(sizes.some((size) => between(size.width, before.width, after.width))).toBe(true);
+		// The text of the wider panel did not wrap to fit the narrower one.
+		const alpha = page.getByText(/^First of many/).element() as HTMLElement;
+		expect(alpha.getClientRects().length).toBe(1);
 	});
 });
 

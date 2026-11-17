@@ -1,6 +1,7 @@
 export { default as Stepper } from './Stepper.svelte';
 export type {
 	StepperApi,
+	StepperFit,
 	StepperMount,
 	StepperPanelAriaLabel,
 	StepperPanelAriaLabelledby,

@@ -66,15 +66,15 @@ NavigationMenu is site navigation: a \`<nav>\` landmark with a row of links and 
 - **density**: 'compact' | 'normal' | 'comfortable' (default: 'normal') - Spacing inside the panel area and between its rows.
 - **color**: Colors - Semantic role of the triggers and the selected look. Falls back to the Theme's default color.
 - **dir**: 'ltr' | 'rtl' - Text direction. When omitted it follows the i18n direction, else the element's computed direction. It mirrors the arrow keys and the panel alignment.
-- **transition**: FSOProps - Popup enter and exit overrides (numeric \`x\`, \`y\`, \`scale\`, \`opacity\`, \`duration\`, \`easing\`).
+- **transition**: FSOProps - Popup enter and exit overrides (numeric \`x\`, \`y\`, \`scale\`, \`opacity\`, \`duration\`, \`easing\`). Its \`duration\` and \`easing\` also time the slide between panels.
 - **ref**: HTMLElement | null - Bindable reference to the nav element.
 - **class**: string - Class name of the nav.
-- **theme**: NavigationMenuThemeProps - Theme overrides: \`root\`, \`list\`, \`item\`, \`trigger\`, \`link\`, \`caret\`, \`viewport\`, \`popup\`, \`panel\`, \`contentList\`, \`contentLink\`, \`contentPrefix\`, \`contentText\`, \`contentTitle\`, \`contentDescription\`, \`nestedTrigger\` and \`motion\`.
+- **theme**: NavigationMenuThemeProps - Theme overrides: \`root\`, \`list\`, \`item\`, \`trigger\`, \`link\`, \`caret\`, \`viewport\`, \`popup\`, \`stage\`, \`panel\`, \`contentList\`, \`contentLink\`, \`contentPrefix\`, \`contentText\`, \`contentTitle\`, \`contentDescription\`, \`nestedTrigger\` and \`motion\` (parts \`popup\` for the enter and exit, \`panel\` for the slide between panels).
 
 ## Behavior
 
 - The markup is \`<nav aria-label><ul>\`: each panel trigger is a \`<button>\` with \`aria-expanded\` and \`aria-controls\` (no \`aria-haspopup\`: it is a disclosure, not a menu), each link an \`<a>\`. There is no \`aria-orientation\`.
-- **One inline panel area.** The panel area is rendered inside the nav, after the trigger list, never portaled. It animates its width and height as the open panel changes, and aligns to the open trigger's inline edge inside the layout viewport. On a switch the new panel fades and slides in from the side of the trigger it comes from, after the old one has faded and slid out the other way (the entry waits for the exit and lasts twice the in duration) (\`data-activation-direction\` names the direction); the \`motion\` / \`transition\` durations and reduced motion apply.
+- **One inline panel area.** The panel area is rendered inside the nav, after the trigger list, never portaled. Each panel keeps its own width, and the area aligns to the open trigger's inline edge inside the layout viewport. On a switch the popup stays: a Stepper inside it slides the old panel out and the new one in from the side of the new trigger, crossfading them, while the popup tweens its width and height to the new panel's and glides under the new trigger (\`data-activation-direction\` names the direction). The slide uses the \`panel\` motion part (\`normal\` duration, \`standard\` easing); the \`motion\` / \`transition\` overrides and reduced motion apply. Going back to a panel mid-slide reverses it from where it is.
 - **Opening.** Click, Enter or Space toggle a trigger; ArrowDown opens it. Opening by keyboard keeps focus on the trigger. Tab from an open trigger enters the panel's links; Tab past the last link continues after the trigger and closes the panel (also when nothing follows the menu and focus leaves the page); Shift+Tab from the first link returns to the trigger. ArrowDown on an open trigger moves into the panel. A panel is entered by Tab only from its own trigger: Tab from a later entry of the bar skips it and leaves the menu. A pointer press focuses the trigger (Safari does not focus buttons on click), so Tab, ArrowDown and Escape carry on from it.
 - **Moving along the bar.** ArrowLeft and ArrowRight (mirrored in RTL), Home and End move focus between the bar's enabled triggers and links, without wrapping; Tab still visits each. With a panel open, the open panel follows: arrowing onto a trigger switches to its panel (focus stays on the trigger) and arrowing onto a link closes it. With no panel open they only move focus.
 - **Inside a panel.** ArrowDown and ArrowUp move to the next and previous link or button of the open panel, wrapping at either end; ArrowRight and ArrowLeft do the same (mirrored in RTL); Home and End jump to the first and last. Disabled links and links of a collapsed nested level are skipped. A text field or select keeps its own arrow keys, and a control that handles an arrow key itself (calls \`preventDefault()\`) keeps it. Snippet panels get the same keys over their tabbable controls.
@@ -107,9 +107,15 @@ CSS variables on the viewport: \`--anchor-width\` and \`--anchor-height\`, the o
 		<li><a href /></li>
 	</ul>
 	<div data-side="bottom">        <!-- viewport, in flow, positioned under the active trigger -->
-		<div>                        <!-- popup, animates its size -->
-			<div id>                 <!-- one panel per open trigger -->
-				<ul><li><a href /></li></ul>
+		<div>                        <!-- popup -->
+			<div data-fit="content">  <!-- Stepper, takes and tweens the shown panel's size -->
+				<div>                 <!-- its track, slides between panels -->
+					<div id data-step>  <!-- one per panel: the open one, and the one leaving -->
+						<div>        <!-- the panel -->
+							<ul><li><a href /></li></ul>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -6,13 +6,22 @@ import { motion, useComponentMotion } from '$lib/utils/motion/index.js';
 // and nothing is clipped: rings and elevation shadows of content flush with the edge render in
 // full. The root clips only while a step transition runs, when the track is `steps × 100%` wide
 // and the outgoing panel slides through it while the height tweens.
+// With `fit: 'content'` it takes the shown panel's width instead of its container's, and tweens
+// that width with the height.
 export const defaultStepper = cva({
 	base: 'relative w-full max-w-full min-w-0 transition-[height] data-[animating=true]:overflow-hidden',
 	variants: {
 		mode: {
 			classic: '',
 			vertical: ''
+		},
+		fit: {
+			container: '',
+			content: 'w-auto transition-[width,height]'
 		}
+	},
+	defaultVariants: {
+		fit: 'container'
 	}
 });
 
@@ -22,7 +31,14 @@ export const defaultStepperContainer = cva({
 		mode: {
 			classic: '',
 			vertical: ''
+		},
+		fit: {
+			container: '',
+			content: ''
 		}
+	},
+	defaultVariants: {
+		fit: 'container'
 	}
 });
 
@@ -34,7 +50,14 @@ export const defaultStepperStep = cva({
 		mode: {
 			classic: '',
 			vertical: ''
+		},
+		fit: {
+			container: '',
+			content: 'w-max max-w-[var(--stepper-panel-max-width,none)]'
 		}
+	},
+	defaultVariants: {
+		fit: 'container'
 	}
 });
 

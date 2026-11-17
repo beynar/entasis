@@ -16,6 +16,12 @@
 	import { rocketIcon } from '$lib/components/Icons/rocket.js';
 	import { squaresFourIcon } from '$lib/components/Icons/squaresFour.js';
 	import { usersIcon } from '$lib/components/Icons/users.js';
+	import { buildingOfficeIcon } from '$lib/components/Icons/buildingOffice.js';
+	import { codeIcon } from '$lib/components/Icons/code.js';
+	import { graduationCapIcon } from '$lib/components/Icons/graduationCap.js';
+	import { handshakeIcon } from '$lib/components/Icons/handshake.js';
+	import { newspaperIcon } from '$lib/components/Icons/newspaper.js';
+	import { storefrontIcon } from '$lib/components/Icons/storefront.js';
 	import { colors, densities, sizes } from '$lib/utils/tokens.js';
 
 	const controls = createComponentControls([
@@ -66,6 +72,48 @@
 				{ label: 'Changelog', href: '#changelog', prefix: chartLineIcon }
 			]
 		},
+		{
+			type: 'panel',
+			value: 'solutions',
+			label: 'Solutions',
+			content: [
+				{
+					label: 'Startups',
+					href: '#startups',
+					description: 'Ship a first version in days.',
+					prefix: rocketIcon
+				},
+				{
+					label: 'Enterprise',
+					href: '#enterprise',
+					description: 'Shared standards across many teams.',
+					prefix: buildingOfficeIcon
+				},
+				{
+					label: 'Agencies',
+					href: '#agencies',
+					description: 'One kit for every client project.',
+					prefix: handshakeIcon
+				},
+				{
+					label: 'Commerce',
+					href: '#commerce',
+					description: 'Storefronts, carts and checkout.',
+					prefix: storefrontIcon
+				}
+			]
+		},
+		{
+			type: 'panel',
+			value: 'resources',
+			label: 'Resources',
+			content: [
+				{ label: 'Guides', href: '#guides', prefix: graduationCapIcon },
+				{ label: 'API reference', href: '#api', prefix: codeIcon },
+				{ label: 'Blog', href: '#blog', prefix: newspaperIcon },
+				{ label: 'Support', href: '#support', prefix: lifebuoyIcon }
+			]
+		},
 		{ type: 'link', label: 'Pricing', href: '#pricing', active: true },
 		{ type: 'link', label: 'Docs', href: '#docs' }
 	];
@@ -90,6 +138,24 @@
 			content: [
 				{ label: 'About', href: '/about' },
 				{ label: 'Careers', href: '/careers' }
+			]
+		},
+		{
+			type: 'panel',
+			value: 'solutions',
+			label: 'Solutions',
+			content: [
+				{ label: 'Startups', href: '/startups', description: 'Ship a first version in days.' },
+				{ label: 'Enterprise', href: '/enterprise', description: 'Shared standards across many teams.' }
+			]
+		},
+		{
+			type: 'panel',
+			value: 'resources',
+			label: 'Resources',
+			content: [
+				{ label: 'Guides', href: '/guides' },
+				{ label: 'Blog', href: '/blog' }
 			]
 		},
 		{ type: 'link', label: 'Pricing', href: '/pricing', active: true },
@@ -239,10 +305,10 @@
 		{controls}
 		title="Site header"
 		description="Open a panel with a press, or rest the pointer on a trigger and move between them: the panel follows and resizes."
-		class="min-h-[420px] items-start"
 		code={usageCode}
 	>
-		<div class="min-h-72 w-full">
+		<!-- Tall enough for the bar to sit in the middle with its largest panel open below it. -->
+		<div class="flex min-h-[36rem] w-full items-center justify-center">
 			<NavigationMenu
 				items={siteItems}
 				label="Main"

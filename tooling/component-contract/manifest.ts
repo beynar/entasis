@@ -2592,6 +2592,7 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 	stepper: [
 		'Stepper',
 		'StepperApi',
+		'StepperFit',
 		'StepperMount',
 		'StepperPanelAriaLabel',
 		'StepperPanelAriaLabelledby',
