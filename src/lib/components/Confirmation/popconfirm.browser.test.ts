@@ -45,11 +45,21 @@ describe('popconfirm', () => {
 
 	test('the question animates in, though its popover is created open', async () => {
 		await render(Harness, { log: [] });
-		await page.getByRole('button', { name: 'Delete', exact: true }).click();
-		await expect.poll(dialog).not.toBeNull();
-		const running = dialog()!.getAnimations({ subtree: true });
-		expect(running.length).toBeGreaterThan(0);
-		await Promise.all(running.map((animation) => animation.finished));
+		// Svelte starts a transition with `element.animate`: recorded rather than read back with
+		// `getAnimations()`, which a short intro on a loaded machine may already have left.
+		const animated: Element[] = [];
+		const animate = Element.prototype.animate;
+		Element.prototype.animate = function (this: Element, ...args) {
+			animated.push(this);
+			return animate.apply(this, args);
+		};
+		try {
+			await page.getByRole('button', { name: 'Delete', exact: true }).click();
+			await expect.poll(dialog).not.toBeNull();
+			await expect.poll(() => animated.some((element) => dialog()?.contains(element))).toBe(true);
+		} finally {
+			Element.prototype.animate = animate;
+		}
 		await answer('Cancel');
 		await expect.poll(dialog).toBeNull();
 	});
