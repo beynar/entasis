@@ -238,6 +238,14 @@ export class PopoverState<Payload = unknown>
 	referenceElement: HTMLElement | VirtualElement | null = $derived(
 		this.triggerReference || this.externalRef || null
 	);
+	// Svelte plays no intro for a block that is already true when it is created, so a floating
+	// panel created open (on an external `ref`, as `popconfirm()` does) renders once the popover
+	// has mounted: it animates in like any other open.
+	#mounted = $state(false);
+	/** Whether the component has mounted; a floating panel renders only from then on. */
+	get mounted() {
+		return this.#mounted;
+	}
 	dialogElement: HTMLElement | null = $state(null);
 	/** The arrow inside the panel (`arrow`); `null` while there is none. */
 	arrowElement: HTMLElement | null = $state(null);
@@ -462,6 +470,9 @@ export class PopoverState<Payload = unknown>
 		provideLayer(() => this.#currentSession?.layer ?? null);
 		// The parent registers its children whatever their payload type.
 		if (this.parent) onMount(this.parent.addChild(this as unknown as PopoverState));
+		onMount(() => {
+			this.#mounted = true;
+		});
 		// Details describe the change `setOpen` made: an open state moved from outside (the bound
 		// `open` prop) leaves none, so a later close does not read the one that opened it.
 		$effect.pre(() => {

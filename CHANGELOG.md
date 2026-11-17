@@ -28,6 +28,9 @@ Unreleased section under the new version.
 - NavigationMenu: going back to a panel while it is still sliding out (hovering the next trigger
   and coming back quickly) no longer leaves the popup collapsed to a small dot with the panel's
   links spilling out of it: the slide reverses from where it is.
+- `popconfirm()` animates its question in. A floating Popover created open on an external `ref`
+  (`popconfirm()`, a Tour started open) now renders once mounted, so it plays its intro like any
+  other open instead of appearing at once.
 
 ## 0.24.1 — 2026-11-16
 

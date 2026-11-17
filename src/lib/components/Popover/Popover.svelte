@@ -208,10 +208,14 @@
 	// Wrapped so the lifecycle knows when the panel's transition plays (and when none does).
 	const panelTransition = popover.lifecycle.transition(fso());
 
-	// An inline panel needs no reference element: it renders where the component sits.
+	// An inline panel needs no reference element: it renders where the component sits (also on
+	// the server). A floating one waits for the mount, so a popover created open still plays its
+	// intro: Svelte plays none for a block that is already true when it is created.
 	const visible = $derived(
 		popover.isOpen &&
-			(inline || popover.isMobileSheet || popover.referenceElement || popover.externalRef)
+			(inline ||
+				popover.isMobileSheet ||
+				(popover.mounted && (popover.referenceElement || popover.externalRef)))
 	);
 
 	// Floating panels portal to the body layer; inline ones stay in normal document flow.

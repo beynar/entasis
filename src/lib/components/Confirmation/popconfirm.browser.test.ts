@@ -43,6 +43,17 @@ describe('popconfirm', () => {
 		await expect.poll(dialog).toBeNull();
 	});
 
+	test('the question animates in, though its popover is created open', async () => {
+		await render(Harness, { log: [] });
+		await page.getByRole('button', { name: 'Delete', exact: true }).click();
+		await expect.poll(dialog).not.toBeNull();
+		const running = dialog()!.getAnimations({ subtree: true });
+		expect(running.length).toBeGreaterThan(0);
+		await Promise.all(running.map((animation) => animation.finished));
+		await answer('Cancel');
+		await expect.poll(dialog).toBeNull();
+	});
+
 	test('Cancel, Escape and a press outside drop the action and give focus back', async () => {
 		const log: string[] = [];
 		await render(Harness, { log });

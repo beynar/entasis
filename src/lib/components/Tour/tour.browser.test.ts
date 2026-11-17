@@ -540,6 +540,8 @@ describe('Tour', () => {
 		const panel = () => dialog.firstElementChild!.getBoundingClientRect();
 		const content = (index: number) =>
 			dialog.querySelector<HTMLElement>(`[data-tour-content="${index}"]`);
+		// A tour created open still animates in: measure once that has finished.
+		await Promise.all(dialog.getAnimations({ subtree: true }).map((a) => a.finished));
 		await frames(4);
 		const start = panel();
 		const samples: {
