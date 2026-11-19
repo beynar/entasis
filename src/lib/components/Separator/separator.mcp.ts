@@ -15,6 +15,9 @@ The Separator component is a visual divider that separates content in an interfa
 - **orientation**: 'horizontal' | 'vertical' (default: 'horizontal') - The direction of the separator
 - **color**: Colors (default: 'neutral') - The color of the separator line
   - Available: primary, secondary, success, warning, danger, info, neutral
+- **variant**: 'solid' | 'gradient' (default: 'solid') - How the line is drawn. \`gradient\` fades the line out toward its ends: both ends of a plain separator, and away from the label when there is one. It keeps \`color\` and \`thickness\`, and works in both orientations
+- **align**: 'start' | 'center' | 'end' (default: 'center') - Where the label sits along the separator
+- **line**: boolean (default: true) - Whether the line is drawn; without it only the label shows
 - **thickness**: number (default: 1) - The thickness of the separator in pixels
 - **decorative**: boolean (default: false) - Whether the separator is purely decorative (affects ARIA role)
 
@@ -69,6 +72,20 @@ The Separator component is a visual divider that separates content in an interfa
 <Separator color="secondary" />
 <Separator color="danger" />
 <Separator color="success" />
+\`\`\`
+
+### Gradient
+\`\`\`svelte
+<!-- Fades out at both ends -->
+<Separator variant="gradient" />
+
+<!-- Each half fades away from the label -->
+<Separator variant="gradient" color="primary">OR</Separator>
+
+<!-- The line fades away from a label at the start -->
+<Separator variant="gradient" align="start">Details</Separator>
+
+<Separator variant="gradient" orientation="vertical" />
 \`\`\`
 
 ### Different Thicknesses
@@ -233,6 +250,9 @@ The theme object contains the following parts:
 - Variants:
   - orientation: 'horizontal' | 'vertical' - Layout direction and styling
   - color: 'primary' | 'secondary' | 'neutral' | 'danger' | 'success' | 'warning' | 'info' - Border color
+  - variant: 'solid' | 'gradient' - An even line, or one masked to fade toward its ends
+  - align: 'start' | 'center' | 'end' - Which side of the label the line fills
+  - line: true | false - Whether the line is drawn
 
 **label**:
 - base: Base classes for label text

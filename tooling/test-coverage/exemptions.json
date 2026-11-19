@@ -73,10 +73,6 @@
 		"scroll-area": {
 			"ssr": "todo"
 		},
-		"separator": {
-			"browser": "todo",
-			"ssr": "todo"
-		},
 		"stack": {
 			"browser": "todo"
 		},

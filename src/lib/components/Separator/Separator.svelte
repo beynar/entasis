@@ -10,6 +10,7 @@
 		orientation = 'horizontal',
 		align = 'center',
 		line = true,
+		variant = 'solid',
 		color = 'neutral',
 		thickness = 1,
 		theme,
@@ -20,8 +21,9 @@
 </script>
 
 <div
-	class={classes.root({ orientation, color, align, line, className })}
+	class={classes.root({ orientation, color, align, line, variant, className })}
 	data-orientation={orientation}
+	data-variant={variant}
 	data-color={color}
 	aria-orientation={orientation}
 	role={decorative ? 'none' : 'separator'}

@@ -17,6 +17,13 @@
 			value: 'horizontal',
 			options: separatorOrientations
 		},
+		{
+			name: 'variant',
+			type: 'segmented',
+			label: 'Variant',
+			value: 'solid',
+			options: ['solid', 'gradient'] as const
+		},
 		{ name: 'decorative', type: 'switch', label: 'Decorative', value: false }
 	]);
 </script>
@@ -29,7 +36,8 @@
 		{ label: 'role=separator with aria-orientation', test: 'a11y:separator.role' },
 		'decorative mode skips semantics',
 		'Horizontal & vertical orientations',
-		'Optional centred label slot'
+		'Optional centred label slot',
+		'Solid or gradient line'
 	]}
 >
 	<ComponentCard
@@ -40,7 +48,7 @@
 		<h4 class="text-sm font-medium leading-none">Entasis</h4>
 		<p class="text-neutral/70 text-sm">The foundation for your design system.</p>
 	</div>
-	<Separator class="my-4" orientation="${controls.value.orientation}" decorative={${controls.value.decorative}} />
+	<Separator class="my-4" orientation="${controls.value.orientation}" variant="${controls.value.variant}" decorative={${controls.value.decorative}} />
 	<p class="text-sm leading-relaxed">
 		A set of beautifully designed Svelte components that you can customize, extend, and build on.
 	</p>
@@ -58,6 +66,7 @@
 			<Separator
 				class={controls.value.orientation === 'vertical' ? 'mx-4 h-full' : 'my-4'}
 				orientation={controls.value.orientation}
+				variant={controls.value.variant}
 				decorative={controls.value.decorative}
 			/>
 			<p class="text-sm leading-relaxed">
@@ -80,6 +89,33 @@
 					<p>Section A</p>
 					<Separator>CONTINUE</Separator>
 					<p>Section B</p>
+				</div>
+			</div>
+		</ComponentCard>
+
+		<ComponentCard
+			title="Gradient"
+			description="`variant=&quot;gradient&quot;` fades the line out toward its ends: both ends of a plain separator, and away from the label when there is one. It keeps the colour and the thickness."
+			class="!min-h-fit"
+			code={`<Separator variant="gradient" />
+<Separator variant="gradient" color="primary" thickness={2} />
+<Separator variant="gradient">OR</Separator>
+<Separator variant="gradient" align="start">Details</Separator>
+<Separator variant="gradient" align="end">More</Separator>
+<Separator variant="gradient" orientation="vertical" />`}
+		>
+			<div class="w-full max-w-xl space-y-6">
+				<Separator variant="gradient" />
+				<Separator variant="gradient" color="primary" thickness={2} />
+				<Separator variant="gradient">OR</Separator>
+				<Separator variant="gradient" align="start">Details</Separator>
+				<Separator variant="gradient" align="end">More</Separator>
+				<div class="flex h-24 items-center gap-4">
+					<div class="flex-1 text-center">Start</div>
+					<Separator variant="gradient" orientation="vertical" />
+					<div class="flex-1 text-center">Middle</div>
+					<Separator variant="gradient" orientation="vertical" color="primary" thickness={2} />
+					<div class="flex-1 text-center">End</div>
 				</div>
 			</div>
 		</ComponentCard>

@@ -33,6 +33,12 @@ export type SeparatorProps = WithAttachments<
 			 */
 			line?: boolean;
 			/**
+			 * How the line is drawn. `solid` is an even line; `gradient` fades it out toward its
+			 * ends: both ends of a plain separator, and away from the label when there is one.
+			 * @default 'solid'
+			 */
+			variant?: 'solid' | 'gradient';
+			/**
 			 * The color of the separator.
 			 * @default 'neutral'
 			 */
