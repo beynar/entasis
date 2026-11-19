@@ -96,7 +96,7 @@ Theme parts: \`root\`, \`side\`, \`image\`, \`label\`, \`rail\`, \`handle\`, \`l
 
 ### Controlled
 \`\`\`svelte
-<script>
+<script lang="ts">
 	let share = $state(30);
 </script>
 

@@ -8,15 +8,19 @@ It only shows the conversation: starting the microphone, detecting speech and pl
 ## Basic Usage
 
 \`\`\`svelte
-<script>
-	import { VoiceIndicator, VoiceMicrophone } from 'entasis/voice-indicator';
+<script lang="ts">
+	import {
+		VoiceIndicator,
+		VoiceMicrophone,
+		type VoiceIndicatorState
+	} from 'entasis/voice-indicator';
 	import { onDestroy } from 'svelte';
 
 	const microphone = new VoiceMicrophone();
 	onDestroy(() => microphone.stop());
 
 	// 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking' | 'error', from your session.
-	let state = $state('idle');
+	let state = $state<VoiceIndicatorState>('idle');
 </script>
 
 <VoiceIndicator {state} input={microphone.stream} output={() => player.level} />
@@ -68,6 +72,8 @@ It only shows the conversation: starting the microphone, detecting speech and pl
 ## VoiceMicrophone
 
 \`\`\`ts
+import { VoiceMicrophone } from 'entasis/voice-indicator';
+
 const microphone = new VoiceMicrophone();
 await microphone.start(); // from a press: browsers start audio only inside a user gesture
 microphone.stream; // MediaStream | null, reactive

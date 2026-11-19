@@ -8,12 +8,12 @@ Use it where a Spinner would say only "busy": beside a streaming answer, in a to
 ## Basic Usage
 
 \`\`\`svelte
-<script>
-	import { ThinkingOrb } from 'entasis/thinking-orb';
+<script lang="ts">
+	import { ThinkingOrb, type ThinkingOrbState } from 'entasis/thinking-orb';
 
 	// From your agent: 'working' | 'searching' | 'solving' | 'listening' | 'connecting'
 	// | 'weaving' | 'composing' | 'breathing' | 'shaping'
-	let state = $state('searching');
+	let state = $state<ThinkingOrbState>('searching');
 </script>
 
 <ThinkingOrb {state} />
