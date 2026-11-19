@@ -163,6 +163,75 @@ describe('sidebar resize', () => {
 		await firePointer(resizeHandle, 'pointerup', start - 160);
 	});
 
+	test('a drag past a bound pulls the panel a little further, then it springs back', async () => {
+		render(SidebarResizeHarness, { props: { resizable: { minWidth: 200, maxWidth: 400 } } });
+		const sidebar = query('[data-slot="sidebar"]');
+		const wrapper = query('[data-slot="sidebar-wrapper"]');
+		const container = query('[data-slot="sidebar-container"]');
+		const resizeHandle = handle();
+		const start = startPanelWidth(260);
+		/** How far the panel is drawn past `bound` (the browser folds the calc into one length). */
+		const pulled = (bound: number) => {
+			const match = container.style.width.match(/^(?:calc\()?(-?\d+(?:\.\d+)?)px\)?$/);
+			if (!match) throw new Error(`no width in "${container.style.width}"`);
+			return Number(match[1]) - bound;
+		};
+
+		await firePointer(resizeHandle, 'pointerdown', start);
+		await firePointer(resizeHandle, 'pointermove', start + 160);
+		const near = pulled(400);
+		await firePointer(resizeHandle, 'pointermove', start + 400);
+		const far = pulled(400);
+		// Past maxWidth it follows less and less, never more than its extent.
+		expect(near).toBeGreaterThan(0);
+		expect(near).toBeLessThan(20);
+		expect(far).toBeGreaterThan(near);
+		expect(far).toBeLessThan(48);
+		// The width itself stays within bounds.
+		expect(width(resizeHandle)).toBe(400);
+		// The content gives with the edge, by part of the pull, and comes back with it.
+		const content = [...query('[data-slot="sidebar-panel"]').children] as HTMLElement[];
+		expect(content.length).toBeGreaterThan(0);
+		for (const child of content) {
+			const shift = Number.parseFloat(child.style.translate);
+			expect(shift).toBeGreaterThan(0);
+			expect(shift).toBeLessThan(far);
+		}
+
+		await firePointer(resizeHandle, 'pointerup', start + 400);
+		expect(container.style.width).toBe('');
+		expect(wrapper.style.getPropertyValue('--sidebar-width')).toBe('400px');
+		expect(sidebar.dataset.settling).toBe('true');
+		for (const child of content) {
+			expect(child.style.translate).toBe('');
+			expect(child.style.transition).toContain('translate');
+		}
+		await vi.waitFor(() => expect(sidebar.dataset.settling).toBeUndefined());
+		for (const child of content) expect(child.style.transition).toBe('');
+
+		// Below minWidth, short of the collapse threshold, it gives the other way.
+		startPanelWidth(400);
+		await firePointer(resizeHandle, 'pointerdown', 400);
+		await firePointer(resizeHandle, 'pointermove', 140);
+		expect(pulled(200)).toBeLessThan(0);
+		expect(pulled(200)).toBeGreaterThan(-48);
+		expect(width(resizeHandle)).toBe(200);
+		await firePointer(resizeHandle, 'pointerup', 140);
+		expect(container.style.width).toBe('');
+	});
+
+	test('a keyboard resize stops at the bounds with no overdrag', async () => {
+		render(SidebarResizeHarness, { props: { resizable: { minWidth: 200, maxWidth: 400 } } });
+		const resizeHandle = handle();
+		const container = query('[data-slot="sidebar-container"]');
+		startPanelWidth(260);
+		resizeHandle.focus();
+		await fireEvent.keyDown(resizeHandle, { key: 'End' });
+		await fireEvent.keyDown(resizeHandle, { key: 'ArrowRight' });
+		expect(width(resizeHandle)).toBe(400);
+		expect(container.style.width).not.toContain('calc');
+	});
+
 	test('collapses the panel when the drag crosses the collapse threshold', async () => {
 		render(SidebarResizeHarness, { props: { resizable: { minWidth: 200, maxWidth: 400 } } });
 		const resizeHandle = handle();

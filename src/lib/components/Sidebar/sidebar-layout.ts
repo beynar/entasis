@@ -8,7 +8,7 @@ export function getSidebarGapClass(variant: SidebarVariant) {
 	const hasInlineInset = variant === 'floating' || variant === 'split';
 
 	return cx(
-		'relative w-[calc(var(--sidebar-width)+var(--sidebar-activity-offset,0px))] bg-transparent transition-[width] duration-normal ease-linear group-data-[width-prehydrating=true]/sidebar-wrapper:!transition-none group-data-[resizing=true]:!transition-none group-data-[collapsible=offcanvas]:w-[var(--sidebar-activity-offset,0px)]',
+		'relative w-[calc(var(--sidebar-width)+var(--sidebar-activity-offset,0px))] bg-transparent transition-[width] duration-normal ease-linear group-data-[width-prehydrating=true]/sidebar-wrapper:!transition-none group-data-[resizing=true]:!transition-none group-data-[settling=true]:ease-enter group-data-[collapsible=offcanvas]:w-[var(--sidebar-activity-offset,0px)]',
 		hasInlineInset
 			? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+var(--space-md)*2+var(--sidebar-activity-offset,0px))]'
 			: 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+var(--sidebar-activity-offset,0px))]',
@@ -38,7 +38,7 @@ export function getSidebarContainerClass(
 	const panelOwnsShadow = variant === 'floating' || variant === 'split';
 
 	return cx(
-		'inset-y-0 z-10 hidden w-[var(--sidebar-width)] bg-transparent transition-[left,right,width] duration-normal ease-linear group-data-[width-prehydrating=true]/sidebar-wrapper:!transition-none group-data-[resizing=true]:!transition-none md:flex',
+		'inset-y-0 z-10 hidden w-[var(--sidebar-width)] bg-transparent transition-[left,right,width] duration-normal ease-linear group-data-[width-prehydrating=true]/sidebar-wrapper:!transition-none group-data-[resizing=true]:!transition-none group-data-[settling=true]:ease-enter md:flex',
 		frame === 'viewport' ? 'fixed h-window' : 'absolute h-full',
 		// The offcanvas offset slides the panel away relative to itself: the activity bar keeps
 		// its own inset, so it never leaves the screen with the panel. Floating and split park it

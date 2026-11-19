@@ -1,6 +1,7 @@
 import { untrack } from 'svelte';
 import type { Attachment } from 'svelte/attachments';
 import { createPointerDrag } from '$lib/utils/pointerDrag.js';
+import { rubberBand } from '$lib/utils/rubberBand.js';
 import { withOptions } from '$lib/utils/state.svelte.js';
 import type {
 	SidebarCollapsible,
@@ -29,6 +30,12 @@ type SidebarResizeStateOptions = {
 
 const DEFAULT_KEYBOARD_STEP = 16;
 const DEFAULT_COLLAPSE_DRAG_RATIO = 0.75;
+/** The furthest the panel follows a drag past `minWidth` or `maxWidth`, in px. */
+const OVERDRAG_EXTENT = 48;
+/** How long the spring back after an overdrag runs: the panel's `duration-normal`. */
+const SETTLE_DURATION = 220;
+/** How much of an overdrag the panel's content follows. */
+const CONTENT_FOLLOW = 0.4;
 
 export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>() {
 	panelNode = $state<HTMLElement | null>(null);
@@ -37,6 +44,14 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 	isStateTransitioning = $state(false);
 	isWidthInitializing = $state(false);
 	isEdgeRevealSuppressed = $state(false);
+	/**
+	 * How far a drag pulls the expanded panel past its bounds, in px: positive past `maxWidth`,
+	 * negative below `minWidth`. It resists more the further it goes and springs back on release;
+	 * the width itself (and what `onWidthChange` reports and storage keeps) stays within bounds.
+	 */
+	overdrag = $state(0);
+	/** Set while the panel springs back from an overdrag, so it eases out rather than linearly. */
+	isSettling = $state(false);
 	/**
 	 * `--sidebar-width` while a resize runs: the width it started from. Every element inside the
 	 * wrapper, the page included, inherits the variable; changed on each pointer move, it made
@@ -51,6 +66,7 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 	private initialStoredWidth: number | null = null;
 	private keyboardResizeTimeout: ReturnType<typeof setTimeout> | null = null;
 	private stateTransitionTimeout: ReturnType<typeof setTimeout> | null = null;
+	private settleTimeout: ReturnType<typeof setTimeout> | null = null;
 	private isRestoringWidth = false;
 	private loadedStorageKeys: string[] = [];
 
@@ -104,7 +120,9 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 	/** The width the expanded panel follows while a resize runs, set on the spacer and container. */
 	get liveWidth() {
 		if (this.resizeStartWidth === null || this.displayState !== 'expanded') return undefined;
-		return this.width;
+		if (this.overdrag === 0) return this.width;
+		const offset = Math.round(this.overdrag);
+		return `calc(${this.width} ${offset < 0 ? '-' : '+'} ${Math.abs(offset)}px)`;
 	}
 
 	private get restingWidth() {
@@ -191,6 +209,28 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 		onEnd: ({ node }) => this.endDrag(node)
 	});
 
+	/**
+	 * On the panel: its direct children (header, rows, footer) follow part of an overdrag, so the
+	 * content gives with the stretching edge instead of sitting still, and springs back with it.
+	 * Written on those few elements rather than through an inherited variable, which every row
+	 * inside would restyle for on each pointer move.
+	 */
+	contentAttachment: Attachment<HTMLElement> = (panel) => {
+		$effect(() => {
+			const shift = this.overdrag * CONTENT_FOLLOW * (this.side === 'left' ? 1 : -1);
+			const transition = this.isDragging
+				? 'none'
+				: this.isSettling
+					? 'translate var(--duration-normal) var(--ease-enter)'
+					: '';
+			for (const child of panel.children) {
+				if (!(child instanceof HTMLElement)) continue;
+				child.style.translate = shift ? `${shift.toFixed(1)}px 0` : '';
+				child.style.transition = transition;
+			}
+		});
+	};
+
 	private resolvePanelNode(handleNode: HTMLElement) {
 		if (this.panelNode) return this.panelNode;
 
@@ -207,13 +247,25 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 
 		this.didDrag = true;
 		const delta = this.side === 'left' ? deltaX : -deltaX;
-		this.resizeToRequestedWidth(this.startWidth + delta, false);
+		const requestedWidth = this.startWidth + delta;
+		this.resizeToRequestedWidth(requestedWidth, false);
+		this.overdrag = this.overdragFor(requestedWidth);
+	}
+
+	/** How far past its bounds the expanded panel follows a drag that asks for `requestedWidth`. */
+	private overdragFor(requestedWidth: number) {
+		if (this.displayState !== 'expanded') return 0;
+		const { min, max } = this.getBounds();
+		if (requestedWidth > max) return rubberBand(requestedWidth - max, OVERDRAG_EXTENT);
+		if (requestedWidth < min) return -rubberBand(min - requestedWidth, OVERDRAG_EXTENT);
+		return 0;
 	}
 
 	private endDrag(node: HTMLElement) {
 		if (!this.isDragging) return;
 
 		this.isDragging = false;
+		if (this.overdrag !== 0) this.settle();
 		if (!this.isKeyboardResizing) this.resizeStartWidth = null;
 		this.suppressNextClick = this.didDrag;
 		if (this.didDrag) this.commitWidth();
@@ -301,6 +353,16 @@ export class SidebarResizeState extends withOptions<SidebarResizeStateOptions>()
 			this.keyboardResizeTimeout = null;
 			if (!this.isDragging) this.resizeStartWidth = null;
 		}, 120);
+	}
+
+	private settle() {
+		this.overdrag = 0;
+		this.isSettling = true;
+		if (this.settleTimeout) clearTimeout(this.settleTimeout);
+		this.settleTimeout = setTimeout(() => {
+			this.isSettling = false;
+			this.settleTimeout = null;
+		}, SETTLE_DURATION);
 	}
 
 	private startStateTransition() {

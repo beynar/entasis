@@ -318,6 +318,7 @@
 	data-state={sidebarState}
 	data-display-state={displayState}
 	data-resizing={resize.shouldSuppressTransitions ? 'true' : undefined}
+	data-settling={resize.isSettling ? 'true' : undefined}
 	data-edge-revealed={edgeRevealed ? 'true' : undefined}
 	data-peek={isHoverExpanded ? 'true' : undefined}
 	data-activity-bar={activityBar ? 'true' : undefined}
@@ -373,6 +374,7 @@
 			data-slot="sidebar-panel"
 			data-color={resolvedColor}
 			data-side={side}
+			{@attach resize.contentAttachment}
 			class={classes.panel({
 				variant,
 				placement: 'positioned',
