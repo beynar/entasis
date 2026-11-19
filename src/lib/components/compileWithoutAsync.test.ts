@@ -15,7 +15,9 @@ describe('library components compile without experimental.async', () => {
 		expect(Object.keys(sources).length).toBeGreaterThan(300);
 	});
 
-	test.each(['client', 'server'] as const)('for the %s', (generate) => {
+	// It compiles every component of the library in one go: about a second on a fast machine, more
+	// than the default five on a loaded CI runner, and longer with each component added.
+	test.each(['client', 'server'] as const)('for the %s', { timeout: 60_000 }, (generate) => {
 		const failures: string[] = [];
 		for (const [filename, source] of Object.entries(sources)) {
 			try {
