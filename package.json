@@ -631,10 +631,20 @@
 			"svelte": "./dist/components/SpinnerText/index.js",
 			"default": "./dist/components/SpinnerText/index.js"
 		},
+		"./thinking-orb": {
+			"types": "./dist/components/ThinkingOrb/index.d.ts",
+			"svelte": "./dist/components/ThinkingOrb/index.js",
+			"default": "./dist/components/ThinkingOrb/index.js"
+		},
 		"./toast": {
 			"types": "./dist/components/Toast/index.d.ts",
 			"svelte": "./dist/components/Toast/index.js",
 			"default": "./dist/components/Toast/index.js"
+		},
+		"./voice-indicator": {
+			"types": "./dist/components/VoiceIndicator/index.d.ts",
+			"svelte": "./dist/components/VoiceIndicator/index.js",
+			"default": "./dist/components/VoiceIndicator/index.js"
 		},
 		"./accordion": {
 			"types": "./dist/components/Accordion/index.d.ts",
@@ -756,6 +766,11 @@
 			"svelte": "./dist/components/AudioPlayer/index.js",
 			"default": "./dist/components/AudioPlayer/index.js"
 		},
+		"./before-after": {
+			"types": "./dist/components/BeforeAfter/index.d.ts",
+			"svelte": "./dist/components/BeforeAfter/index.js",
+			"default": "./dist/components/BeforeAfter/index.js"
+		},
 		"./carousel": {
 			"types": "./dist/components/Carousel/index.d.ts",
 			"svelte": "./dist/components/Carousel/index.js",
@@ -785,6 +800,11 @@
 			"types": "./dist/components/VideoPlayer/index.d.ts",
 			"svelte": "./dist/components/VideoPlayer/index.js",
 			"default": "./dist/components/VideoPlayer/index.js"
+		},
+		"./annotation": {
+			"types": "./dist/components/Annotation/index.d.ts",
+			"svelte": "./dist/components/Annotation/index.js",
+			"default": "./dist/components/Annotation/index.js"
 		},
 		"./code": {
 			"types": "./dist/components/Code/index.d.ts",
@@ -1183,8 +1203,14 @@
 			"spinner-text": [
 				"dist/components/SpinnerText/index.d.ts"
 			],
+			"thinking-orb": [
+				"dist/components/ThinkingOrb/index.d.ts"
+			],
 			"toast": [
 				"dist/components/Toast/index.d.ts"
+			],
+			"voice-indicator": [
+				"dist/components/VoiceIndicator/index.d.ts"
 			],
 			"accordion": [
 				"dist/components/Accordion/index.d.ts"
@@ -1258,6 +1284,9 @@
 			"audio-player": [
 				"dist/components/AudioPlayer/index.d.ts"
 			],
+			"before-after": [
+				"dist/components/BeforeAfter/index.d.ts"
+			],
 			"carousel": [
 				"dist/components/Carousel/index.d.ts"
 			],
@@ -1275,6 +1304,9 @@
 			],
 			"video-player": [
 				"dist/components/VideoPlayer/index.d.ts"
+			],
+			"annotation": [
+				"dist/components/Annotation/index.d.ts"
 			],
 			"code": [
 				"dist/components/Code/index.d.ts"

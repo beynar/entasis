@@ -414,8 +414,16 @@ export const componentNavigationSections = [
 				text: 'Spinner text'
 			},
 			{
+				href: '/components/thinking-orb',
+				text: 'Thinking orb'
+			},
+			{
 				href: '/components/toast',
 				text: 'Toast'
+			},
+			{
+				href: '/components/voice-indicator',
+				text: 'Voice indicator'
 			}
 		]
 	},
@@ -539,6 +547,10 @@ export const componentNavigationSections = [
 				text: 'Audio player'
 			},
 			{
+				href: '/components/before-after',
+				text: 'Before / after'
+			},
+			{
 				href: '/components/carousel',
 				text: 'Carousel'
 			},
@@ -567,6 +579,10 @@ export const componentNavigationSections = [
 	{
 		label: 'Content & graphics',
 		links: [
+			{
+				href: '/components/annotation',
+				text: 'Annotation'
+			},
 			{
 				href: '/components/code',
 				text: 'Code'

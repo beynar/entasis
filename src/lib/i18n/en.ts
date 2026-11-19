@@ -18,6 +18,35 @@ export const en = {
 	open: 'Open',
 	toggle: 'Toggle',
 	clear: 'Clear',
+	/** BeforeAfter: each side's name, the divider's name and its value as read aloud. */
+	beforeAfterBefore: 'Before',
+	beforeAfterAfter: 'After',
+	beforeAfterLabel: 'Before and after comparison',
+	beforeAfterValueText: (
+		before: string,
+		beforeShare: string | number,
+		after: string,
+		afterShare: string | number
+	) => `${before} ${beforeShare}%, ${after} ${afterShare}%`,
+	/** VoiceIndicator: each state as its accessible name, and what a press does as a button. */
+	voiceIndicatorIdle: 'Voice assistant idle',
+	voiceIndicatorConnecting: 'Voice assistant connecting',
+	voiceIndicatorListening: 'Voice assistant listening',
+	voiceIndicatorThinking: 'Voice assistant thinking',
+	voiceIndicatorSpeaking: 'Voice assistant speaking',
+	voiceIndicatorError: 'Voice assistant error',
+	voiceIndicatorStart: 'Start voice session',
+	voiceIndicatorStop: 'Stop voice session',
+	/** ThinkingOrb: each state as its accessible name. */
+	thinkingOrbWorking: 'Working…',
+	thinkingOrbSearching: 'Searching…',
+	thinkingOrbSolving: 'Solving…',
+	thinkingOrbListening: 'Listening…',
+	thinkingOrbConnecting: 'Connecting…',
+	thinkingOrbWeaving: 'Weaving…',
+	thinkingOrbComposing: 'Composing…',
+	thinkingOrbBreathing: 'Thinking…',
+	thinkingOrbShaping: 'Shaping…',
 	/** MaskedInput: a value that leaves required slots of its mask empty. */
 	maskedInputIncomplete: 'Enter the complete value',
 	/** Tour step popup: buttons, progress (`2 of 5`) and the step announced to screen readers. */

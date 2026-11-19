@@ -95,7 +95,9 @@ import { progressCircleDescription } from '$lib/components/ProgressCircle/progre
 import { skeletonDescription } from '$lib/components/Skeleton/skeleton.mcp.js';
 import { spinnerDescription } from '$lib/components/Spinner/spinner.mcp.js';
 import { spinnerTextDescription } from '$lib/components/SpinnerText/spinnerText.mcp.js';
+import { thinkingOrbDescription } from '$lib/components/ThinkingOrb/thinkingOrb.mcp.js';
 import { toastDescription } from '$lib/components/Toast/toast.mcp.js';
+import { voiceIndicatorDescription } from '$lib/components/VoiceIndicator/voiceIndicator.mcp.js';
 import { accordionDescription } from '$lib/components/Accordion/accordion.mcp.js';
 import { collapsibleDescription } from '$lib/components/Collapsible/collapsible.mcp.js';
 import { breadcrumbsDescription } from '$lib/components/Breadcrumbs/breadcrumbs.mcp.js';
@@ -120,12 +122,14 @@ import { popoverDescription } from '$lib/components/Popover/popover.mcp.js';
 import { tourDescription } from '$lib/components/Tour/tour.mcp.js';
 import { tooltipDescription } from '$lib/components/Tooltip/tooltip.mcp.js';
 import { audioPlayerDescription } from '$lib/components/AudioPlayer/audioPlayer.mcp.js';
+import { beforeAfterDescription } from '$lib/components/BeforeAfter/beforeAfter.mcp.js';
 import { carouselDescription } from '$lib/components/Carousel/carousel.mcp.js';
 import { imageGalleryDescription } from '$lib/components/ImageGallery/imageGallery.mcp.js';
 import { imageZoomDescription } from '$lib/components/ImageZoom/imageZoom.mcp.js';
 import { mediaVolumeDescription } from '$lib/components/MediaVolume/mediaVolume.mcp.js';
 import { documentViewerDescription } from '$lib/components/DocumentViewer/documentViewer.mcp.js';
 import { videoPlayerDescription } from '$lib/components/VideoPlayer/videoPlayer.mcp.js';
+import { annotationDescription } from '$lib/components/Annotation/annotation.mcp.js';
 import { codeDescription } from '$lib/components/Code/code.mcp.js';
 import { diffDescription } from '$lib/components/Diff/diff.mcp.js';
 import { globeDescription } from '$lib/components/Globe/globe.mcp.js';
@@ -248,7 +252,9 @@ export const componentMcpRegistry = {
 	skeleton: skeletonDescription,
 	spinner: spinnerDescription,
 	'spinner-text': spinnerTextDescription,
+	'thinking-orb': thinkingOrbDescription,
 	toast: toastDescription,
+	'voice-indicator': voiceIndicatorDescription,
 	accordion: accordionDescription,
 	collapsible: collapsibleDescription,
 	breadcrumbs: breadcrumbsDescription,
@@ -273,12 +279,14 @@ export const componentMcpRegistry = {
 	tour: tourDescription,
 	tooltip: tooltipDescription,
 	'audio-player': audioPlayerDescription,
+	'before-after': beforeAfterDescription,
 	carousel: carouselDescription,
 	'image-gallery': imageGalleryDescription,
 	'image-zoom': imageZoomDescription,
 	'media-volume': mediaVolumeDescription,
 	'document-viewer': documentViewerDescription,
 	'video-player': videoPlayerDescription,
+	annotation: annotationDescription,
 	code: codeDescription,
 	diff: diffDescription,
 	globe: globeDescription,

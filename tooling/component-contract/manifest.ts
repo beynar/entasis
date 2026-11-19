@@ -388,8 +388,14 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	component('spinner-text', 'components/SpinnerText', 'Feedback', 'Spinner text', {
 		related: ['spinner']
 	}),
+	component('thinking-orb', 'components/ThinkingOrb', 'Feedback', 'Thinking orb', {
+		related: ['spinner', 'spinner-text', 'voice-indicator', 'ai-reasoning']
+	}),
 	component('toast', 'components/Toast', 'Feedback', 'Toast', {
 		related: ['alert', 'confirmation']
+	}),
+	component('voice-indicator', 'components/VoiceIndicator', 'Feedback', 'Voice indicator', {
+		related: ['voice-input', 'ai-composer', 'spinner']
 	}),
 
 	component('accordion', 'components/Accordion', 'Disclosure', 'Accordion', {
@@ -464,6 +470,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	component('audio-player', 'components/AudioPlayer', 'Media', 'Audio player', {
 		related: ['media-volume', 'video-player']
 	}),
+	component('before-after', 'components/BeforeAfter', 'Media', 'Before / after', {
+		related: ['slider', 'aspect-ratio', 'image-zoom']
+	}),
 	component('carousel', 'components/Carousel', 'Media', 'Carousel', {
 		related: ['image-gallery']
 	}),
@@ -483,6 +492,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 		related: ['audio-player', 'media-volume']
 	}),
 
+	component('annotation', 'components/Annotation', 'Content & graphics', 'Annotation', {
+		related: ['tour', 'tooltip', 'kbd']
+	}),
 	component('code', 'components/Code', 'Content & graphics', 'Code', {
 		related: ['diff', 'markdown']
 	}),
@@ -1819,6 +1831,54 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'timeInputTheme',
 		'useTimeInputTheme'
 	],
+	annotation: [
+		'Annotation',
+		'AnnotationColor',
+		'AnnotationPlacement',
+		'AnnotationProps',
+		'AnnotationTheme',
+		'AnnotationThemeProps',
+		'annotationTheme',
+		'setAnnotationTheme',
+		'useAnnotationTheme'
+	],
+	'thinking-orb': [
+		'ThinkingOrb',
+		'ThinkingOrbColorScheme',
+		'ThinkingOrbDot',
+		'ThinkingOrbFrame',
+		'ThinkingOrbFrameFunction',
+		'ThinkingOrbLine',
+		'ThinkingOrbOptions',
+		'ThinkingOrbProps',
+		'ThinkingOrbState',
+		'ThinkingOrbTheme',
+		'ThinkingOrbThemeProps',
+		'ThinkingOrbTuning',
+		'setThinkingOrbTheme',
+		'thinkingOrbTheme',
+		'useThinkingOrbTheme'
+	],
+	'voice-indicator': [
+		'VoiceIndicator',
+		'VoiceIndicatorAppearance',
+		'VoiceIndicatorColor',
+		'VoiceIndicatorColorScheme',
+		'VoiceIndicatorCurve',
+		'VoiceIndicatorMotion',
+		'VoiceIndicatorProps',
+		'VoiceIndicatorSource',
+		'VoiceIndicatorState',
+		'VoiceIndicatorTheme',
+		'VoiceIndicatorThemeProps',
+		'VoiceIndicatorTuning',
+		'VoiceIndicatorVariant',
+		'VoiceMicrophone',
+		'VoiceMicrophoneStatus',
+		'setVoiceIndicatorTheme',
+		'useVoiceIndicatorTheme',
+		'voiceIndicatorTheme'
+	],
 	'voice-input': [
 		'VoiceInput',
 		'VoiceInputProps',
@@ -1865,6 +1925,25 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'setAddressProvider',
 		'setAddressTheme',
 		'useAddressTheme'
+	],
+	'before-after': [
+		'BeforeAfter',
+		'BeforeAfterContent',
+		'BeforeAfterHandlePayload',
+		'BeforeAfterHandleVariant',
+		'BeforeAfterImage',
+		'BeforeAfterLabelPosition',
+		'BeforeAfterLabelVariant',
+		'BeforeAfterLabels',
+		'BeforeAfterLineVariant',
+		'BeforeAfterOrientation',
+		'BeforeAfterProps',
+		'BeforeAfterTheme',
+		'BeforeAfterThemeProps',
+		'BeforeAfterVariant',
+		'beforeAfterTheme',
+		'setBeforeAfterTheme',
+		'useBeforeAfterTheme'
 	],
 	avatar: [
 		'Avatar',

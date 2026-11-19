@@ -125,7 +125,9 @@ Each link is that entry's full documentation as Markdown (props, data model, the
 - [Skeleton](https://entasis.beynar.workers.dev/components/skeleton.md) `entasis/skeleton` — The Skeleton component is a loading placeholder element that displays a pulsing animation to indicate that content is being loaded.
 - [Spinner](https://entasis.beynar.workers.dev/components/spinner.md) `entasis/spinner` — The Spinner component is a standalone indeterminate loading indicator.
 - [Spinner text](https://entasis.beynar.workers.dev/components/spinner-text.md) `entasis/spinner-text` — SpinnerText combines the existing Spinner with a stable-width sequence of loading messages.
+- [Thinking orb](https://entasis.beynar.workers.dev/components/thinking-orb.md) `entasis/thinking-orb` — Shows what an agent is doing as a small animated figure made of dots, drawn on a canvas: nine states, each with its own drawing, at any size from a line of text to an avatar.
 - [Toast](https://entasis.beynar.workers.dev/components/toast.md) `entasis/toast` — The toast function displays non-blocking notification messages to the user.
+- [Voice indicator](https://entasis.beynar.workers.dev/components/voice-indicator.md) `entasis/voice-indicator` — Shows where a voice conversation is (idle, connecting, listening, thinking, speaking, error) and how loud the voice is, as an animated ring or orb drawn on a canvas.
 
 ## Disclosure
 
@@ -165,6 +167,7 @@ Each link is that entry's full documentation as Markdown (props, data model, the
 ## Media
 
 - [Audio player](https://entasis.beynar.workers.dev/components/audio-player.md) `entasis/audio-player` — AudioPlayer is a native HTML5 audio player with Entasis chrome.
+- [Before / after](https://entasis.beynar.workers.dev/components/before-after.md) `entasis/before-after` — Two contents laid one over the other with a draggable divider between them: the before side shows up to the divider, the after side past it.
 - [Carousel](https://entasis.beynar.workers.dev/components/carousel.md) `entasis/carousel` — Carousel renders a scrollable collection from items.
 - [Image gallery](https://entasis.beynar.workers.dev/components/image-gallery.md) `entasis/image-gallery` — ImageGallery enhances descendant images inside arbitrary HTML.
 - [Image zoom](https://entasis.beynar.workers.dev/components/image-zoom.md) `entasis/image-zoom` — ImageZoom renders an accessible image trigger powered by LightGallery's Medium Zoom plugin.
@@ -174,6 +177,7 @@ Each link is that entry's full documentation as Markdown (props, data model, the
 
 ## Content & graphics
 
+- [Annotation](https://entasis.beynar.workers.dev/components/annotation.md) `entasis/annotation` — Calls attention to a piece of content the way a pen would: a marker tint on the target, and a handwritten note beside it with a hand-drawn arrow back to it.
 - [Code](https://entasis.beynar.workers.dev/components/code.md) `entasis/code` — Displays a syntax-highlighted code block with an optional header (language label + copy button), line numbers, and header/footer slots.
 - [Diff](https://entasis.beynar.workers.dev/components/diff.md) `entasis/diff` — Renders rich, syntax-highlighted code diffs — split (side-by-side) or unified (inline) — for one or more files.
 - [Globe](https://entasis.beynar.workers.dev/components/globe.md) `entasis/globe` — An interactive, auto-rotating WebGL globe (powered by cobe).

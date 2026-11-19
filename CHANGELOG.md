@@ -6,6 +6,91 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- Annotation (`entasis/annotation`): calls attention to a piece of content the way a pen would: a
+  marker tint on the target and a handwritten `note` beside it, with a hand-drawn arrow back to
+  it. `placement` takes eight places (`start` and `end` draw the arrow on a slant and follow the
+  reading direction), `color` a role or `rainbow`, a hue that keeps turning. Without a note it is a
+  marker alone; `highlight={false}` suits a target with its own fill, `as="div"` goes round a
+  block, and `decorative` hides the note from assistive technology. `draw` draws it in when it
+  comes into view: the marker sweeps, the note is written, then the arrow is traced; `drawOffset`
+  is how far up the screen it must be first. The note and the arrow are placed by CSS alone and
+  the server renders them whole; `--annotation-*` variables move and restyle the drawing. Adapted from neat-annotations by Maxim Syabro (MIT).
+- BeforeAfter (`entasis/before-after`): two contents laid one over the other with a divider to drag
+  between them. The divider is the Slider's own state on a range input, so it takes arrow keys,
+  Home and End, screen-reader adjustments and right-to-left; a press on the picture brings it
+  there, and on touch a swipe along its axis drags it while the page keeps its scroll. Sides are
+  images by their attributes or snippets, with optional `labels`, `ratio`, `orientation`, a custom
+  `handle`, `readOnly` and `disabled`. Variants: `variant` (surface, solid, glass) and `color` paint
+  the divider, `handleVariant` (grip, pill, arrows, none) shapes its handle, `lineVariant` (solid,
+  dashed, none) its line, and `labelVariant` and `labelPosition` set the labels.
+- VoiceIndicator (`entasis/voice-indicator`): shows where a voice conversation is and how loud the
+  voice is, drawn on a canvas. `variant` is the shape (`ring`, `orb`) and `appearance` what it is
+  made of (`light`: a blooming ribbon, a flowing cloud; `solid`: lit tubes a voice opens into a
+  globe, a matt ball of clouds). `state` takes `idle`, `connecting`, `listening`, `thinking`, `speaking` and
+  `error`, eased into each other. `input` and `output` take a MediaStream, an AnalyserNode, a level
+  or a function returning one. `color` is `spectrum` or a role, crossfaded; `direction` leans the
+  indicator toward the voice; `motion`, `speed`, `sensitivity`, `threshold`, `curve` (soft, linear, log, exp or a function, with `curveAmount`), `hoverBend`, `paused`,
+  `colorScheme` and `tuning` set the rest. With `onStart` or `onStop` it is the button that starts
+  and stops the session. It stops drawing off screen and holds still under reduced motion.
+  `VoiceMicrophone`, exported beside it, holds a microphone stream as reactive state. The ring is
+  adapted from Voice Ring and the cloud from orb-ui (both MIT).
+- ThinkingOrb (`entasis/thinking-orb`): shows what an agent is doing as a small figure of dots
+  drawn on a canvas. `state` takes `working`, `searching`, `solving`, `listening`, `connecting`,
+  `weaving`, `composing`, `breathing` and `shaping`, each with its own drawing, and a change of
+  state crosses from one to the next. `size` is 20, 32 or 64 pixels, tuned as separate designs,
+  and `diameter` any size between; `color` is a role, and the ink is the root's text colour.
+  `speed`, `paused`, `dots`, `dotSize` and `tuning` set the rest, and `frame` takes a drawing of
+  your own. Every orb reads one clock in one animation loop; an orb stops drawing off screen and
+  shows a still frame under reduced motion. The drawings are adapted from thinking-orbs by Jakub
+  Antalik (MIT).
+- Separator: `variant="gradient"` fades the line out toward its ends: both ends of a plain
+  separator, and away from the label when there is one. It keeps `color` and `thickness`, works in
+  both orientations and follows the reading direction. The root carries `data-variant`.
+- glimm: a `surge` preset and an `arc` shape, after Distortion Waves: given the control that started
+  it as `source`, the band draws its breath there, leaves it as an arc that swells over the element
+  (a dome from a wide button, sideways from a tall tab) and reveals the change behind it. New options
+  that work with every shape: `anticipation`, `sparks` that ride the band and burn out, `edges`
+  (the band lights the element's rounded edges where it meets them, in its own colour, with a white
+  hairline) and `blur` (the content blurs where the band crosses it) and `distort` (with `change`, in Chromium:
+  the content swells as the band crosses it, its colours parting slightly, through an SVG
+  displacement lens over the two pictures of the element's view transition). A `ring` with a `source` grows
+  from its centre and leaves it clear. `surge` is the default when a `source` is given.
+
+### Changed
+
+- Theme: the dialog backdrop and the tooltip surface are no longer in every app. The first dialog
+  and the first tooltip of a page bring theirs (`ThemeState.mountHost`), and `<Theme>` renders it
+  once; an app that uses neither no longer ships the dialog, popover and positioning code. The
+  server markup is unchanged: a dialog open on the server still dims the page from the first paint.
+- Button: the loading overlay and its spinner are fetched the first time a button of the page
+  loads, so the spinner shows a moment after `loading` turns true the first time; the button is
+  busy and refuses activation at once, as before. `spinnerOverlay` used directly is unchanged.
+- Theme: the view transitions of a theme change are fetched on demand. An app that sets
+  `transition` gets them right after it mounts; one that does not never loads them.
+- With the three changes above, an app with one Button loads 51 KB of JavaScript gzipped instead
+  of 101 KB. `check:bundle-absent` refuses a static import of any of these modules outside its
+  owner.
+- Button, Slot: mounting is about a quarter faster (1,000 Buttons: 51 ms of JavaScript down to
+  37 ms in Chromium on an M1 Pro). Slot decides what it renders in one condition chain instead of
+  four nested ones, and a Button mounts no Slot for a prefix or suffix it does not have. Field does
+  the same for its actions, prefix, suffix, description and helper.
+- glimm: the presets use the new options: reveal leaves light edges and a slight blur, glint throws
+  a few sparks, ripple adds sparks, edges and blur, double and split leave edges, wave edges and
+  blur. The shader's gradients are dithered.
+- glimm: the sweep spans the element's content rather than its whole box: the box its children
+  occupy less their own padding (a Card's slots carry its spacing). The band's timeline, the cut of
+  the change, the sparks and the blur follow the content, and the padding is never blurred. Every
+  shape is drawn by one shader, glimm's straight band included, so the band and the edges it lights
+  share one colour. The band now runs to the element's edges, clipped to its rounded shape, instead
+  of fading out 24 px before them (`feather` defaults to 0).
+- Sidebar: dragging the resize handle past `maxWidth`, or below `minWidth` short of collapsing,
+  pulls the panel a little further with growing resistance (at most 48 px), its content giving by
+  part of that pull, and both spring back with the enter easing on release, as the drawer and
+  toasts already do. The width `onWidthChange` reports and storage keeps still stops at the
+  bounds; keyboard resizing is unchanged.
+
 ## 0.25.0 — 2026-11-17
 
 ### Added

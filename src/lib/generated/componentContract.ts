@@ -3383,6 +3383,39 @@ export const componentInventory = [
 		visibility: 'public'
 	},
 	{
+		id: 'thinking-orb',
+		subpath: 'entasis/thinking-orb',
+		sourceIndex: 'src/lib/components/ThinkingOrb/index.ts',
+		exportedSymbols: [
+			'ThinkingOrb',
+			'ThinkingOrbColorScheme',
+			'ThinkingOrbDot',
+			'ThinkingOrbFrame',
+			'ThinkingOrbFrameFunction',
+			'ThinkingOrbLine',
+			'ThinkingOrbOptions',
+			'ThinkingOrbProps',
+			'ThinkingOrbState',
+			'ThinkingOrbTheme',
+			'ThinkingOrbThemeProps',
+			'ThinkingOrbTuning',
+			'setThinkingOrbTheme',
+			'thinkingOrbTheme',
+			'useThinkingOrbTheme'
+		],
+		docs: [
+			{
+				id: 'thinking-orb',
+				route: '/components/thinking-orb',
+				category: 'Feedback',
+				label: 'Thinking orb'
+			}
+		],
+		capabilities: ['svelte', 'component', 'feedback'],
+		relatedComponents: ['spinner', 'spinner-text', 'voice-indicator', 'ai-reasoning'],
+		visibility: 'public'
+	},
+	{
 		id: 'toast',
 		subpath: 'entasis/toast',
 		sourceIndex: 'src/lib/components/Toast/index.ts',
@@ -3410,6 +3443,42 @@ export const componentInventory = [
 		],
 		capabilities: ['svelte', 'component', 'feedback'],
 		relatedComponents: ['alert', 'confirmation'],
+		visibility: 'public'
+	},
+	{
+		id: 'voice-indicator',
+		subpath: 'entasis/voice-indicator',
+		sourceIndex: 'src/lib/components/VoiceIndicator/index.ts',
+		exportedSymbols: [
+			'VoiceIndicator',
+			'VoiceIndicatorAppearance',
+			'VoiceIndicatorColor',
+			'VoiceIndicatorColorScheme',
+			'VoiceIndicatorCurve',
+			'VoiceIndicatorMotion',
+			'VoiceIndicatorProps',
+			'VoiceIndicatorSource',
+			'VoiceIndicatorState',
+			'VoiceIndicatorTheme',
+			'VoiceIndicatorThemeProps',
+			'VoiceIndicatorTuning',
+			'VoiceIndicatorVariant',
+			'VoiceMicrophone',
+			'VoiceMicrophoneStatus',
+			'setVoiceIndicatorTheme',
+			'useVoiceIndicatorTheme',
+			'voiceIndicatorTheme'
+		],
+		docs: [
+			{
+				id: 'voice-indicator',
+				route: '/components/voice-indicator',
+				category: 'Feedback',
+				label: 'Voice indicator'
+			}
+		],
+		capabilities: ['svelte', 'component', 'feedback'],
+		relatedComponents: ['voice-input', 'ai-composer', 'spinner'],
 		visibility: 'public'
 	},
 	{
@@ -4182,6 +4251,41 @@ export const componentInventory = [
 		visibility: 'public'
 	},
 	{
+		id: 'before-after',
+		subpath: 'entasis/before-after',
+		sourceIndex: 'src/lib/components/BeforeAfter/index.ts',
+		exportedSymbols: [
+			'BeforeAfter',
+			'BeforeAfterContent',
+			'BeforeAfterHandlePayload',
+			'BeforeAfterHandleVariant',
+			'BeforeAfterImage',
+			'BeforeAfterLabelPosition',
+			'BeforeAfterLabelVariant',
+			'BeforeAfterLabels',
+			'BeforeAfterLineVariant',
+			'BeforeAfterOrientation',
+			'BeforeAfterProps',
+			'BeforeAfterTheme',
+			'BeforeAfterThemeProps',
+			'BeforeAfterVariant',
+			'beforeAfterTheme',
+			'setBeforeAfterTheme',
+			'useBeforeAfterTheme'
+		],
+		docs: [
+			{
+				id: 'before-after',
+				route: '/components/before-after',
+				category: 'Media',
+				label: 'Before / after'
+			}
+		],
+		capabilities: ['svelte', 'component', 'media'],
+		relatedComponents: ['slider', 'aspect-ratio', 'image-zoom'],
+		visibility: 'public'
+	},
+	{
 		id: 'carousel',
 		subpath: 'entasis/carousel',
 		sourceIndex: 'src/lib/components/Carousel/index.ts',
@@ -4379,6 +4483,33 @@ export const componentInventory = [
 		],
 		capabilities: ['svelte', 'component', 'media'],
 		relatedComponents: ['audio-player', 'media-volume'],
+		visibility: 'public'
+	},
+	{
+		id: 'annotation',
+		subpath: 'entasis/annotation',
+		sourceIndex: 'src/lib/components/Annotation/index.ts',
+		exportedSymbols: [
+			'Annotation',
+			'AnnotationColor',
+			'AnnotationPlacement',
+			'AnnotationProps',
+			'AnnotationTheme',
+			'AnnotationThemeProps',
+			'annotationTheme',
+			'setAnnotationTheme',
+			'useAnnotationTheme'
+		],
+		docs: [
+			{
+				id: 'annotation',
+				route: '/components/annotation',
+				category: 'Content & graphics',
+				label: 'Annotation'
+			}
+		],
+		capabilities: ['svelte', 'component', 'content-&Graphics'],
+		relatedComponents: ['tour', 'tooltip', 'kbd'],
 		visibility: 'public'
 	},
 	{
@@ -5087,7 +5218,9 @@ export const relatedComponents = {
 	skeleton: ['spinner'],
 	spinner: ['spinner-text', 'skeleton'],
 	'spinner-text': ['spinner'],
+	'thinking-orb': ['spinner', 'spinner-text', 'voice-indicator', 'ai-reasoning'],
 	toast: ['alert', 'confirmation'],
+	'voice-indicator': ['voice-input', 'ai-composer', 'spinner'],
 	accordion: ['collapsible'],
 	collapsible: ['accordion'],
 	breadcrumbs: [],
@@ -5112,12 +5245,14 @@ export const relatedComponents = {
 	tour: ['popover', 'dialog'],
 	tooltip: ['popover', 'hover-card'],
 	'audio-player': ['media-volume', 'video-player'],
+	'before-after': ['slider', 'aspect-ratio', 'image-zoom'],
 	carousel: ['image-gallery'],
 	'image-gallery': ['image-zoom', 'carousel'],
 	'image-zoom': ['image-gallery'],
 	'media-volume': ['audio-player', 'video-player'],
 	'document-viewer': ['ai-file-preview'],
 	'video-player': ['audio-player', 'media-volume'],
+	annotation: ['tour', 'tooltip', 'kbd'],
 	code: ['diff', 'markdown'],
 	diff: ['code'],
 	globe: ['map'],
