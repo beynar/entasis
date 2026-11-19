@@ -297,6 +297,10 @@ export const componentNavigationSections = [
 				text: 'Address'
 			},
 			{
+				href: '/components/animated-number',
+				text: 'Animated number'
+			},
+			{
 				href: '/components/avatar',
 				text: 'Avatar'
 			},

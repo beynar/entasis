@@ -68,6 +68,7 @@ import { textAreaDescription } from '$lib/components/Form/TextArea/textArea.mcp.
 import { timeInputDescription } from '$lib/components/Form/TimeInput/timeInput.mcp.js';
 import { voiceInputDescription } from '$lib/components/Form/VoiceInput/voiceInput.mcp.js';
 import { addressDescription } from '$lib/components/Address/address.mcp.js';
+import { animatedNumberDescription } from '$lib/components/AnimatedNumber/animatedNumber.mcp.js';
 import { avatarDescription } from '$lib/components/Avatar/avatar.mcp.js';
 import { chartDescription } from '$lib/components/Chart/chart.mcp.js';
 import { chipDescription } from '$lib/components/Chip/chip.mcp.js';
@@ -224,6 +225,7 @@ export const componentMcpRegistry = {
 	'time-input': timeInputDescription,
 	'voice-input': voiceInputDescription,
 	address: addressDescription,
+	'animated-number': animatedNumberDescription,
 	avatar: avatarDescription,
 	'avatar-group': avatarDescription,
 	chart: chartDescription,

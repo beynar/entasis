@@ -94,6 +94,7 @@ Each link is that entry's full documentation as Markdown (props, data model, the
 ## Data display
 
 - [Address](https://entasis.beynar.workers.dev/components/address.md) `entasis/address` — `entasis/address` holds the address model, the line order of each country, an `<Address>` display component, and the Google Places search `AddressInput` uses by default (with the server route that serves it).
+- [Animated number](https://entasis.beynar.workers.dev/components/animated-number.md) `entasis/animated-number` — A number that animates from the one it showed to the one it shows.
 - [Avatar](https://entasis.beynar.workers.dev/components/avatar.md) `entasis/avatar` — The Avatar component displays a user's profile picture with fallback initials.
 - [Avatar group](https://entasis.beynar.workers.dev/components/avatar-group.md) `entasis/avatar` — The Avatar component displays a user's profile picture with fallback initials.
 - [Chart](https://entasis.beynar.workers.dev/components/chart.md) `entasis/chart` — Chart renders layered cartesian, polar, relation, or faceted marks from one typed data array.

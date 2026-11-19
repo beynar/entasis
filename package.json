@@ -496,6 +496,11 @@
 			"svelte": "./dist/components/Address/index.js",
 			"default": "./dist/components/Address/index.js"
 		},
+		"./animated-number": {
+			"types": "./dist/components/AnimatedNumber/index.d.ts",
+			"svelte": "./dist/components/AnimatedNumber/index.js",
+			"default": "./dist/components/AnimatedNumber/index.js"
+		},
 		"./avatar": {
 			"types": "./dist/components/Avatar/index.d.ts",
 			"svelte": "./dist/components/Avatar/index.js",
@@ -1121,6 +1126,9 @@
 			],
 			"address": [
 				"dist/components/Address/index.d.ts"
+			],
+			"animated-number": [
+				"dist/components/AnimatedNumber/index.d.ts"
 			],
 			"avatar": [
 				"dist/components/Avatar/index.d.ts"

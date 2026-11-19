@@ -6,6 +6,21 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+### Added
+
+- AnimatedNumber (`entasis/animated-number`): a number that animates from the one it showed to the
+  one it shows. It is formatted with `Intl.NumberFormat` (`format`, `locale`, `prefix`, `suffix`)
+  and cut into digits and symbols that are followed from one value to the next: the units stay
+  the units when the number gains a digit, what joins it fades in, what leaves it fades out, and
+  the rest slides to its new place. `variant="flow"` turns each digit like a wheel behind a window
+  with soft edges; `variant="blur"` slides the new digit in and the old one out through a blur and
+  leaves the others still. `trend` (auto, up, down, nearest) is the way digits travel,
+  `continuous` makes every digit under the one that changed turn, `duration` and `blur` set the
+  pace and the blur, and `animated={false}` changes the number at once. The server renders the
+  plain number, assistive technology reads it as plain text, and nothing moves under reduced
+  motion. Adapted from NumberFlow by Maxwell Barvian (MIT) and animated-blur-number by serafim
+  (MIT).
+
 ## 0.26.0 — 2026-11-19
 
 ### Added

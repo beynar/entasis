@@ -71,6 +71,7 @@ export const componentAliases = {
 	'entasis/time-input': './src/lib/components/Form/TimeInput/index.ts',
 	'entasis/voice-input': './src/lib/components/Form/VoiceInput/index.ts',
 	'entasis/address': './src/lib/components/Address/index.ts',
+	'entasis/animated-number': './src/lib/components/AnimatedNumber/index.ts',
 	'entasis/avatar': './src/lib/components/Avatar/index.ts',
 	'entasis/chart': './src/lib/components/Chart/index.ts',
 	'entasis/chip': './src/lib/components/Chip/index.ts',

@@ -315,6 +315,9 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	component('address', 'components/Address', 'Data display', 'Address', {
 		related: ['address-input']
 	}),
+	component('animated-number', 'components/AnimatedNumber', 'Data display', 'Animated number', {
+		related: ['stat', 'countdown', 'meter']
+	}),
 	component('avatar', 'components/Avatar', 'Data display', 'Avatar', {
 		docs: [
 			docs('avatar', '/components/avatar', 'Data display', 'Avatar'),
@@ -1944,6 +1947,18 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'beforeAfterTheme',
 		'setBeforeAfterTheme',
 		'useBeforeAfterTheme'
+	],
+	'animated-number': [
+		'AnimatedNumber',
+		'AnimatedNumberProps',
+		'AnimatedNumberTheme',
+		'AnimatedNumberThemeProps',
+		'AnimatedNumberTrend',
+		'AnimatedNumberValue',
+		'AnimatedNumberVariant',
+		'animatedNumberTheme',
+		'setAnimatedNumberTheme',
+		'useAnimatedNumberTheme'
 	],
 	avatar: [
 		'Avatar',

@@ -2315,6 +2315,34 @@ export const componentInventory = [
 		visibility: 'public'
 	},
 	{
+		id: 'animated-number',
+		subpath: 'entasis/animated-number',
+		sourceIndex: 'src/lib/components/AnimatedNumber/index.ts',
+		exportedSymbols: [
+			'AnimatedNumber',
+			'AnimatedNumberProps',
+			'AnimatedNumberTheme',
+			'AnimatedNumberThemeProps',
+			'AnimatedNumberTrend',
+			'AnimatedNumberValue',
+			'AnimatedNumberVariant',
+			'animatedNumberTheme',
+			'setAnimatedNumberTheme',
+			'useAnimatedNumberTheme'
+		],
+		docs: [
+			{
+				id: 'animated-number',
+				route: '/components/animated-number',
+				category: 'Data display',
+				label: 'Animated number'
+			}
+		],
+		capabilities: ['svelte', 'component', 'dataDisplay'],
+		relatedComponents: ['stat', 'countdown', 'meter'],
+		visibility: 'public'
+	},
+	{
 		id: 'avatar',
 		subpath: 'entasis/avatar',
 		sourceIndex: 'src/lib/components/Avatar/index.ts',
@@ -5190,6 +5218,7 @@ export const relatedComponents = {
 	'time-input': ['date-input'],
 	'voice-input': ['text-input', 'ai-composer'],
 	address: ['address-input'],
+	'animated-number': ['stat', 'countdown', 'meter'],
 	avatar: [],
 	'avatar-group': [],
 	chart: [],
