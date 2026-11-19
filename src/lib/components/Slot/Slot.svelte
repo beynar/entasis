@@ -55,23 +55,21 @@
 	{/if}
 {/snippet}
 
-{#if renderIf || render}
-	<!-- If no class is pass, we assume that we don't want to wrap it inside a div -->
-	{#if render}
-		{#if !className && render}
-			{@render slot()}
-		{:else if render}
-			<svelte:element this={as} {style} {...attrs} class={className} {...attachments}>
-				{@render slot()}
-			</svelte:element>
-		{/if}
-	{:else if children}
-		{#if className}
-			<svelte:element this={as} {style} {...attrs} class={className} {...attachments}>
-				{@render children()}
-			</svelte:element>
-		{:else}
-			{@render children()}
-		{/if}
-	{/if}
+<!-- One chain, so a slot costs one block whatever it renders (a Button mounts three).
+     Without a class the content renders bare, with no wrapping element. -->
+{#if render && className}
+	<svelte:element this={as} {style} {...attrs} class={className} {...attachments}>
+		{@render slot()}
+	</svelte:element>
+{:else if render && typeof render !== 'string'}
+	<!-- The conditional prop contract requires payload when the snippet needs it. -->
+	{@render render(payload as Payload)}
+{:else if render}
+	{render}
+{:else if renderIf && children && className}
+	<svelte:element this={as} {style} {...attrs} class={className} {...attachments}>
+		{@render children()}
+	</svelte:element>
+{:else if renderIf && children}
+	{@render children()}
 {/if}

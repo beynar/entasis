@@ -1,5 +1,5 @@
 import { createBindableStateClass } from '$lib/utils/state.svelte.js';
-import { getContext, onDestroy, onMount, setContext, tick } from 'svelte';
+import { getContext, onDestroy, onMount, setContext, tick, untrack, type Component } from 'svelte';
 import { BROWSER as browser } from 'esm-env';
 import { MediaQuery } from 'svelte/reactivity';
 import type { SpinnerVariant } from '../Spinner/spinner.props.js';
@@ -16,7 +16,7 @@ import { LayerStack } from '$lib/utils/layers.svelte.js';
 import { HoverIntentGroup } from '$lib/utils/hoverIntent.js';
 import type { TooltipOptions } from '../Tooltip/tooltip.props.js';
 import type { ConfirmationHost } from '../Confirmation/confirmation.state.svelte.js';
-import { updateThemeWithTransition, type ThemeTransitionInput } from './themeTransition.js';
+import type { ThemeTransitionInput } from './themeTransition.js';
 import { ThemeFloatingWindows } from './theme.floatingWindows.js';
 import type { Colors } from '$lib/types/theme.js';
 import { REDUCED_MOTION_QUERY, registerActiveTheme } from '$lib/utils/motion.svelte.js';
@@ -60,6 +60,20 @@ interface ThemeOptions {
 	readonly webmcp?: boolean | WebMCPOptions;
 }
 
+/**
+ * The view transitions of a theme change, loaded on demand: an app that sets no `transition` on
+ * `<Theme>` does not carry them. `<Theme>` calls it ahead when one is set, so the first change does
+ * not wait for the code.
+ */
+export const loadThemeTransition = () => import('./themeTransition.js');
+
+// The module's own check, repeated here so a browser that cannot play a transition swaps the
+// theme at once, as it did when the module was always there.
+const canPlayThemeTransition = () =>
+	typeof document !== 'undefined' &&
+	document.visibilityState === 'visible' &&
+	typeof document.startViewTransition === 'function';
+
 export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 	tooltip = $state<(TooltipOptions & { ref: HTMLElement }) | null>(null);
 	/**
@@ -82,6 +96,27 @@ export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 	 */
 	confirmation = $state<ConfirmationHost | null>(null);
 	readonly floatingWindows = new ThemeFloatingWindows();
+	// The surfaces `<Theme>` renders after its content for the components that need one: the
+	// dialog backdrop, the tooltip surface. Each is brought by the component that uses it
+	// (`mountHost`), so a page without dialogs or tooltips does not load their code.
+	/** Hosts registered while their component initialises, on the server as in the browser. */
+	hosts = $state.raw<readonly Component[]>([]);
+	/** Hosts registered in the browser only; `<Theme>` renders them once it has hydrated. */
+	clientHosts = $state.raw<readonly Component[]>([]);
+	/**
+	 * Asks `<Theme>` to render `host` once, after its content, for as long as the Theme lives.
+	 * Call it while a component initialises. `clientOnly` is for a caller that does not run on the
+	 * server (an attachment in a template): the host then stays out of the server markup and of
+	 * hydration, and mounts right after.
+	 */
+	mountHost(host: Component, options?: { clientOnly?: boolean }) {
+		if (options?.clientOnly && !browser) return;
+		const list = options?.clientOnly ? 'clientHosts' : 'hosts';
+		// Untracked: the caller may be a template expression, which may not write state it tracks.
+		untrack(() => {
+			if (!this[list].includes(host)) this[list] = [...this[list], host];
+		});
+	}
 	/** Every floating surface registers here; see `LayerStack` for dismissal and z-order. */
 	readonly layers = new LayerStack();
 	// Tailwind's default breakpoint widths. `min-width` queries so the first that
@@ -141,7 +176,12 @@ export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 		return this.svelteTheme.theme;
 	}
 
+	// Counts the theme changes asked for, so a transition whose code is still loading does not
+	// apply its theme over a later one.
+	#themeRequest = 0;
+
 	set theme(theme: string) {
+		const request = ++this.#themeRequest;
 		if (theme === this.svelteTheme.theme) return;
 		if (!this.svelteTheme.themes.includes(theme)) {
 			this.svelteTheme.theme = theme;
@@ -150,9 +190,18 @@ export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 
 		// A reduced-motion preference turns the view transition into an instant swap.
 		const transition = this.preferReducesMotion ? undefined : this.themeTransition;
-		updateThemeWithTransition(transition, async () => {
+		// Without a transition, or where the browser cannot play one, the swap is immediate and the
+		// transition code is never loaded.
+		if (!transition || !canPlayThemeTransition()) {
 			this.svelteTheme.theme = theme;
-			await tick();
+			return;
+		}
+		void loadThemeTransition().then(({ updateThemeWithTransition }) => {
+			if (request !== this.#themeRequest) return;
+			updateThemeWithTransition(transition, async () => {
+				this.svelteTheme.theme = theme;
+				await tick();
+			});
 		});
 	}
 

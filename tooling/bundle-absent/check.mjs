@@ -1,7 +1,9 @@
 // npm run check:bundle-absent
 //
 // No public entry statically reaches a module it must not bundle (rules in ./graph.mjs): a
-// component's `*.webmcp.ts` (dynamically imported only under `<Theme webmcp>`), MapLibre and
+// component's `*.webmcp.ts` (dynamically imported only under `<Theme webmcp>`), the dialog
+// backdrop and the tooltip surface outside their owners (`<Theme>` must not import them), the
+// loading overlay and the theme transitions (both imported dynamically), MapLibre and
 // intl-tel-input (loaded from a CDN at runtime).
 //
 //   node tooling/bundle-absent/check.mjs            reads dist/ (run `svelte-package` first; CI)

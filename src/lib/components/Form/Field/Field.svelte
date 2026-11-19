@@ -303,7 +303,9 @@
 					})}
 					render={label}
 				/>
-				<Slot class={classes.actions({ density })} render={actions} />
+				{#if actions}
+					<Slot class={classes.actions({ density })} render={actions} />
+				{/if}
 			</Slot>
 		{:else}
 			<Slot
@@ -327,7 +329,9 @@
 					render={label}
 					{@attach labelFor === false ? labelClick : undefined}
 				/>
-				<Slot class={classes.actions({ density })} render={actions} />
+				{#if actions}
+					<Slot class={classes.actions({ density })} render={actions} />
+				{/if}
 			</Slot>
 		{/if}
 	{/if}
@@ -341,22 +345,31 @@
 		{@attach focusFromContainer}
 		{@attach anchor}
 	>
-		<Slot render={prefix} class={classes.prefix({ density })} />
+		<!-- Most fields have neither: an absent prefix or suffix mounts nothing and resolves no class. -->
+		{#if prefix}
+			<Slot render={prefix} class={classes.prefix({ density })} />
+		{/if}
 		{@render children()}
-		<Slot render={suffix} class={classes.suffix({ density })} />
+		{#if suffix}
+			<Slot render={suffix} class={classes.suffix({ density })} />
+		{/if}
 	</div>
 	{#if description || helper || footer}
 		<Slot render={footer} class={classes.footer({ density, labelPosition: resolvedLabelPosition })}>
-			<Slot
-				class={classes.description({ size, disabled: field.disabled })}
-				render={description}
-				attrs={{ id: field.descriptionId }}
-			/>
-			<Slot
-				class={classes.helper({ size, disabled: field.disabled })}
-				render={helper}
-				attrs={{ id: field.helperId }}
-			/>
+			{#if description}
+				<Slot
+					class={classes.description({ size, disabled: field.disabled })}
+					render={description}
+					attrs={{ id: field.descriptionId }}
+				/>
+			{/if}
+			{#if helper}
+				<Slot
+					class={classes.helper({ size, disabled: field.disabled })}
+					render={helper}
+					attrs={{ id: field.helperId }}
+				/>
+			{/if}
 		</Slot>
 	{/if}
 	{#if field.hasError}

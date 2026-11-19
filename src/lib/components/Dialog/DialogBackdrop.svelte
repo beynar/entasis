@@ -2,7 +2,10 @@
 	import { useTheme } from '../Theme/theme.state.svelte.js';
 	import { useDialogMotion, useDialogTheme } from './dialog.theme.js';
 	import { easingBezierStrings } from '$lib/transitions/easingFunctions.js';
-	import { DIALOG_Z_BASE, type DialogState } from './dialog.state.svelte.js';
+	// The z-index comes from the Theme's own table: `dialog.state` imports this component, to
+	// bring it along with the first dialog, and must not be imported back for a value.
+	import { DIALOG_Z_BASE } from '../Theme/theme.layers.js';
+	import type { DialogState } from './dialog.state.svelte.js';
 	import { fso } from '$lib/transitions/transition.js';
 	import type { ResolvedMotion } from '$lib/utils/motion/index.js';
 	import { portal } from '$lib/attachments/portal.js';
@@ -13,7 +16,8 @@
 	const theme = useTheme();
 	const classes = $derived(useDialogTheme());
 	const fade = fso();
-	// The backdrop is rendered by `Theme` itself, so its own context sits *above* every
+	// The backdrop is rendered by `Theme` itself (the first dialog of the page registers it with
+	// `mountHost`), so its own context sits *above* every
 	// `setDialogTheme({ motion })` an app makes — resolving a preset here would ignore
 	// them and desync the fade from the panel. Follow the topmost dialog's already
 	// resolved motion instead; the preset below is only the empty-stack fallback.
@@ -76,7 +80,7 @@
 				: `opacity ${backdropMotion.out.duration ?? 0}ms ${
 						easingBezierStrings[backdropMotion.out.easing ?? 'cubicInOut']
 					}`}
-			in:fade={{
+			in:fade|global={{
 				opacity: 0,
 				duration: backdropMotion.in.duration,
 				easing: backdropMotion.in.easing

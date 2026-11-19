@@ -13,19 +13,32 @@ const toggle = async () => {
 };
 const overlay = (host: HTMLElement) =>
 	host.querySelector<HTMLElement>(':scope > [data-spinner-overlay]');
+// A Button fetches the overlay's code the first time one loads, so the overlay arrives after it.
+const overlayShown = (...ids: string[]) =>
+	expect.poll(() => ids.every((id) => overlay(button(id)) !== null)).toBe(true);
 
 describe('spinnerOverlay', () => {
+	test('a button that does not load carries no overlay and no style of its own', async () => {
+		render(SpinnerOverlayHarness, { initial: false });
+		await tick();
+		for (const id of ['placed', 'flow']) {
+			expect(overlay(button(id))).toBeNull();
+			expect(button(id).getAttribute('style') ?? '').toBe('');
+		}
+	});
+
 	test('a host placed by its classes keeps its place while it loads', async () => {
 		render(SpinnerOverlayHarness, { initial: false });
 		const before = box(button('placed'));
 		await toggle();
-		expect(overlay(button('placed'))).not.toBeNull();
+		await overlayShown('placed');
 		expect(getComputedStyle(button('placed')).position).toBe('absolute');
 		expect(box(button('placed'))).toEqual(before);
 	});
 
 	test('the overlay covers its host exactly', async () => {
 		render(SpinnerOverlayHarness, { initial: true });
+		await overlayShown('placed', 'flow');
 		for (const id of ['placed', 'flow']) {
 			const host = button(id);
 			const cover = overlay(host)!;
@@ -42,6 +55,7 @@ describe('spinnerOverlay', () => {
 
 	test('the overlay follows a radius change while its host loads', async () => {
 		render(SpinnerOverlayHarness, { initial: true });
+		await overlayShown('flow');
 		const host = button('flow');
 		const before = getComputedStyle(overlay(host)!).borderTopLeftRadius;
 		button('round').click();
@@ -73,6 +87,7 @@ describe('spinnerOverlay', () => {
 
 	test('an unpositioned host is anchored while it loads and given back after', async () => {
 		render(SpinnerOverlayHarness, { initial: true });
+		await overlayShown('flow');
 		expect(getComputedStyle(button('flow')).position).toBe('relative');
 		await toggle();
 		await expect.poll(() => overlay(button('flow'))).toBeNull();

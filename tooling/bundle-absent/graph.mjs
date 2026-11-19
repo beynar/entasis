@@ -20,6 +20,30 @@ export const absentRules = [
 		allowFrom: [/\/Form\/Ask\/Ask\.svelte$/, /\/Form\/MultiStepForm\/MultiStepForm\.svelte$/]
 	},
 	{
+		name: 'The dialog backdrop and the tooltip surface come with the first dialog or tooltip',
+		// `<Theme>` renders them once a component registered them (`ThemeState.mountHost`); a
+		// static import from Theme would put the dialog, popover and positioning code in every app.
+		file: /\/(?:DialogBackdrop|TooltipHost)\.svelte$/,
+		allowFrom: [
+			/\/Dialog\/dialog\.state\.svelte\.(js|ts)$/,
+			/\/Tooltip\/tooltip\.attachment\.svelte\.(js|ts)$/,
+			/\/Tooltip\/index\.(js|ts)$/
+		]
+	},
+	{
+		name: 'The loading overlay comes with the first host that loads',
+		// Button reaches it through `lazySpinnerOverlay`, which imports it dynamically; a static
+		// import would put the overlay and the spinner in every app that has a button.
+		file: /\/attachments\/spinnerOverlay\.svelte\.(js|ts)$/,
+		allowFrom: []
+	},
+	{
+		name: 'Theme transitions come with the first theme change that plays one',
+		// `ThemeState` imports them dynamically; the Theme entry only re-exports their names.
+		file: /\/Theme\/themeTransition\.(js|ts)$/,
+		allowFrom: [/\/Theme\/index\.(js|ts)$/]
+	},
+	{
 		name: 'MapLibre loads from a CDN at runtime',
 		package: 'maplibre-gl',
 		dynamic: true

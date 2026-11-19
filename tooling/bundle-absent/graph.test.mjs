@@ -115,5 +115,74 @@ test('MapLibre and intl-tel-input are never imported, statically or dynamically'
 			assert.deepEqual(cdn.problems, [], 'a CDN URL is not a bundled module');
 		}
 	);
-	assert.equal(absentRules.length, 3);
+	assert.equal(absentRules.length, 6);
+});
+
+test('the dialog backdrop and the tooltip surface are imported by their owners only', async () => {
+	await fixture(
+		{
+			'components/Theme/index.js': "export { default as Theme } from './Theme.svelte';",
+			'components/Theme/Theme.svelte':
+				"<script>\n\timport TooltipHost from '../Tooltip/TooltipHost.svelte';\n</script>",
+			'components/Tooltip/index.js':
+				"export { tooltip } from './tooltip.attachment.svelte.js';\nexport { default as TooltipHost } from './TooltipHost.svelte';",
+			'components/Tooltip/tooltip.attachment.svelte.js':
+				"import TooltipHost from './TooltipHost.svelte';\nexport const tooltip = () => TooltipHost;",
+			'components/Tooltip/TooltipHost.svelte': '<div></div>',
+			'components/Dialog/index.js': "export { DialogState } from './dialog.state.svelte.js';",
+			'components/Dialog/dialog.state.svelte.js':
+				"import DialogBackdrop from './DialogBackdrop.svelte';\nexport class DialogState {}",
+			'components/Dialog/DialogBackdrop.svelte': '<div></div>'
+		},
+		async (root) => {
+			const theme = await checkEntry(path.join(root, 'components/Theme/index.js'), root);
+			assert.equal(theme.problems.length, 1);
+			assert.match(
+				theme.problems[0],
+				/come with the first dialog or tooltip: .*Theme\.svelte -> components\/Tooltip\/TooltipHost\.svelte \(static import\)/
+			);
+			const tooltip = await checkEntry(path.join(root, 'components/Tooltip/index.js'), root);
+			assert.deepEqual(tooltip.problems, []);
+			const dialog = await checkEntry(path.join(root, 'components/Dialog/index.js'), root);
+			assert.deepEqual(dialog.problems, []);
+		}
+	);
+});
+
+test('the loading overlay and the theme transitions are imported dynamically', async () => {
+	await fixture(
+		{
+			'components/Button/index.js': "export { default as Button } from './Button.svelte';",
+			'components/Button/Button.svelte':
+				"<script>\n\timport { lazySpinnerOverlay } from '../../attachments/spinnerOverlay.lazy.svelte.js';\n</script>",
+			'components/Eager/index.js':
+				"export { spinnerOverlay } from '../../attachments/spinnerOverlay.svelte.js';",
+			'attachments/spinnerOverlay.lazy.svelte.js':
+				"export const lazySpinnerOverlay = () => import('./spinnerOverlay.svelte.js');",
+			'attachments/spinnerOverlay.svelte.js': 'export const spinnerOverlay = () => {};',
+			'components/Theme/index.js':
+				"export { ThemeState } from './theme.state.svelte.js';\nexport { themeTransitions } from './themeTransition.js';",
+			'components/Theme/theme.state.svelte.js':
+				"export const loadThemeTransition = () => import('./themeTransition.js');\nexport class ThemeState {}",
+			'components/Theme/themeTransition.js': 'export const themeTransitions = [];',
+			'components/Other/index.js':
+				"import { themeTransitions } from '../Theme/themeTransition.js';\nexport const other = themeTransitions;"
+		},
+		async (root) => {
+			const button = await checkEntry(path.join(root, 'components/Button/index.js'), root);
+			assert.deepEqual(button.problems, [], 'a dynamic import is the supported path');
+			const eager = await checkEntry(path.join(root, 'components/Eager/index.js'), root);
+			assert.match(
+				eager.problems.join(),
+				/loading overlay .*spinnerOverlay\.svelte\.js \(static import\)/
+			);
+			const theme = await checkEntry(path.join(root, 'components/Theme/index.js'), root);
+			assert.deepEqual(theme.problems, [], 'the Theme entry re-exports the names');
+			const other = await checkEntry(path.join(root, 'components/Other/index.js'), root);
+			assert.match(
+				other.problems.join(),
+				/Theme transitions .*themeTransition\.js \(static import\)/
+			);
+		}
+	);
 });

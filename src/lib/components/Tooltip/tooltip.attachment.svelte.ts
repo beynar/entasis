@@ -23,6 +23,7 @@ import { isRestoringFocus } from '$lib/utils/useFocusScope.svelte.js';
 import { inputModality } from '$lib/utils/inputModality.js';
 import type { TooltipOptions } from './tooltip.props.js';
 import { requestTooltipChange, watchTooltipContentHover } from './tooltip.surface.js';
+import TooltipHost from './TooltipHost.svelte';
 
 const FOCUSABLE =
 	'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable]:not([contenteditable="false"])';
@@ -53,6 +54,9 @@ const showsFocusRing = (target: EventTarget | null) => {
 
 export const tooltip = (props: TooltipOptions) => {
 	const theme = useTheme();
+	// The first tooltip of the page brings the shared surface: `<Theme>` renders it once. In the
+	// browser only: an attachment written in a template is not evaluated on the server.
+	theme.mountHost(TooltipHost, { clientOnly: true });
 	let refElement: HTMLElement | null = null;
 	// A press closes the tooltip and keeps it closed until the pointer leaves or focus moves on.
 	let pressed = false;

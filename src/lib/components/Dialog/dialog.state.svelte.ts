@@ -36,6 +36,7 @@ import { refuseDismissal } from '$lib/utils/dismissible.js';
 import { rubberBand } from '$lib/utils/rubberBand.js';
 import { useDialogMotion, type DialogThemeProps } from './dialog.theme.js';
 import type { DialogApi } from './dialog.api.js';
+import DialogBackdrop from './DialogBackdrop.svelte';
 
 /** The furthest a drawer follows a pull past fully open, in px, however far the finger goes. */
 const OVERDRAG_EXTENT = 48;
@@ -377,6 +378,8 @@ export class DialogState extends createBindableStateClass<DialogOptions>() imple
 	constructor(options: DialogOptions) {
 		super(options);
 		setContext('dialog', this);
+		// The first dialog of the page brings the shared backdrop: `<Theme>` renders it once.
+		this.theme.mountHost(DialogBackdrop);
 		// Details describe the change `setOpen` made: an open state moved from outside (the bound
 		// `open` prop) leaves none, so a later close does not read the one that opened it.
 		$effect.pre(() => {

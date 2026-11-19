@@ -4,17 +4,15 @@
 >
 	import BeforeHydratation from '../Utils/BeforeHydratation.svelte';
 	import { Theme as SvelteTheme } from 'svelte-themes';
-	import { ThemeState } from './theme.state.svelte.js';
+	import { ThemeState, loadThemeTransition } from './theme.state.svelte.js';
 	import { compileThemeBlockingScript, compileViewportScript, disableAnimation } from './helper.js';
-	import TooltipHost from '../Tooltip/TooltipHost.svelte';
-	import DialogBackdrop from '../Dialog/DialogBackdrop.svelte';
 	import type { ThemeProps } from './theme.props.js';
 	import { portal } from '$lib/attachments/portal.js';
 	import { FLOATING_WINDOW_LAYER_Z_INDEX } from './theme.layers.js';
 	import { compileThemeDesignTokens, type ThemeDesignTokens } from './theme.designTokens.js';
 	import { mergeMotionTokens } from '$lib/tailwind/scales.js';
 	import { REDUCED_MOTION_ATTRIBUTE, REDUCED_MOTION_QUERY } from '$lib/utils/motion.svelte.js';
-	import { untrack } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { installFocusHistory } from '$lib/utils/focusHistory.js';
 
 	let {
@@ -160,6 +158,19 @@
 		theme
 	);
 
+	// Hosts registered from the browser only are not in the server markup, so they wait for
+	// hydration to finish before they mount.
+	let hydrated = $state(false);
+	onMount(() => {
+		hydrated = true;
+	});
+
+	// The transition code is loaded on demand; an app that sets one gets it ahead of the first
+	// theme change.
+	$effect(() => {
+		if (transition) void loadThemeTransition();
+	});
+
 	// Remember where focus has been, so a dialog whose opener left the page (a menu item) can hand
 	// focus to the last element that is still there.
 	$effect(() => installFocusHistory(document));
@@ -232,8 +243,15 @@
 
 {@render children(entasisTheme)}
 
-<DialogBackdrop />
-<TooltipHost />
+<!-- The dialog backdrop, the tooltip surface: each is brought by the component that needs it. -->
+{#each entasisTheme.hosts as Host (Host)}
+	<Host />
+{/each}
+{#if hydrated}
+	{#each entasisTheme.clientHosts as Host (Host)}
+		<Host />
+	{/each}
+{/if}
 
 <style>
 	:global(html[data-entasis-theme-transition]::view-transition-old(root)),

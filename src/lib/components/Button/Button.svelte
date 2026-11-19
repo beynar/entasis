@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { safeHref } from '$lib/utils/safeHref.js';
 	import type { Attachment } from 'svelte/attachments';
-	import { spinnerOverlay } from '$lib/attachments/spinnerOverlay.svelte.js';
+	import { lazySpinnerOverlay } from '$lib/attachments/spinnerOverlay.lazy.svelte.js';
 	import Slot from '../Slot/Slot.svelte';
 	import type { ButtonInternalProps } from './button.props.js';
 	import { useButtonTheme } from './button.theme.js';
@@ -105,6 +105,14 @@
 		return () => node.removeEventListener('click', refuse, { capture: true });
 	};
 
+	// Most buttons never load, so the overlay attaches from the first time this one does (it stays
+	// attached afterwards, to fade out), and its code is fetched the first time any host loads.
+	let hasLoaded = false;
+	const loadingOverlay = () => {
+		hasLoaded ||= loading;
+		return hasLoaded ? lazySpinnerOverlay({ loading, size }) : undefined;
+	};
+
 	const webmcp = useWebMCPConfig();
 
 	// It reads what decides that, so a button that gets disabled leaves the list; without the
@@ -160,14 +168,19 @@
 	disabled={nativeDisabled ? true : undefined}
 	class={slots.root({ className })}
 	{@attach refuseInactiveActivation}
-	{@attach spinnerOverlay({ loading, size })}
+	{@attach loadingOverlay()}
 	{@attach offerToAgents}
 	{onclick}
 	onpointerenter={onpointerenter ? handlePointerEnter : undefined}
 	onpointerleave={onpointerleave ? handlePointerLeave : undefined}
 	{...attachments}
 >
-	<Slot render={prefix} as="span" class={slots.prefix()} />
+	<!-- Most buttons have neither: an absent prefix or suffix mounts nothing and resolves no class. -->
+	{#if prefix}
+		<Slot render={prefix} as="span" class={slots.prefix()} />
+	{/if}
 	<Slot render={children} />
-	<Slot render={suffix} as="span" class={slots.suffix()} />
+	{#if suffix}
+		<Slot render={suffix} as="span" class={slots.suffix()} />
+	{/if}
 </svelte:element>
