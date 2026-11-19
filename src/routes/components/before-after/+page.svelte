@@ -116,7 +116,11 @@
 	subtitle="Compares two contents laid one over the other, with a divider to drag between them."
 	component="BeforeAfter"
 	features={[
-		'The divider is a slider: keyboard, screen readers and right-to-left',
+		{
+			label: 'The divider is a slider: arrow keys, Page keys, Home and End',
+			test: 'a11y:before-after.keyboard'
+		},
+		{ label: 'Right-to-left mirrors the sides and the arrows', test: 'a11y:before-after.rtl' },
 		'Drag the divider, press anywhere on the picture, or swipe and tap on touch',
 		'The page keeps scrolling across it on touch',
 		'Images by their attributes, or any content as snippets',

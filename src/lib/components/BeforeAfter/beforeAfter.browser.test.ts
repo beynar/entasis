@@ -75,7 +75,7 @@ describe('BeforeAfter', () => {
 		expect(document.activeElement).toBe(input());
 	});
 
-	test('keys move the focused divider by the step, the large step, and to either end', async () => {
+	test('a11y:before-after.keyboard keys move the focused divider by the step, the large step, and to either end', async () => {
 		const onValueCommit = vi.fn();
 		render(BeforeAfter, { props: { before, after, ratio: '2x1', step: 5, onValueCommit } });
 
@@ -92,7 +92,7 @@ describe('BeforeAfter', () => {
 		expect(onValueCommit.mock.calls).toEqual([[55], [45], [100], [0]]);
 	});
 
-	test('right to left, the before side is at the right and the arrows are mirrored', async () => {
+	test('a11y:before-after.rtl right to left, the before side is at the right and the arrows are mirrored', async () => {
 		document.documentElement.setAttribute('dir', 'rtl');
 		render(BeforeAfter, { props: { before, after, ratio: '2x1', defaultValue: 25 } });
 
