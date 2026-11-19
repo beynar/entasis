@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.26.0 — 2026-11-19
+
 ### Added
 
 - Annotation (`entasis/annotation`): calls attention to a piece of content the way a pen would: a
