@@ -100,9 +100,11 @@ export class ThemeState extends createBindableStateClass<ThemeOptions>() {
 	// dialog backdrop, the tooltip surface. Each is brought by the component that uses it
 	// (`mountHost`), so a page without dialogs or tooltips does not load their code.
 	/** Hosts registered while their component initialises, on the server as in the browser. */
-	hosts = $state.raw<readonly Component[]>([]);
+	// Annotated on the field: an inferred type is written to the declaration file with
+	// `Component`'s defaults spelled out, which older Svelte versions refuse.
+	hosts: readonly Component[] = $state.raw([]);
 	/** Hosts registered in the browser only; `<Theme>` renders them once it has hydrated. */
-	clientHosts = $state.raw<readonly Component[]>([]);
+	clientHosts: readonly Component[] = $state.raw([]);
 	/**
 	 * Asks `<Theme>` to render `host` once, after its content, for as long as the Theme lives.
 	 * Call it while a component initialises. `clientOnly` is for a caller that does not run on the
