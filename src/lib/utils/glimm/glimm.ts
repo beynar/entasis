@@ -23,12 +23,14 @@ import type {
 } from 'glimm';
 import type { Colors } from '../../types/theme.js';
 import { applyCspNonce } from '../cspNonce.js';
+import { createDistortion, type Distortion } from './glimm.distort.js';
 import { prefersReducedMotion } from '../motion.svelte.js';
 import {
 	createShapeShader,
 	shapeGeometry,
 	type GlimmShape,
-	type ShapeGeometry
+	type ShapeGeometry,
+	type SourceRect
 } from './glimm.shapes.js';
 
 export type { GlimmShape } from './glimm.shapes.js';
@@ -51,9 +53,11 @@ export type GlimmPalette = PaletteName | readonly Colors[];
  * quick streak of light from a corner. `ripple` is a ring that grows from the centre, or from the
  * point given as `origin` (a click). `double` is two soft bands, one from each side, that meet in the middle;
  * `split` is the reverse, two bands that open from the middle towards both sides. `wave` is a
- * bent band whose edge ripples. Options passed with a preset win over its values.
+ * bent band whose edge ripples. `surge` (the default with a `source`) draws its breath at the
+ * control that started it, then leaves it as an arc that swells over the element, sparks riding
+ * it, and leaves its colour on the edges. Options passed with a preset win over its values.
  */
-export type GlimmPreset = 'reveal' | 'glint' | 'ripple' | 'double' | 'split' | 'wave';
+export type GlimmPreset = 'reveal' | 'glint' | 'ripple' | 'double' | 'split' | 'wave' | 'surge';
 
 type PresetValues = Pick<
 	GlimmOptions,
@@ -69,11 +73,24 @@ type PresetValues = Pick<
 	| 'waveSpeed'
 	| 'swellAmount'
 	| 'curve'
+	| 'anticipation'
+	| 'sparks'
+	| 'edges'
+	| 'blur'
+	| 'distort'
 >;
 
 /** The values each preset sets. */
 export const glimmPresets: Record<GlimmPreset, Readonly<PresetValues>> = {
-	reveal: { shape: 'line', sweepMs: 1000, outroMs: 220, bandTight: 16, easing: 'ease' },
+	reveal: {
+		shape: 'line',
+		sweepMs: 1000,
+		outroMs: 220,
+		bandTight: 16,
+		easing: 'ease',
+		edges: 0.5,
+		blur: 4
+	},
 	glint: {
 		shape: 'glint',
 		sweepMs: 900,
@@ -81,7 +98,8 @@ export const glimmPresets: Record<GlimmPreset, Readonly<PresetValues>> = {
 		bandTight: 9,
 		peakAlpha: 0.85,
 		rippleAmount: 0.4,
-		easing: 'easeOutCubic'
+		easing: 'easeOutCubic',
+		sparks: 12
 	},
 	ripple: {
 		shape: 'ring',
@@ -89,7 +107,11 @@ export const glimmPresets: Record<GlimmPreset, Readonly<PresetValues>> = {
 		outroMs: 240,
 		bandTight: 11,
 		rippleAmount: 1,
-		easing: 'easeOutCubic'
+		easing: 'easeOutCubic',
+		sparks: 20,
+		edges: 0.7,
+		blur: 4,
+		distort: 6
 	},
 	double: {
 		shape: 'double',
@@ -97,7 +119,8 @@ export const glimmPresets: Record<GlimmPreset, Readonly<PresetValues>> = {
 		outroMs: 220,
 		bandTight: 9,
 		rippleAmount: 0.5,
-		easing: 'easeOutCubic'
+		easing: 'easeOutCubic',
+		edges: 0.5
 	},
 	split: {
 		shape: 'split',
@@ -105,7 +128,8 @@ export const glimmPresets: Record<GlimmPreset, Readonly<PresetValues>> = {
 		outroMs: 220,
 		bandTight: 7,
 		rippleAmount: 0.5,
-		easing: 'easeOutCubic'
+		easing: 'easeOutCubic',
+		edges: 0.5
 	},
 	wave: {
 		shape: 'line',
@@ -115,7 +139,23 @@ export const glimmPresets: Record<GlimmPreset, Readonly<PresetValues>> = {
 		waveAmount: 1.2,
 		rippleAmount: 1.4,
 		curve: 0.16,
-		easing: 'easeOutCubic'
+		easing: 'easeOutCubic',
+		edges: 0.6,
+		blur: 6,
+		distort: 6
+	},
+	surge: {
+		shape: 'arc',
+		sweepMs: 1300,
+		outroMs: 260,
+		bandTight: 7,
+		rippleAmount: 0.6,
+		easing: 'easeOutCubic',
+		anticipation: 240,
+		sparks: 32,
+		edges: 0.9,
+		blur: 8,
+		distort: 12
 	}
 };
 
@@ -138,15 +178,47 @@ export type GlimmOptions = {
 	color?: Colors;
 	/** Colours that replace the ones `color` makes. */
 	palette?: GlimmPalette;
-	/** A set of defaults: `'reveal'` with `change`, `'glint'` without. */
+	/** A set of defaults: `'surge'` with a `source`, else `'reveal'` with `change`, `'glint'` without. */
 	preset?: GlimmPreset;
-	/** The form of the band, which the preset sets: `'line'`, `'double'`, `'split'`, `'glint'`, `'ring'`. */
+	/**
+	 * The form of the band, which the preset sets: `'line'`, `'double'`, `'split'`, `'glint'`,
+	 * `'ring'`, `'arc'`.
+	 */
 	shape?: GlimmShape;
 	/**
+	 * The control the sweep starts from, inside the element or beside it: an `arc` leaves it, flat
+	 * along its long side (a wide button sends up a dome, a tall tab a sideways one), and a `ring`
+	 * grows from its centre and leaves it clear. Without one, an arc leaves the middle of the side
+	 * `direction` starts from.
+	 */
+	source?: Element;
+	/**
 	 * Where a `ring` grows from: a point in CSS pixels from the element's top-left, or the pointer
-	 * event that started it, so the ring spreads from the click. Default: the centre.
+	 * event that started it, so the ring spreads from the click. Default: the centre, or the
+	 * `source`'s. An `arc` without a `source` leaves this point.
 	 */
 	origin?: GlimmOrigin;
+	/**
+	 * Milliseconds the band takes to draw its breath before it leaves: it shows a little inside the
+	 * element and is drawn back to where it starts. 240 in `surge`, 0 elsewhere.
+	 */
+	anticipation?: number;
+	/** How many sparks ride the band and burn out behind it, up to 32. 32 in `surge`. */
+	sparks?: number;
+	/**
+	 * 0 to 1, how much the band lights the element's edges where it meets them: the same band, in
+	 * its colour, hugging the rounded edge with a white hairline. 0.9 in `surge`.
+	 */
+	edges?: number;
+	/** CSS pixels of blur the content takes where the band crosses it. 8 in `surge`, 0 to turn off. */
+	blur?: number;
+	/**
+	 * CSS pixels the content swells by where the band crosses it, its colours parting slightly: a
+	 * lens over the element's old and new content while they change. Only with `change`, in browsers
+	 * with scoped view transitions (Chromium); elsewhere the content stays still. 12 in `surge`, 6 in
+	 * `ripple` and `wave`, 0 to turn off.
+	 */
+	distort?: number;
 	/**
 	 * Where the band goes: `'ltr'` (default, `'rtl'` when the element reads right to left), `'rtl'`,
 	 * `'ttb'`, `'btt'`. A glint starts from the top-left corner, the top-right one for `'rtl'` and
@@ -178,7 +250,10 @@ export type GlimmOptions = {
 	curve?: number;
 	/** 0 to 1, the share of the element's cross axis the band covers, centred. Default 1. */
 	span?: number;
-	/** CSS pixels over which the band fades out at the element's edges, or `'auto'` (up to 24). */
+	/**
+	 * CSS pixels over which the band fades out before the element's edges, or `'auto'` (up to 24).
+	 * Default 0: the band runs to the edges, where the element's rounded shape clips it.
+	 */
 	feather?: number | 'auto';
 	/** Cancels the sweep when it aborts, like `cancel()`. */
 	signal?: AbortSignal;
@@ -187,7 +262,7 @@ export type GlimmOptions = {
 export type GlimmHandle = {
 	/** Resolves once `change` has run and its update is in the DOM (right away without one). */
 	changed: Promise<void>;
-	/** Resolves when the band has faded out, or when the sweep is cancelled. */
+	/** Resolves when the band and its sparks have faded out, or when the sweep is cancelled. */
 	done: Promise<void>;
 	/**
 	 * Stops the sweep: the band and the old content go, and the element shows what it holds now.
@@ -276,7 +351,9 @@ export function glimm(element: HTMLElement, options: GlimmOptions = {}): GlimmHa
 		if (cancelled) return;
 
 		const settings: GlimmOptions = {
-			...glimmPresets[options.preset ?? (options.change ? 'reveal' : 'glint')]
+			...glimmPresets[
+				options.preset ?? (options.source ? 'surge' : options.change ? 'reveal' : 'glint')
+			]
 		};
 		for (const [key, value] of Object.entries(options)) {
 			if (value !== undefined) (settings as Record<string, unknown>)[key] = value;
@@ -286,38 +363,51 @@ export function glimm(element: HTMLElement, options: GlimmOptions = {}): GlimmHa
 		const bandTight = settings.bandTight ?? 16;
 		const shape = settings.shape ?? 'line';
 		const box = element.getBoundingClientRect();
-		const origin = resolveOrigin(settings.origin, box);
-		const geometry = shapeGeometry(shape, direction, bandTight, box, origin);
+		const source = settings.source ? sourceRect(settings.source, box) : undefined;
+		const origin = resolveOrigin(settings.origin, box, source);
+		const content = contentRect(element, box);
+		const geometry = shapeGeometry(
+			shape,
+			direction,
+			bandTight,
+			box,
+			origin,
+			source ?? (settings.origin ? { x: origin[0], y: origin[1], width: 0, height: 0 } : undefined),
+			content
+		);
 		const palette = settings.palette
 			? resolvePalette(lib, settings.palette, element)
 			: rolePalette(lib, settings.color ?? 'primary', element);
-		const overlay = createOverlay(element);
+
+		const anticipation = Math.max(0, settings.anticipation ?? 0);
+		const overlay = createOverlay(element, { blur: Math.max(0, settings.blur ?? 0) });
 		cleanups.push(overlay.destroy);
-		const ctrl =
-			shape === 'line'
-				? lib.createShader({
-						canvas: overlay.canvas,
-						palette,
-						direction,
-						bandTight,
-						curve: settings.curve,
-						span: settings.span,
-						feather: settings.feather
-					})
-				: createShapeShader({
-						canvas: overlay.canvas,
-						shape,
-						geometry,
-						palette,
-						direction,
-						bandTight,
-						origin,
-						feather: settings.feather
-					});
-		if (!ctrl) return;
+		const band = createShapeShader({
+			canvas: overlay.canvas,
+			shape,
+			geometry,
+			palette,
+			direction,
+			bandTight,
+			origin,
+			feather: settings.feather,
+			curve: settings.curve,
+			span: settings.span,
+			sparks: Math.max(0, settings.sparks ?? 0),
+			edges: Math.max(0, Math.min(1, settings.edges ?? 0)),
+			corner: parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0,
+			blurLayer: overlay.blur,
+			sweepMs: settings.sweepMs ?? 1000,
+			// A ring from a control leaves the control clear, so it can change in place.
+			hold:
+				shape === 'ring' && source && !settings.origin
+					? Math.min(source.width, source.height) / 2
+					: 0
+		});
+		if (!band) return;
 		cleanups.push(() => {
-			ctrl.setAlpha(0);
-			ctrl.destroy();
+			band.setAlpha(0);
+			band.destroy();
 			overlay.canvas.getContext('webgl')?.getExtension('WEBGL_lose_context')?.loseContext();
 		});
 
@@ -332,28 +422,42 @@ export function glimm(element: HTMLElement, options: GlimmOptions = {}): GlimmHa
 			waveSpeed: settings.waveSpeed,
 			swellAmount: settings.swellAmount
 		};
-		const play = (controller: ShaderController, extra: SweepOptions = {}) => {
+		let gathered = false;
+		const play: Play = async (controller, extra = {}, withEdges = true) => {
+			// The breath before the first pass.
+			if (!gathered) {
+				gathered = true;
+				await band.gather(anticipation);
+				if (cancelled) return;
+			}
+			band.launch(withEdges);
 			active = lib.playSweep(controller, { ...sweep, ...extra });
 			return active.done;
 		};
 
 		if (!options.change) {
-			await play(ctrl);
+			await play(band);
 		} else if (typeof (element as ScopedElement).startViewTransition === 'function') {
 			await maskedSweep(
 				element,
 				geometry,
-				ctrl,
+				band,
 				play,
 				change,
 				cleanups,
 				(next) => {
 					transition = next;
 				},
-				() => cancelled
+				() => cancelled,
+				Math.max(0, settings.distort ?? 0)
 			);
 		} else {
-			await coveredSweep(element, overlay, geometry, ctrl, play, change, sweep, () => cancelled);
+			await coveredSweep(element, overlay, geometry, band, play, change, sweep, () => cancelled);
+		}
+		// The element is itself again while the last sparks burn out.
+		if (!cancelled) {
+			transition?.skipTransition();
+			await band.settled();
 		}
 	})()
 		.catch((error) => console.error('[entasis/glimm] sweep failed:', error))
@@ -365,17 +469,89 @@ export function glimm(element: HTMLElement, options: GlimmOptions = {}): GlimmHa
 const defaultDirection = (element: Element): Direction =>
 	getComputedStyle(element).direction === 'rtl' ? 'rtl' : 'ltr';
 
-const resolveOrigin = (origin: GlimmOrigin | undefined, box: DOMRect): [number, number] => {
-	if (!origin) return [box.width / 2, box.height / 2];
+const resolveOrigin = (
+	origin: GlimmOrigin | undefined,
+	box: DOMRect,
+	source?: SourceRect
+): [number, number] => {
+	if (!origin) {
+		return source
+			? [source.x + source.width / 2, source.y + source.height / 2]
+			: [box.width / 2, box.height / 2];
+	}
 	if ('clientX' in origin) return [origin.clientX - box.left, origin.clientY - box.top];
 	return [origin[0], origin[1]];
+};
+
+/**
+ * The part of the element its content takes, from its top-left: the box its children occupy less
+ * their own padding (a Card's slots carry its inner spacing), or the element's own content box when
+ * it holds no element. The sweep's field spans it, so no time goes on empty padding.
+ */
+function contentRect(element: HTMLElement, box: DOMRect): SourceRect {
+	const lengths = (style: CSSStyleDeclaration, side: 'Top' | 'Right' | 'Bottom' | 'Left') =>
+		(parseFloat(style[`padding${side}`]) || 0) + (parseFloat(style[`border${side}Width`]) || 0);
+	const inner = (rect: DOMRect, style: CSSStyleDeclaration) => ({
+		left: rect.left + lengths(style, 'Left'),
+		top: rect.top + lengths(style, 'Top'),
+		right: rect.right - lengths(style, 'Right'),
+		bottom: rect.bottom - lengths(style, 'Bottom')
+	});
+	const own = inner(box, getComputedStyle(element));
+	let union: { left: number; top: number; right: number; bottom: number } | undefined;
+	for (const child of element.children) {
+		const style = getComputedStyle(child);
+		if (style.display === 'none' || style.position === 'absolute' || style.position === 'fixed') {
+			continue;
+		}
+		const rect = child.getBoundingClientRect();
+		if (rect.width === 0 || rect.height === 0) continue;
+		const part = child instanceof HTMLElement ? inner(rect, style) : rect;
+		union = union
+			? {
+					left: Math.min(union.left, part.left),
+					top: Math.min(union.top, part.top),
+					right: Math.max(union.right, part.right),
+					bottom: Math.max(union.bottom, part.bottom)
+				}
+			: { left: part.left, top: part.top, right: part.right, bottom: part.bottom };
+	}
+	const area = union
+		? {
+				left: Math.max(own.left, union.left),
+				top: Math.max(own.top, union.top),
+				right: Math.min(own.right, union.right),
+				bottom: Math.min(own.bottom, union.bottom)
+			}
+		: own;
+	// Nothing left once the padding is out: the whole element.
+	if (area.right - area.left < 8 || area.bottom - area.top < 8) {
+		return { x: 0, y: 0, width: box.width, height: box.height };
+	}
+	return {
+		x: area.left - box.left,
+		y: area.top - box.top,
+		width: area.right - area.left,
+		height: area.bottom - area.top
+	};
+}
+
+// The source's box, from the element's top-left.
+const sourceRect = (source: Element, box: DOMRect): SourceRect => {
+	const rect = source.getBoundingClientRect();
+	return { x: rect.left - box.left, y: rect.top - box.top, width: rect.width, height: rect.height };
 };
 
 /* ---------------------------------------------------------------------------------------------- */
 /* Before and after                                                                               */
 /* ---------------------------------------------------------------------------------------------- */
 
-type Play = (controller: ShaderController, extra?: SweepOptions) => Promise<void>;
+/** One pass of the band; `withEdges` false for a pass whose colour should not stay on the edges. */
+type Play = (
+	controller: ShaderController,
+	extra?: SweepOptions,
+	withEdges?: boolean
+) => Promise<void>;
 
 // Element-scoped view transitions (Chromium) are not in TypeScript's DOM types yet.
 type ScopedElement = HTMLElement & {
@@ -383,27 +559,28 @@ type ScopedElement = HTMLElement & {
 };
 
 const SCOPE_ATTRIBUTE = 'data-glimm-scope';
+let scopes = 0;
 
 // The new picture lies over the old one, cut to the part the band has passed (no cross-fade, no
 // blend), and the element's own parts are captured with it as one picture.
-const scopeStyles = `
-[${SCOPE_ATTRIBUTE}] * { view-transition-name: none !important; }
-[${SCOPE_ATTRIBUTE}]::view-transition { pointer-events: none; }
-[${SCOPE_ATTRIBUTE}]::view-transition-group(root) {
+const scopeStyles = (scope: string) => `
+${scope} * { view-transition-name: none !important; }
+${scope}::view-transition { pointer-events: none; }
+${scope}::view-transition-group(root) {
 	animation: glimm-hold 86400s linear both !important;
 }
-[${SCOPE_ATTRIBUTE}]::view-transition-group-children(root) {
+${scope}::view-transition-group-children(root) {
 	animation: glimm-hold 86400s linear both !important;
 }
-[${SCOPE_ATTRIBUTE}]::view-transition-image-pair(root) { isolation: auto; }
-[${SCOPE_ATTRIBUTE}]::view-transition-old(root),
-[${SCOPE_ATTRIBUTE}]::view-transition-new(root) {
+${scope}::view-transition-image-pair(root) { isolation: auto; }
+${scope}::view-transition-old(root),
+${scope}::view-transition-new(root) {
 	animation: none !important;
 	mix-blend-mode: normal;
 	opacity: 1;
 }
-[${SCOPE_ATTRIBUTE}]::view-transition-old(root) { z-index: 1; }
-[${SCOPE_ATTRIBUTE}]::view-transition-new(root) { z-index: 2; }
+${scope}::view-transition-old(root) { z-index: 1; }
+${scope}::view-transition-new(root) { z-index: 2; }
 @keyframes glimm-hold { from { opacity: 1; } to { opacity: 1; } }
 `;
 
@@ -415,12 +592,17 @@ async function maskedSweep(
 	runChange: () => Promise<void>,
 	cleanups: Array<() => void>,
 	setTransition: (transition: ViewTransition) => void,
-	isCancelled: () => boolean
+	isCancelled: () => boolean,
+	distort: number
 ) {
+	// Each sweep marks the element with its own value: one that is taken over ends a moment after
+	// the next one has started, and must neither unmark the element nor style the new pictures.
+	const token = String(++scopes);
+	const scope = `[${SCOPE_ATTRIBUTE}="${token}"]`;
 	const style = applyCspNonce(document.createElement('style'));
-	style.textContent = scopeStyles;
+	style.textContent = scopeStyles(scope);
 	document.head.append(style);
-	element.setAttribute(SCOPE_ATTRIBUTE, '');
+	element.setAttribute(SCOPE_ATTRIBUTE, token);
 	let clip: Animation | undefined;
 	const release = () => transition.skipTransition();
 	// Once the old picture is gone (cut through, skipped or never taken), the element is itself again.
@@ -429,7 +611,7 @@ async function maskedSweep(
 		for (const type of ['pointerdown', 'wheel', 'keydown'] as const) {
 			element.removeEventListener(type, release, true);
 		}
-		element.removeAttribute(SCOPE_ATTRIBUTE);
+		if (element.getAttribute(SCOPE_ATTRIBUTE) === token) element.removeAttribute(SCOPE_ATTRIBUTE);
 		style.remove();
 	};
 	cleanups.push(unscope);
@@ -492,10 +674,22 @@ async function maskedSweep(
 		effect?.setKeyframes([{ clipPath: value }, { clipPath: value }]);
 	};
 	cut(0);
+	// The lens over both pictures, where the map can be drawn.
+	let lens: Distortion | null = null;
+	if (distort > 0) {
+		const box = element.getBoundingClientRect();
+		lens = createDistortion(geometry, box.width, box.height, distort);
+		if (lens) {
+			const drawn = lens;
+			cleanups.push(() => drawn.destroy());
+			style.textContent += drawn.rule(scope);
+		}
+	}
 	await play({
 		...ctrl,
 		setProgress: (progress) => {
 			cut(progress);
+			lens?.update(progress);
 			ctrl.setProgress(progress);
 		}
 	});
@@ -523,25 +717,31 @@ async function coveredSweep(
 	};
 
 	const total = Number.isFinite(sweep.sweepMs) ? Math.max(0, sweep.sweepMs!) : 1100;
-	const split = 0.56;
+	// An arc's quick start reaches the far side early: covering with it would leave the element
+	// hidden while the band crawls on past it. It covers at an even pace, and in less of the time.
+	const arc = geometry.arc !== undefined;
+	const split = arc ? 0.42 : 0.56;
 	let covering = true;
 	let late = false;
-	show(true);
-	mask(0, true);
 
 	// The band covers the element behind it.
 	await play(
 		{
 			...ctrl,
 			getProgress: () => 0,
+			// The curtain goes up as the band leaves, not while it gathers at the control.
 			setProgress: (progress) => {
-				if (covering) mask(progress, true);
+				if (covering) {
+					show(true);
+					mask(progress, true);
+				}
 				ctrl.setProgress(progress);
 			}
 		},
 		{
 			sweepMs: total * split,
 			outroMs: 0,
+			...(arc ? { easing: 'easeInOutCubic' as const } : {}),
 			midpoint: 1,
 			onMidpoint: async () => {
 				covering = false;
@@ -564,7 +764,9 @@ async function coveredSweep(
 				await work;
 				await nextPaint();
 			}
-		}
+		},
+		// The colour stays on the edges after the pass that reveals, not this one.
+		false
 	);
 	if (isCancelled()) return;
 
@@ -610,6 +812,8 @@ const nextPaint = () =>
 
 type Overlay = {
 	canvas: HTMLCanvasElement;
+	/** A layer under the band whose backdrop blurs, when asked for. */
+	blur?: HTMLElement;
 	curtain: HTMLElement;
 	destroy: () => void;
 };
@@ -632,13 +836,12 @@ const clippingAncestors = (element: Element) => {
 	return ancestors;
 };
 
-function createOverlay(element: HTMLElement): Overlay {
-	const host = document.createElement('div');
-	host.setAttribute('aria-hidden', 'true');
-	host.dataset.glimmOverlay = '';
-	const supportsPopover = typeof host.showPopover === 'function';
-	if (supportsPopover) host.popover = 'manual';
-	Object.assign(host.style, {
+// A box laid over the element in the top layer, out of the way of the pointer.
+const layer = () => {
+	const node = document.createElement('div');
+	node.setAttribute('aria-hidden', 'true');
+	if (typeof node.showPopover === 'function') node.popover = 'manual';
+	Object.assign(node.style, {
 		position: 'fixed',
 		inset: 'auto',
 		margin: '0',
@@ -649,28 +852,43 @@ function createOverlay(element: HTMLElement): Overlay {
 		pointerEvents: 'none',
 		zIndex: '2147483647'
 	} satisfies Partial<CSSStyleDeclaration>);
+	return node;
+};
 
-	const curtain = document.createElement('div');
-	Object.assign(curtain.style, { position: 'absolute', inset: '0', display: 'none' });
-	const canvas = document.createElement('canvas');
-	Object.assign(canvas.style, {
+const fill = (node: HTMLElement) =>
+	Object.assign(node.style, {
 		position: 'absolute',
 		inset: '0',
 		width: '100%',
 		height: '100%',
 		display: 'block'
 	});
+
+function createOverlay(element: HTMLElement, options: { blur?: number } = {}): Overlay {
+	const host = layer();
+	host.dataset.glimmOverlay = '';
+
+	const curtain = document.createElement('div');
+	Object.assign(curtain.style, { position: 'absolute', inset: '0', display: 'none' });
+	const canvas = document.createElement('canvas');
+	fill(canvas);
 	host.append(curtain, canvas);
+	// The blur is a layer of its own under the band: a backdrop blurs only up to an ancestor that
+	// clips or masks, and the band's layer clips to the scroll containers.
+	let blur: HTMLElement | undefined;
+	if (options.blur) {
+		blur = layer();
+		blur.dataset.glimmBlur = '';
+		blur.style.visibility = 'hidden';
+		blur.style.backdropFilter = `blur(${options.blur}px)`;
+		blur.style.setProperty('-webkit-backdrop-filter', `blur(${options.blur}px)`);
+	}
+	const layers = blur ? [blur, host] : [host];
 
 	const ancestors = clippingAncestors(element);
 	const sync = () => {
 		const box = element.getBoundingClientRect();
-		host.style.left = `${box.left}px`;
-		host.style.top = `${box.top}px`;
-		host.style.width = `${box.width}px`;
-		host.style.height = `${box.height}px`;
 		const style = getComputedStyle(element);
-		host.style.borderRadius = style.borderRadius;
 
 		let top = 0;
 		let right = window.innerWidth;
@@ -691,14 +909,25 @@ function createOverlay(element: HTMLElement): Overlay {
 			Math.max(0, box.bottom - bottom),
 			Math.max(0, left - box.left)
 		];
-		host.style.clipPath = cut.some((side) => side > 0)
+		const clipPath = cut.some((side) => side > 0)
 			? `inset(${cut.map((side) => `${side}px`).join(' ')})`
 			: '';
+		for (const node of layers) {
+			node.style.left = `${box.left}px`;
+			node.style.top = `${box.top}px`;
+			node.style.width = `${box.width}px`;
+			node.style.height = `${box.height}px`;
+			node.style.borderRadius = style.borderRadius;
+			node.style.clipPath = clipPath;
+		}
 	};
 
 	sync();
-	document.body.append(host);
-	if (supportsPopover) host.showPopover();
+	// In the top layer in the order shown: the blur first, under the band.
+	for (const node of layers) {
+		document.body.append(node);
+		if (typeof node.showPopover === 'function') node.showPopover();
+	}
 	let frame = requestAnimationFrame(function follow() {
 		sync();
 		frame = requestAnimationFrame(follow);
@@ -706,10 +935,11 @@ function createOverlay(element: HTMLElement): Overlay {
 
 	return {
 		canvas,
+		blur,
 		curtain,
 		destroy: () => {
 			cancelAnimationFrame(frame);
-			host.remove();
+			for (const node of layers) node.remove();
 		}
 	};
 }

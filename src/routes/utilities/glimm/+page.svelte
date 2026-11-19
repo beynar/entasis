@@ -16,7 +16,7 @@
 	import { createComponentControls } from '../../componentControls.svelte.js';
 
 	const colors = ['primary', 'secondary', 'info', 'success', 'warning', 'danger', 'neutral'];
-	const presets = ['default', 'reveal', 'glint', 'ripple', 'double', 'split', 'wave'];
+	const presets = ['default', 'reveal', 'glint', 'ripple', 'double', 'split', 'wave', 'surge'];
 	const palettes = ['color', 'spectrum', 'prism', 'berry', 'lagoon', 'citrus', 'azure', 'ember'];
 	const directions = ['ltr', 'rtl', 'ttb', 'btt'] as const;
 	const controls = createComponentControls([
@@ -81,6 +81,18 @@
 		});
 	};
 
+	let transferSent = $state(false);
+	let transferCard = $state<HTMLElement | null>(null);
+	let transferButton = $state<HTMLElement | null>(null);
+	const sendTransfer = () => {
+		if (!transferCard || !transferButton) return;
+		glimm(transferCard, {
+			...sweepOptions,
+			source: transferButton,
+			change: () => (transferSent = !transferSent)
+		});
+	};
+
 	let saving = $state(false);
 	let savedCount = $state(0);
 	let asyncCard = $state<HTMLElement | null>(null);
@@ -117,7 +129,8 @@
 		'The new content shows behind the band, the old one ahead of it',
 		'Drawn above dialogs, clipped to rounded corners and scroll containers',
 		'Coloured by the theme: a semantic role, or several blended along the band',
-		'Six shapes: a band, a corner glint, a ring from a click, bands closing in or opening out, a wave',
+		'Seven shapes: a band, a corner glint, a ring from a click, bands closing in or opening out, a wave, an arc that leaves a button',
+		'Sparks, a blur and a lens where the band passes, and edges lit where it meets them',
 		'Reduced motion and missing WebGL apply the change at once'
 	]}
 >
@@ -152,6 +165,35 @@ glimm(card, {
 
 	{#snippet examples()}
 		<ComponentCard
+			title="Surge from a control"
+			description="Pass the control that started it as `source`: the band draws its breath there, leaves it as an arc that swells over the element with sparks riding it, blurs the content as it passes, and leaves its colour on the edges before they clear."
+			code={`glimm(card, {
+	source: confirmButton,
+	change: () => (sent = true)
+});`}
+		>
+			<Stack gap="md" class="w-full max-w-sm">
+				<Card
+					bind:ref={transferCard}
+					title={transferSent ? 'Sent to Maya Chen' : 'Sending to Maya Chen'}
+					description={transferSent ? 'Arrived at 6:51 PM' : 'Arrives in seconds'}
+				>
+					<Stack gap="md">
+						<p class="text-3xl font-semibold">€1,250.00</p>
+						<ul class="text-sm">
+							<li>From Everyday ·· 4821</li>
+							<li>Fee: free</li>
+							<li>Note: studio rent</li>
+						</ul>
+						<Button bind:ref={transferButton} class="w-full" onclick={sendTransfer}>
+							{transferSent ? 'Done' : 'Confirm'}
+						</Button>
+					</Stack>
+				</Card>
+			</Stack>
+		</ComponentCard>
+
+		<ComponentCard
 			title="Glint"
 			description="Without `change`, the default is a glint: a thin streak of light from a corner that draws the eye to the element."
 			code={`glimm(element, {
@@ -180,7 +222,7 @@ glimm(card, {
 					<p class="text-sm">{reports[reportIndex].line}</p>
 				</Card>
 				<Stack orientation="horizontal" gap="sm" justify="center" wrap="wrap">
-					{#each ['reveal', 'glint', 'ripple', 'double', 'split', 'wave'] as const as preset (preset)}
+					{#each ['reveal', 'glint', 'ripple', 'double', 'split', 'wave', 'surge'] as const as preset (preset)}
 						<Button variant="outline" size="small" onclick={() => playPreset(preset)}>
 							{preset}
 						</Button>

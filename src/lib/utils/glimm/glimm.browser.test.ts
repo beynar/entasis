@@ -186,6 +186,103 @@ describe('glimm', () => {
 		expect(overlay()).toBeNull();
 	});
 
+	test('with blur, a layer under the band blurs the content around it, and goes with it', async () => {
+		const element = mount('margin: 40px;');
+		const blurLayer = () => document.querySelector<HTMLElement>('[data-glimm-blur]');
+		const handle = glimm(element, { preset: 'surge', sweepMs: 600, outroMs: 50 });
+
+		await expect.poll(blurLayer).not.toBeNull();
+		const layer = blurLayer()!;
+		expect(layer.getAttribute('aria-hidden')).toBe('true');
+		expect(layer.matches(':popover-open')).toBe(true);
+		expect(getComputedStyle(layer).pointerEvents).toBe('none');
+		expect(
+			layer.style.backdropFilter || layer.style.getPropertyValue('-webkit-backdrop-filter')
+		).toBe('blur(8px)');
+		// Shown first, so it lies under the band in the top layer.
+		expect(
+			layer.compareDocumentPosition(overlay()!) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+		await expect.poll(() => layer.style.visibility).toBe('visible');
+		expect(layer.style.maskImage || layer.style.getPropertyValue('-webkit-mask-image')).toMatch(
+			/^radial-gradient\(/
+		);
+
+		await handle.done;
+		expect(blurLayer()).toBeNull();
+		expect(overlay()).toBeNull();
+	});
+
+	test('the colour on the edges goes with the band: it does not hold the sweep open', async () => {
+		const element = mount();
+		const timed = async (options: Parameters<typeof glimm>[1]) => {
+			const started = performance.now();
+			await glimm(element, { sweepMs: 1000, outroMs: 50, ...options }).done;
+			return performance.now() - started;
+		};
+		const plain = await timed({ edges: 0, sparks: 0, blur: 0 });
+		const edged = await timed({ edges: 1, sparks: 0, blur: 0 });
+		// Room for a loaded machine; edges that lingered on their own clock held it a second more.
+		expect(edged).toBeLessThan(plain + 300);
+		expect(overlay()).toBeNull();
+	});
+
+	test.runIf(scopedTransitions)(
+		'with distort, a lens bends both pictures of the change, and goes with the sweep',
+		async () => {
+			const element = mount('margin: 40px;');
+			const lens = () => document.querySelector('filter[id^="glimm-lens-"]');
+			const handle = glimm(element, {
+				preset: 'surge',
+				sweepMs: 600,
+				outroMs: 50,
+				change: () => (element.textContent = 'after')
+			});
+			await expect.poll(lens).not.toBeNull();
+			const filter = lens()!;
+			expect(filter.querySelectorAll('feDisplacementMap')).toHaveLength(3);
+			// The map is redrawn as the band moves.
+			const map = filter.querySelector('feImage')!;
+			await expect.poll(() => map.getAttribute('href')).toMatch(/^data:image\/png/);
+			const first = map.getAttribute('href');
+			await expect.poll(() => map.getAttribute('href')).not.toBe(first);
+			const rules = [...document.head.querySelectorAll('style')].map((style) => style.textContent);
+			expect(rules.some((rule) => rule?.includes(`filter: url(#${filter.id})`))).toBe(true);
+
+			await handle.done;
+			expect(lens()).toBeNull();
+			expect(element.textContent).toBe('after');
+		}
+	);
+
+	test.runIf(scopedTransitions)(
+		'a sweep started before the last one ends keeps its cut and lens to the end',
+		async () => {
+			const element = mount('margin: 40px;');
+			const filterOfOld = () =>
+				getComputedStyle(element, '::view-transition-old(root)').getPropertyValue('filter');
+			const first = glimm(element, {
+				preset: 'surge',
+				sweepMs: 1500,
+				change: () => (element.textContent = 'one')
+			});
+			await expect.poll(filterOfOld).toMatch(/glimm-lens/);
+			const second = glimm(element, {
+				preset: 'surge',
+				sweepMs: 1500,
+				change: () => (element.textContent = 'two')
+			});
+			await first.done;
+			// The first sweep, taken over, has ended: the second still holds the element.
+			await new Promise((resolve) => setTimeout(resolve, 200));
+			expect(element.hasAttribute('data-glimm-scope')).toBe(true);
+			expect(filterOfOld()).toMatch(/glimm-lens/);
+			second.cancel();
+			await second.done;
+			expect(element.hasAttribute('data-glimm-scope')).toBe(false);
+		}
+	);
+
 	test('the band is clipped to the scroll container around the element', async () => {
 		const scroller = document.createElement('div');
 		scroller.setAttribute('style', 'height: 100px; overflow: auto;');

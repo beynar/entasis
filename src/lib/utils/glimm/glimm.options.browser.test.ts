@@ -85,6 +85,20 @@ describe('presets', () => {
 		expect(calls.sweeps[0]).toMatchObject({ sweepMs: 1250, waveAmount: 0.4, rippleAmount: 1.4 });
 	});
 
+	test('a source makes it a surge: an arc that leaves the control', async () => {
+		const element = mount();
+		const button = document.createElement('button');
+		button.setAttribute(
+			'style',
+			'display: block; width: 120px; height: 24px; margin: 60px auto 0;'
+		);
+		element.append(button);
+		await glimm(element, { source: button, change: () => {} }).done;
+		// One 1300 ms pass, or the even covering share where the curtain stands in for the snapshot.
+		expect(calls.sweeps[0]).toMatchObject({ sweepMs: expect.any(Number) });
+		expect([1300, 1300 * 0.42]).toContain(calls.sweeps[0].sweepMs);
+	});
+
 	test('over a dark surface the band is dimmed, unless brightness is set', async () => {
 		await glimm(mount('background: rgb(20, 20, 24);')).done;
 		await glimm(mount('background: rgb(20, 20, 24);'), { brightness: 1.2 }).done;
