@@ -751,6 +751,16 @@ export const es: Messages = {
 	// Medidor
 	meter: 'Medidor',
 	meterSegment: (index: string | number, count: string | number) => `Segmento ${index} de ${count}`,
+	sparklineEmpty: 'Sin datos',
+	sparklineSummary: (
+		count: string | number,
+		first: string,
+		last: string,
+		lowest: string,
+		highest: string,
+		trend: 'up' | 'down' | 'neutral'
+	) =>
+		`${count} valores de ${first} a ${last}, mínimo ${lowest}, máximo ${highest}, ${trend === 'up' ? 'al alza' : trend === 'down' ? 'a la baja' : 'estable'}`,
 	progressIndeterminate: 'Progreso indeterminado',
 	// Validación de campos
 	fieldRequired: 'Este campo es obligatorio',

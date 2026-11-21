@@ -735,6 +735,16 @@ export const ja: Messages = {
 	// メーター
 	meter: 'メーター',
 	meterSegment: (index: string | number, count: string | number) => `セグメント ${index}/${count}`,
+	sparklineEmpty: 'データなし',
+	sparklineSummary: (
+		count: string | number,
+		first: string,
+		last: string,
+		lowest: string,
+		highest: string,
+		trend: 'up' | 'down' | 'neutral'
+	) =>
+		`${count} 個の値、${first} から ${last}、最小 ${lowest}、最大 ${highest}、${trend === 'up' ? '上昇傾向' : trend === 'down' ? '下降傾向' : '横ばい'}`,
 	progressIndeterminate: '進行状況は不定です',
 	// フィールドの検証
 	fieldRequired: 'この項目は必須です',

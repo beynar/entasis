@@ -736,6 +736,16 @@ export const ar: Messages = {
 	// مقياس
 	meter: 'مقياس',
 	meterSegment: (index: string | number, count: string | number) => `الجزء ${index} من ${count}`,
+	sparklineEmpty: 'لا توجد بيانات',
+	sparklineSummary: (
+		count: string | number,
+		first: string,
+		last: string,
+		lowest: string,
+		highest: string,
+		trend: 'up' | 'down' | 'neutral'
+	) =>
+		`${count} قيم من ${first} إلى ${last}، الأدنى ${lowest}، الأعلى ${highest}، ${trend === 'up' ? 'في ارتفاع' : trend === 'down' ? 'في انخفاض' : 'مستقر'}`,
 	progressIndeterminate: 'تقدم غير محدد',
 	// التحقق من الحقول
 	fieldRequired: 'هذا الحقل مطلوب',

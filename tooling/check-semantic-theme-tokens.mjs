@@ -43,6 +43,21 @@ const geometryExceptions = new Map([
 		])
 	],
 	[
+		'Stat/stat.theme.ts',
+		new Map([
+			['h-8', 'Small Stat sparkline band (32 px), a chart across the card, not a control'],
+			['h-10', 'Normal Stat sparkline band (40 px), a chart across the card, not a control'],
+			['h-12', 'Large Stat sparkline band (48 px), a chart across the card, not a control']
+		])
+	],
+	[
+		'Sparkline/sparkline.theme.ts',
+		new Map([
+			['h-8', 'Normal sparkline box, a chart beside a figure (32 px), not a control'],
+			['h-12', 'Large sparkline box, a chart beside a figure (48 px), not a control']
+		])
+	],
+	[
 		'Spinner/spinner.theme.ts',
 		new Map([
 			['gap-[calc(var(--spinner-size)*0.1)]', 'Pulse geometry scales with spinner diameter']

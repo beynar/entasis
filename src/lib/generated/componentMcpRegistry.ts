@@ -81,6 +81,7 @@ import { metadataListDescription } from '$lib/components/MetadataList/metadataLi
 import { miniCalendarDescription } from '$lib/components/MiniCalendar/miniCalendar.mcp.js';
 import { ratingDescription } from '$lib/components/Rating/rating.mcp.js';
 import { sortableListDescription } from '$lib/components/SortableList/sortableList.mcp.js';
+import { sparklineDescription } from '$lib/components/Sparkline/sparkline.mcp.js';
 import { statDescription } from '$lib/components/Stat/stat.mcp.js';
 import { tableDescription } from '$lib/components/Table/table.mcp.js';
 import { dataTableDescription } from '$lib/components/DataTable/dataTable.mcp.js';
@@ -239,6 +240,7 @@ export const componentMcpRegistry = {
 	'mini-calendar': miniCalendarDescription,
 	rating: ratingDescription,
 	'sortable-list': sortableListDescription,
+	sparkline: sparklineDescription,
 	stat: statDescription,
 	table: tableDescription,
 	'data-table': dataTableDescription,

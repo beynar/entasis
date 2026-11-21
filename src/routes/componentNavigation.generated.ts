@@ -353,6 +353,10 @@ export const componentNavigationSections = [
 				text: 'Sortable list'
 			},
 			{
+				href: '/components/sparkline',
+				text: 'Sparkline'
+			},
+			{
 				href: '/components/stat',
 				text: 'Stat'
 			},

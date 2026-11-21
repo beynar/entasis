@@ -1,9 +1,11 @@
 export { default as Stat } from './Stat.svelte';
 export { statDefaultOrder } from './stat.props.js';
 export type {
+	StatAnimatedNumber,
 	StatIndicatorVariant,
 	StatPart,
 	StatProps,
+	StatSparkline,
 	StatTrendDirection,
 	StatVariant
 } from './stat.props.js';

@@ -727,6 +727,16 @@ export const zh: Messages = {
 	meter: '计量器',
 	meterSegment: (index: string | number, count: string | number) =>
 		`第 ${index} 段，共 ${count} 段`,
+	sparklineEmpty: '无数据',
+	sparklineSummary: (
+		count: string | number,
+		first: string,
+		last: string,
+		lowest: string,
+		highest: string,
+		trend: 'up' | 'down' | 'neutral'
+	) =>
+		`${count} 个数值，从 ${first} 到 ${last}，最低 ${lowest}，最高 ${highest}，${trend === 'up' ? '呈上升趋势' : trend === 'down' ? '呈下降趋势' : '保持平稳'}`,
 	progressIndeterminate: '进度不确定',
 	// 字段验证
 	fieldRequired: '此字段为必填项',

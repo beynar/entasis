@@ -351,7 +351,12 @@ const entries: Omit<ComponentContractEntry, 'exportedSymbols'>[] = [
 	component('sortable-list', 'components/SortableList', 'Data display', 'Sortable list', {
 		related: ['kanban']
 	}),
-	component('stat', 'components/Stat', 'Data display', 'Stat'),
+	component('sparkline', 'components/Sparkline', 'Data display', 'Sparkline', {
+		related: ['stat', 'chart', 'animated-number']
+	}),
+	component('stat', 'components/Stat', 'Data display', 'Stat', {
+		related: ['animated-number', 'sparkline']
+	}),
 	component('table', 'components/Table', 'Data display', 'Table', {
 		related: ['data-table']
 	}),
@@ -2338,11 +2343,28 @@ const exportedSymbols: Record<string, ExportedSymbols> = {
 		'sortableListTheme',
 		'useSortableListTheme'
 	],
+	sparkline: [
+		'Sparkline',
+		'SparklineAnimation',
+		'SparklineMarker',
+		'SparklinePoint',
+		'SparklineProps',
+		'SparklineTheme',
+		'SparklineThemeProps',
+		'SparklineTrend',
+		'SparklineVariant',
+		'setSparklineTheme',
+		'sparklineTheme',
+		'sparklineTrend',
+		'useSparklineTheme'
+	],
 	stat: [
 		'Stat',
+		'StatAnimatedNumber',
 		'StatIndicatorVariant',
 		'StatPart',
 		'StatProps',
+		'StatSparkline',
 		'StatTheme',
 		'StatThemeProps',
 		'StatTrendDirection',

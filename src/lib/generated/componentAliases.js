@@ -84,6 +84,7 @@ export const componentAliases = {
 	'entasis/mini-calendar': './src/lib/components/MiniCalendar/index.ts',
 	'entasis/rating': './src/lib/components/Rating/index.ts',
 	'entasis/sortable-list': './src/lib/components/SortableList/index.ts',
+	'entasis/sparkline': './src/lib/components/Sparkline/index.ts',
 	'entasis/stat': './src/lib/components/Stat/index.ts',
 	'entasis/table': './src/lib/components/Table/index.ts',
 	'entasis/data-table': './src/lib/components/DataTable/index.ts',

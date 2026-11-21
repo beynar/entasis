@@ -561,6 +561,11 @@
 			"svelte": "./dist/components/SortableList/index.js",
 			"default": "./dist/components/SortableList/index.js"
 		},
+		"./sparkline": {
+			"types": "./dist/components/Sparkline/index.d.ts",
+			"svelte": "./dist/components/Sparkline/index.js",
+			"default": "./dist/components/Sparkline/index.js"
+		},
 		"./stat": {
 			"types": "./dist/components/Stat/index.d.ts",
 			"svelte": "./dist/components/Stat/index.js",
@@ -1165,6 +1170,9 @@
 			],
 			"sortable-list": [
 				"dist/components/SortableList/index.d.ts"
+			],
+			"sparkline": [
+				"dist/components/Sparkline/index.d.ts"
 			],
 			"stat": [
 				"dist/components/Stat/index.d.ts"

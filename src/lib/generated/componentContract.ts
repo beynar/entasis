@@ -2927,14 +2927,47 @@ export const componentInventory = [
 		visibility: 'public'
 	},
 	{
+		id: 'sparkline',
+		subpath: 'entasis/sparkline',
+		sourceIndex: 'src/lib/components/Sparkline/index.ts',
+		exportedSymbols: [
+			'Sparkline',
+			'SparklineAnimation',
+			'SparklineMarker',
+			'SparklinePoint',
+			'SparklineProps',
+			'SparklineTheme',
+			'SparklineThemeProps',
+			'SparklineTrend',
+			'SparklineVariant',
+			'setSparklineTheme',
+			'sparklineTheme',
+			'sparklineTrend',
+			'useSparklineTheme'
+		],
+		docs: [
+			{
+				id: 'sparkline',
+				route: '/components/sparkline',
+				category: 'Data display',
+				label: 'Sparkline'
+			}
+		],
+		capabilities: ['svelte', 'component', 'dataDisplay'],
+		relatedComponents: ['stat', 'chart', 'animated-number'],
+		visibility: 'public'
+	},
+	{
 		id: 'stat',
 		subpath: 'entasis/stat',
 		sourceIndex: 'src/lib/components/Stat/index.ts',
 		exportedSymbols: [
 			'Stat',
+			'StatAnimatedNumber',
 			'StatIndicatorVariant',
 			'StatPart',
 			'StatProps',
+			'StatSparkline',
 			'StatTheme',
 			'StatThemeProps',
 			'StatTrendDirection',
@@ -2953,7 +2986,7 @@ export const componentInventory = [
 			}
 		],
 		capabilities: ['svelte', 'component', 'dataDisplay'],
-		relatedComponents: [],
+		relatedComponents: ['animated-number', 'sparkline'],
 		visibility: 'public'
 	},
 	{
@@ -5232,7 +5265,8 @@ export const relatedComponents = {
 	'mini-calendar': ['calendar', 'date-input'],
 	rating: ['rating-input'],
 	'sortable-list': ['kanban'],
-	stat: [],
+	sparkline: ['stat', 'chart', 'animated-number'],
+	stat: ['animated-number', 'sparkline'],
 	table: ['data-table'],
 	'data-table': ['table'],
 	timeline: ['gantt-chart'],

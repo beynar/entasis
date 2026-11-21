@@ -108,6 +108,7 @@ Each link is that entry's full documentation as Markdown (props, data model, the
 - [Mini calendar](https://entasis.beynar.workers.dev/components/mini-calendar.md) `entasis/mini-calendar` — A compact horizontal date strip showing N consecutive days (default 5) with a previous/next chevron on each side that shifts the visible range by N days.
 - [Rating](https://entasis.beynar.workers.dev/components/rating.md) `entasis/rating` — A read-only star rating display with half/partial star support, a configurable star count, and RTL support.
 - [Sortable list](https://entasis.beynar.workers.dev/components/sortable-list.md) `entasis/sortable-list` — A vertical list whose items are reordered by drag and drop.
+- [Sparkline](https://entasis.beynar.workers.dev/components/sparkline.md) `entasis/sparkline` — A small chart with no axes, read at a glance beside a figure: in a Stat, a table row, a list item.
 - [Stat](https://entasis.beynar.workers.dev/components/stat.md) `entasis/stat` — Stat renders a compact metric card.
 - [Table](https://entasis.beynar.workers.dev/components/table.md) `entasis/table` — The Table component provides a flexible way to display tabular data with support for headers, footers, and customizable rows.
 - [Data table](https://entasis.beynar.workers.dev/components/data-table.md) `entasis/data-table` — DataTable is the typed, interactive, virtualized table for application data.

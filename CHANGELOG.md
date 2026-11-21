@@ -20,6 +20,29 @@ Unreleased section under the new version.
   plain number, assistive technology reads it as plain text, and nothing moves under reduced
   motion. Adapted from NumberFlow by Maxwell Barvian (MIT) and animated-blur-number by serafim
   (MIT).
+- Sparkline (`entasis/sparkline`): a small chart with no axes, read at a glance beside a figure.
+  `variant` draws the series as a `line`, a line over a shaded `area`, a `bar` for each value
+  standing on zero, or a `dot` for each value; `curved` bends the line without overshooting a
+  value. `size` sets the box and the weight of the line, and width and height classes stretch it
+  to any size while strokes and dots keep their weight. `markers` marks the lowest, highest,
+  first and last value, `showTrend` puts an arrow on the last value for the way the series goes, `tooltip` shows
+  the value under the pointer with its label from `labels`, in the color of the series or in a
+  color of its own (`tooltipContent` draws its content), and `min` and `max` fix the scale.
+  The series appears with `animation` (draw, grow, fade, none) and moves to new values of the
+  same length; `duration` and `easing` set both in the Theme's motion vocabulary (a token or
+  milliseconds, a role or an easing name), and nothing moves under reduced motion. Its accessible name summarizes the values from the I18n catalog.
+  `sparklineTrend(data)` returns `'up' | 'down' | 'neutral'`, the vocabulary of Stat's
+  `trendDirection`. Adapted from react-tiny-sparkline by Franz Benthin (MIT).
+- Stat: a numeric `value` is drawn by AnimatedNumber, so each change of value is animated. The
+  new `animatedNumber` prop takes AnimatedNumber's props (`variant`, `format`, `locale`, `prefix`,
+  `suffix`, `duration`, `animated`…), and `animatedNumber={false}` writes the plain number in the
+  I18n locale instead. A string or a snippet is drawn as before.
+- Stat: `sparkline` draws a Sparkline across the card, last by default and placed by `order` like
+  any region (`'sparkline'` joins `StatPart`). It takes the values, or Sparkline props with their
+  `data`; it follows the card's `size` and ink, is named by its `label`, and formats its values
+  like `animatedNumber`. Without a `trendDirection`, the trend takes the way the series goes.
+  `sparklineBleed` runs it past the card's padding to both sides of the card, and down to its
+  bottom edge when it is the last region.
 
 ## 0.26.0 — 2026-11-19
 

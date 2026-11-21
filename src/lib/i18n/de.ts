@@ -754,6 +754,16 @@ export const de: Messages = {
 	// Messanzeige
 	meter: 'Messanzeige',
 	meterSegment: (index: string | number, count: string | number) => `Segment ${index} von ${count}`,
+	sparklineEmpty: 'Keine Daten',
+	sparklineSummary: (
+		count: string | number,
+		first: string,
+		last: string,
+		lowest: string,
+		highest: string,
+		trend: 'up' | 'down' | 'neutral'
+	) =>
+		`${count} Werte von ${first} bis ${last}, Minimum ${lowest}, Maximum ${highest}, ${trend === 'up' ? 'steigend' : trend === 'down' ? 'fallend' : 'stabil'}`,
 	progressIndeterminate: 'Fortschritt unbestimmt',
 	// Feldvalidierung
 	fieldRequired: 'Dieses Feld ist erforderlich',

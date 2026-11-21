@@ -750,6 +750,16 @@ export const pt: Messages = {
 	// Medidor
 	meter: 'Medidor',
 	meterSegment: (index: string | number, count: string | number) => `Segmento ${index} de ${count}`,
+	sparklineEmpty: 'Sem dados',
+	sparklineSummary: (
+		count: string | number,
+		first: string,
+		last: string,
+		lowest: string,
+		highest: string,
+		trend: 'up' | 'down' | 'neutral'
+	) =>
+		`${count} valores de ${first} a ${last}, mínimo ${lowest}, máximo ${highest}, ${trend === 'up' ? 'em alta' : trend === 'down' ? 'em baixa' : 'estável'}`,
 	progressIndeterminate: 'Progresso indeterminado',
 	// Validação de campos
 	fieldRequired: 'Este campo é obrigatório',

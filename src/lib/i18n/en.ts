@@ -758,6 +758,17 @@ export const en = {
 	// Meter
 	meter: 'Meter',
 	meterSegment: (index: string | number, count: string | number) => `Segment ${index} of ${count}`,
+	/** Sparkline: its accessible name when it has no value, and the summary of its values. */
+	sparklineEmpty: 'No data',
+	sparklineSummary: (
+		count: string | number,
+		first: string,
+		last: string,
+		lowest: string,
+		highest: string,
+		trend: 'up' | 'down' | 'neutral'
+	) =>
+		`${count} values from ${first} to ${last}, lowest ${lowest}, highest ${highest}, ${trend === 'up' ? 'trending up' : trend === 'down' ? 'trending down' : 'stable'}`,
 	progressIndeterminate: 'Indeterminate progress',
 	// Field validation
 	fieldRequired: 'This field is required',

@@ -31,13 +31,19 @@ const defaultStatRoot = cva({
 			outline: 'border-color bg-transparent text-color-readable',
 			soft: 'border-color/20 bg-color-muted text-color-muted-readable',
 			ghost: 'border-transparent bg-transparent text-color-readable shadow-none'
+		},
+		// A sparkline that bleeds reaches the card's edges: the card clips it to its rounded corners.
+		bleed: {
+			true: 'overflow-hidden',
+			false: ''
 		}
 	},
 	defaultVariants: {
 		size: 'normal',
 		density: 'normal',
 		color: 'neutral',
-		variant: 'solid'
+		variant: 'solid',
+		bleed: false
 	},
 	compoundVariants: [
 		{
@@ -274,6 +280,45 @@ const defaultStatSeparator = cva({
 	}
 });
 
+// The sparkline runs across the card, one step taller with each size, in the card's ink. With
+// `bleed`, it takes back the card's padding (the root's, density by density): on both `sides`, or
+// on the sides and at the bottom at the `end` of the card.
+const defaultStatSparkline = cva({
+	base: 'flex min-w-0 pt-xs',
+	variants: {
+		size: {
+			small: 'h-8',
+			normal: 'h-10',
+			large: 'h-12'
+		},
+		density: {
+			compact: '',
+			normal: '',
+			comfortable: ''
+		},
+		bleed: {
+			none: '',
+			sides: '',
+			end: ''
+		}
+	},
+	defaultVariants: {
+		size: 'normal',
+		density: 'normal',
+		bleed: 'none'
+	},
+	compoundVariants: [
+		{ bleed: ['sides', 'end'], density: 'compact', class: '-mx-lg' },
+		{ bleed: ['sides', 'end'], density: 'normal', class: '-mx-xl' },
+		{ bleed: ['sides', 'end'], density: 'comfortable', class: '-mx-layout-sm' },
+		{ bleed: 'end', density: 'compact', class: '-mb-lg' },
+		{ bleed: 'end', density: 'normal', class: '-mb-xl' },
+		{ bleed: 'end', density: 'comfortable', class: '-mb-layout-sm' }
+	]
+});
+
+const defaultStatSparklineChart = cva({ base: 'h-full w-full' });
+
 export const statTheme = {
 	root: defaultStatRoot,
 	region: defaultStatRegion,
@@ -287,7 +332,9 @@ export const statTheme = {
 	trendIcon: defaultStatTrendIcon,
 	trendText: defaultStatTrendText,
 	description: defaultStatDescription,
-	separator: defaultStatSeparator
+	separator: defaultStatSeparator,
+	sparkline: defaultStatSparkline,
+	sparklineChart: defaultStatSparklineChart
 };
 
 export type StatTheme = typeof statTheme;

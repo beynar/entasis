@@ -757,6 +757,16 @@ export const fr: Messages = {
 	// Jauge
 	meter: 'Jauge',
 	meterSegment: (index: string | number, count: string | number) => `Segment ${index} sur ${count}`,
+	sparklineEmpty: 'Aucune donnée',
+	sparklineSummary: (
+		count: string | number,
+		first: string,
+		last: string,
+		lowest: string,
+		highest: string,
+		trend: 'up' | 'down' | 'neutral'
+	) =>
+		`${count} valeurs de ${first} à ${last}, minimum ${lowest}, maximum ${highest}, ${trend === 'up' ? 'en hausse' : trend === 'down' ? 'en baisse' : 'stable'}`,
 	progressIndeterminate: 'Progression indéterminée',
 	// Validation des champs
 	fieldRequired: 'Ce champ est obligatoire',
