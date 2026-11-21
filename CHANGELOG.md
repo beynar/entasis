@@ -6,6 +6,8 @@ Unreleased section under the new version.
 
 ## Unreleased
 
+## 0.27.0 — 2026-11-21
+
 ### Added
 
 - AnimatedNumber (`entasis/animated-number`): a number that animates from the one it showed to the
